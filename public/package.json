@@ -1,7 +1,7 @@
 {
-  "name": "meodl-esports-tekken8-bracket",
+  "name": "tekken8-engineering-days",
   "version": "1.0.0",
-  "description": "MEODL Esports - Tekken 8 Double Elimination Tournament Bracket & Control Room System",
+  "description": "Tekken 8 14-Player Double Elimination Championship - Engineering Days 2026",
   "main": "server.js",
   "type": "module",
   "scripts": {
