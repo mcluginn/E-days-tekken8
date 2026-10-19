@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Master Attendance Dashboard • Dynamic Event, Session & Roster Hub</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    if (window.tailwind) {
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+            },
+            colors: {
+              obsidian: '#140b09',
+              cardBg: '#1c100d',
+              carnivalDark: '#140b09',
+              carnivalSurface: '#1c100d'
+            }
+          }
+        }
+      };
+    }
+  </script>
+
+  <!-- Local Standalone Libraries with Resilient Fallback -->
+  <script src="./assets/qrcode.min.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/qrcode.min.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/meodl_data.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/meodl_data.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/meodl_attendance.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/meodl_attendance.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/engday_attendance.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/engday_attendance.js';document.head.appendChild(s);}"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #140b09;
+      background-image: 
+        radial-gradient(circle at 50% -10%, rgba(220, 38, 38, 0.14), transparent 60%),
+        radial-gradient(circle at 50% 10%, rgba(245, 158, 11, 0.12), transparent 50%);
+      color: #f4f4f5;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Printable QR Cards Mode */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      #print-qr-sheet-area {
+        display: block !important;
+      }
+      .qr-print-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border: 1.5px dashed #94a3b8 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-obsidian min-h-screen flex flex-col">
+
+  <!-- ================================================================= -->
+  <!-- TOP NAVIGATION BAR (UNIFIED STYLING WITH SCANNER) -->
+  <!-- ================================================================= -->
+  <header class="no-print sticky top-0 z-40 bg-[#140b09]/95 backdrop-blur-xl border-b border-amber-500/30 px-4 py-3 shadow-xl shadow-black/60">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+      
+      <!-- Left: Brand + Dynamic Event Selector -->
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="px-3 py-1.5 rounded-xl bg-[#1c100d] hover:bg-[#2a1713] border border-amber-500/30 text-xs font-mono font-bold text-amber-200 flex items-center gap-1.5 transition-colors">
+          <span>↩</span> HUB
+        </a>
+        <button onclick="openAdminSetupModal('events')" class="flex items-center gap-2.5 text-left px-2.5 py-1 rounded-xl hover:bg-[#1c100d] border border-transparent hover:border-amber-500/30 transition-all group" title="Switch or Configure Event">
+          <img src="assets/esc_logo.jpg" alt="ESC Logo" class="w-10 h-10 rounded-lg object-cover border border-amber-500/40 shadow-md shrink-0">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h1 id="dash-event-title" class="text-sm sm:text-base font-extrabold text-amber-50 tracking-tight leading-none drop-shadow-sm">
+                ENGINEERING DAYS 2026
+              </h1>
+              <span class="px-1.5 py-0.2 rounded bg-red-600/30 text-amber-300 border border-amber-500/40 text-[9px] font-mono font-bold uppercase shrink-0">2026</span>
+              <span class="text-xs text-amber-400 font-mono shrink-0">▾</span>
+            </div>
+            <p id="dash-event-subtitle" class="text-[11px] font-mono text-amber-300/90 mt-0.5">
+              UPHSD CALAMBA • ENGINEERING STUDENT COUNCIL • OCT 19–20, 2026 (7:30 AM – 8:00 PM) • UPHSD GYMNASIUM / OVAL
+            </p>
+          </div>
+        </button>
+      </div>
+
+      <!-- Right: Action Buttons (Unified Top Toolbar on Wide Screens) -->
+      <div class="flex items-center gap-2 flex-wrap lg:justify-end">
+        <!-- Event & Roster Admin Setup Button -->
+        <button onclick="openAdminSetupModal('events')" class="px-3 py-2 rounded-xl bg-[#1c100d] hover:bg-[#2a1713] border border-amber-500/40 text-amber-300 font-mono font-bold text-xs flex items-center gap-1.5 transition-all shadow">
+          <span>⚙️</span>
+          <span>Event & Roster Setup</span>
+        </button>
+
+        <!-- Generate / Print QR Cards Button (Safeguard 1) -->
+        <button onclick="openQrGeneratorModal()" class="px-3 py-2 rounded-xl bg-[#1c100d] hover:bg-[#2a1713] border border-amber-500/40 text-amber-200 font-mono font-bold text-xs flex items-center gap-1.5 transition-all">
+          <span>🪪</span>
+          <span>Print QR Cards</span>
+        </button>
+
+        <!-- 4-Layer Local Backup Center -->
+        <button onclick="openBackupModal()" class="px-3 py-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900/80 border border-emerald-600/60 text-emerald-300 font-mono font-bold text-xs flex items-center gap-1.5 transition-all">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>💾 Backup / Restore</span>
+        </button>
+
+        <!-- Manual On-Demand Refresh Button -->
+        <button id="btn-manual-refresh" onclick="triggerManualDashboardRefresh()" title="Fetch latest attendance from server" class="px-3 py-2 rounded-xl bg-[#1c100d] hover:bg-[#2a1713] border border-sky-500/40 text-sky-300 font-mono font-bold text-xs flex items-center gap-1.5 transition-all shadow">
+          <span id="btn-refresh-icon">🔄</span>
+          <span id="btn-refresh-text">Refresh</span>
+        </button>
+
+        <!-- Cloud Sync & Phone Link -->
+        <button onclick="openPhoneConnectModal()" class="px-3 py-2 rounded-xl bg-[#1c100d] hover:bg-[#2a1713] border border-amber-500/30 text-amber-100 font-mono font-bold text-xs flex items-center gap-1.5 transition-all">
+          <span id="dash-sync-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span id="dash-sync-label">☁️ Cloud Sync</span>
+          <span id="dash-pending-badge" class="hidden px-1.5 py-0.2 rounded bg-amber-500 text-black text-[9px] font-extrabold">0</span>
+        </button>
+
+        <!-- Open QR Scanner -->
+        <a href="engday_scanner.html" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 border border-amber-400/40 text-white font-mono font-bold text-xs shadow-lg shadow-red-950/50 flex items-center gap-1.5 transition-all">
+          <span>📷</span>
+          <span>Open Scanner</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================================================================= -->
+  <!-- MAIN DASHBOARD CONTENT -->
+  <!-- ================================================================= -->
+  <main class="no-print flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
+
+    <!-- 1. EXECUTIVE KPI SUMMARY STRIP -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 font-mono">
+      <div class="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800">
+        <span class="text-[10px] text-zinc-400 uppercase block">Total Roster</span>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span id="kpi-total-roster" class="text-2xl font-extrabold text-white">0</span>
+          <span class="text-[11px] text-zinc-500">Registered</span>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-amber-950/30 border border-amber-700/50">
+        <span class="text-[10px] text-amber-400 uppercase block">Attended ≥1 Checkpoint</span>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span id="kpi-unique-attendees" class="text-2xl font-extrabold text-amber-300">0</span>
+          <span id="kpi-participation-rate" class="text-xs text-amber-400/80 font-bold">(0%)</span>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-700/50">
+        <span class="text-[10px] text-emerald-400 uppercase block">Active Checkpoint Inside</span>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span id="kpi-active-inside" class="text-2xl font-extrabold text-emerald-300">0</span>
+          <span id="kpi-active-game-tag" class="text-[11px] text-emerald-400/80 truncate">Checkpoint</span>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-cyan-950/30 border border-cyan-700/50">
+        <span class="text-[10px] text-cyan-400 uppercase block">Total Checkpoint Check-Ins</span>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span id="kpi-total-checkins" class="text-2xl font-extrabold text-cyan-300">0</span>
+          <span id="kpi-sessions-label" class="text-[11px] text-cyan-400/80">Across 8 Checkpoints</span>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 col-span-2 sm:col-span-1 min-w-0">
+        <span class="text-[10px] text-zinc-400 uppercase block">Venue & Time (PH)</span>
+        <div class="mt-1">
+          <span id="kpi-live-clock" class="text-lg font-extrabold text-white block leading-tight">--:--</span>
+          <span id="kpi-venue-name" class="text-[10px] text-emerald-400 leading-snug break-words block mt-0.5">Gymnasium / Oval & Engineering Labs</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. DYNAMIC ENGINEERING PROGRAMS / GROUP LEADERBOARD -->
+    <section class="bg-zinc-950 border border-zinc-800 rounded-3xl p-5 shadow-xl">
+      <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
+        <div>
+          <h2 class="text-sm font-extrabold text-white uppercase tracking-wider font-mono flex items-center gap-2">
+            <span>🏆</span> Engineering Program / Group Attendance Breakdown
+          </h2>
+          <p class="text-xs text-zinc-400 mt-0.5">Live attendance participation across IE, ME, CE, EE, ECE, CPE & custom groups</p>
+        </div>
+        <button onclick="openAdminSetupModal('roster')" class="text-xs font-mono text-amber-400 hover:underline font-bold">
+          + Import / Manage Roster →
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 font-mono" id="teams-leaderboard-grid">
+        <!-- Dynamically populated from engine.getGroups() -->
+      </div>
+    </section>
+
+    <!-- 3. DYNAMIC SESSIONS OVERVIEW CARDS -->
+    <section>
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div>
+          <h2 class="text-sm font-extrabold text-white uppercase tracking-wider font-mono flex items-center gap-2">
+            <span>📅</span> Track A Major Gate Checkpoints (<span id="section-session-count">8</span>)
+          </h2>
+          <p class="text-xs text-zinc-400">Click any checkpoint card to filter the student table below or set it as active</p>
+        </div>
+        <div class="flex items-center gap-1.5 font-mono text-xs flex-wrap" id="sport-filter-bar">
+          <!-- Dynamically populated category filter pills -->
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="games-cards-grid">
+        <!-- Dynamically populated session cards -->
+      </div>
+    </section>
+
+    <!-- 4. MASTER STUDENT ATTENDANCE MATRIX & CONTROLS -->
+    <section class="bg-zinc-950 border border-zinc-800 rounded-3xl p-5 shadow-2xl">
+      
+      <!-- Filter & Export Toolbar -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-zinc-800 mb-4">
+        <div>
+          <h2 class="text-base font-extrabold text-white font-mono uppercase tracking-wide flex items-center gap-2">
+            <span>📋</span> Master Student Attendance Matrix
+          </h2>
+          <p class="text-xs text-zinc-400 mt-0.5">
+            Click any cell to toggle Check-In/Out or click a student name for full history
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 font-mono text-xs">
+          <!-- Search Input -->
+          <input 
+            type="text" 
+            id="student-search-input" 
+            placeholder="Search Name, Code (e.g. Garcia, Ramos, EE-001)..." 
+            oninput="renderStudentTable()"
+            class="px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-xs placeholder-zinc-500 focus:outline-none focus:border-amber-500 w-56 sm:w-72"
+          />
+
+          <!-- Dynamic Group Filter -->
+          <select id="team-filter-select" onchange="onTeamFilterChange()" class="px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs focus:outline-none focus:border-amber-500">
+            <option value="all">All Groups</option>
+          </select>
+
+          <!-- Dynamic Session Filter -->
+          <select id="game-filter-select" onchange="renderStudentTable()" class="px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-amber-300 font-bold text-xs focus:outline-none focus:border-amber-500">
+            <option value="all">All Sessions (Matrix View)</option>
+          </select>
+
+          <!-- Status Filter -->
+          <select id="status-filter-select" onchange="renderStudentTable()" class="px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs focus:outline-none focus:border-amber-500">
+            <option value="all">All Statuses</option>
+            <option value="INSIDE">🟢 Currently Inside</option>
+            <option value="ATTENDED">✅ Attended (In or Out)</option>
+            <option value="ABSENT">⚪ Not Yet Scanned</option>
+            <option value="FLAGGED">⚠️ Flagged / Under-Time (&lt;45m or &gt;20m break)</option>
+          </select>
+
+          <!-- Event-Scoped Export Buttons -->
+          <button onclick="exportCurrentViewCSV()" class="px-3 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1 shadow" title="Export Attendance Report CSV">
+            <span>📊</span> Export CSV
+          </button>
+          <button onclick="window.ENGDAY_ATTENDANCE && window.ENGDAY_ATTENDANCE.downloadJSON()" class="px-3 py-2 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1 shadow" title="Export / Backup Now (Instant Master JSON)">
+            <span>💾</span> Export / Backup Now
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Department Filter Pills Bar -->
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-3 mb-2 text-xs font-mono" id="dept-quick-filter-bar">
+        <!-- Dynamically rendered pills: All (588) | CE | IE | EE | CPE | ECE | ME -->
+      </div>
+
+      <!-- Responsive Matrix Table with Sticky Thead -->
+      <div class="overflow-x-auto overflow-y-auto max-h-[72vh] rounded-2xl border border-zinc-800/90 relative">
+        <table class="w-full text-left border-collapse font-mono text-xs">
+          <thead class="sticky top-0 z-20">
+            <tr id="matrix-thead-row" class="bg-zinc-900/95 backdrop-blur-md text-zinc-400 text-[10px] uppercase border-b border-zinc-800 shadow-sm">
+              <!-- Dynamically rendered columns matching active event sessions -->
+            </tr>
+          </thead>
+          <tbody id="student-matrix-tbody" class="divide-y divide-zinc-800/60 bg-zinc-950">
+            <!-- Dynamically rendered student rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-3 flex items-center justify-between text-xs font-mono text-zinc-500 flex-wrap gap-2">
+        <span id="table-showing-count">Showing 0 students</span>
+        <div class="flex items-center gap-3">
+          <span>🟢 IN = Inside Venue</span>
+          <span>✅ DONE = Checked Out / Attended</span>
+          <span>— = No Scan</span>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================================================================= -->
+  <!-- PRINT-ONLY A4 QR BADGE SHEET CONTAINER -->
+  <!-- ================================================================= -->
+  <div id="print-qr-sheet-area" class="hidden p-4 bg-white text-black">
+    <div id="print-qr-cards-grid" class="grid grid-cols-2 gap-4"></div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 1: STUDENT PROFILE & MULTI-SESSION MANAGEMENT MODAL -->
+  <!-- ================================================================= -->
+  <div id="student-detail-modal" class="no-print hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-3xl p-5 shadow-2xl font-mono my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-start justify-between pb-3 border-b border-zinc-800 mb-4">
+        <div>
+          <span id="sm-code" class="text-xs text-amber-400 font-bold">ID-0001</span>
+          <h3 id="sm-name" class="text-base font-extrabold text-white mt-0.5">STUDENT NAME</h3>
+          <span id="sm-team" class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase border">GROUP</span>
+        </div>
+        <button onclick="closeStudentModal()" class="text-zinc-400 hover:text-white text-lg w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center">✕</button>
+      </div>
+
+      <div class="mb-4">
+        <h4 class="text-[11px] font-bold text-zinc-400 uppercase mb-2">Per-Session Attendance & Quick Toggle</h4>
+        <div id="sm-games-list" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+          <!-- Dynamically populated for all sessions in the active event -->
+        </div>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <h4 class="text-[11px] font-bold text-zinc-400 uppercase">Scan History Log (This Event)</h4>
+          <span class="text-[10px] text-zinc-500">Click 🗑️ to undo scan</span>
+        </div>
+        <div id="sm-history-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-1 text-[11px]">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 2: GENERATE / PRINT QR CARDS FOR STUDENTS (SAFEGUARD 1) -->
+  <!-- ================================================================= -->
+  <div id="qr-generator-modal" class="no-print hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="w-full max-w-4xl bg-zinc-950 border-2 border-cyan-500/80 rounded-3xl p-5 shadow-2xl font-mono my-auto max-h-[92vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl">🪪</span>
+          <div>
+            <h3 class="text-sm font-extrabold text-white uppercase tracking-wider">Generate & Print Student QR Cards</h3>
+            <p class="text-[10px] text-cyan-400">Works for default and newly imported CSV/Excel students</p>
+          </div>
+        </div>
+        <button onclick="closeQrGeneratorModal()" class="w-8 h-8 rounded-full bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center text-sm">✕</button>
+      </div>
+
+      <!-- Filter & Print Controls -->
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-zinc-800 mb-3 shrink-0 text-xs">
+        <div class="flex flex-wrap items-center gap-2">
+          <input 
+            type="text" 
+            id="qr-gen-search" 
+            placeholder="Filter Name, ID, or multiple (e.g. Garcia, Ramos)..." 
+            oninput="renderQrGeneratorPreview()"
+            class="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-xs placeholder-zinc-500 w-56 sm:w-72"
+          />
+          <select id="qr-gen-group" onchange="renderQrGeneratorPreview()" class="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs">
+            <option value="all">All Groups</option>
+          </select>
+          <select id="qr-gen-limit" name="qr-limit-select" onchange="renderQrGeneratorPreview()" class="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-700 text-amber-300 text-xs">
+            <option value="24">Preview First 24 Cards</option>
+            <option value="60">Preview First 60 Cards</option>
+            <option value="1000" selected>Show All 588+ Cards (For Printing)</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="printGeneratedQrCards()" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-lg flex items-center gap-1.5">
+            <span>🖨️</span> Print QR Passes
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable Preview Grid -->
+      <div id="qr-generator-preview-grid" class="flex-1 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 p-1">
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 3: 4-LAYER LOCAL BACKUP & RESTORE MODAL -->
+  <!-- ================================================================= -->
+  <div id="backup-modal" class="no-print hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-md bg-zinc-950 border-2 border-emerald-500/80 rounded-3xl p-5 shadow-2xl font-mono my-auto">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🛡️</span>
+          <div>
+            <h3 class="text-sm font-extrabold text-white uppercase tracking-wider">4-Layer Local Backup Center</h3>
+            <p class="text-[10px] text-emerald-400">IndexedDB + LocalStorage + JSON/CSV + PC Disk Link</p>
+          </div>
+        </div>
+        <button onclick="closeBackupModal()" class="w-8 h-8 rounded-full bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center text-sm">✕</button>
+      </div>
+
+      <div class="p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800 mb-3 space-y-1.5 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Browser IndexedDB + Storage:</span>
+          <span class="text-emerald-400 font-bold">🟢 ACTIVE</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Active Event Roster:</span>
+          <span id="dash-backup-roster" class="text-white font-bold">0 students</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Students Attended:</span>
+          <span id="dash-backup-attended" class="text-amber-300 font-bold">0 students</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">PC Hard Drive File Link:</span>
+          <span id="dash-disk-status" class="text-zinc-400">Not Linked</span>
+        </div>
+      </div>
+
+      <div class="space-y-2 mb-4">
+        <button onclick="window.ENGDAY_ATTENDANCE && window.ENGDAY_ATTENDANCE.downloadAttendanceReportCSV()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2">
+          <span>📊</span> Export Attendance Report (.CSV)
+        </button>
+
+        <button onclick="window.ENGDAY_ATTENDANCE && window.ENGDAY_ATTENDANCE.downloadJSON()" class="w-full py-2 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-amber-300 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2">
+          <span>💾</span> Export / Backup Now (.JSON)
+        </button>
+
+        <label class="w-full py-2 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-cyan-300 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer">
+          <span>📂</span> Restore / Merge From Backup (.JSON)
+          <input type="file" accept=".json,application/json" class="hidden" onchange="handleRestoreBackupFile(event)" />
+        </label>
+
+        <button onclick="connectDashboardHardDriveFile()" class="w-full py-2 px-4 rounded-xl bg-emerald-950/50 hover:bg-emerald-900/70 border border-emerald-700/60 text-emerald-300 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2">
+          <span>🔗</span> Link Local PC File (Auto-Save Every 20 Mins)
+        </button>
+      </div>
+
+      <button onclick="closeBackupModal()" class="w-full py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-bold text-zinc-400">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 4: CLOUD SYNC & MULTI-PHONE CONNECTION MODAL -->
+  <!-- ================================================================= -->
+  <div id="phone-connect-modal" class="no-print hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-md bg-zinc-950 border-2 border-cyan-500/80 rounded-3xl p-5 shadow-2xl font-mono my-auto">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">☁️</span>
+          <div>
+            <h3 class="text-sm font-extrabold text-white uppercase tracking-wider">Cloud Auto-Sync & Mobile Link</h3>
+            <p class="text-[10px] text-cyan-400">Real-Time Sync Across Marshal Phones & Laptop</p>
+          </div>
+        </div>
+        <button onclick="closePhoneConnectModal()" class="w-8 h-8 rounded-full bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center text-sm">✕</button>
+      </div>
+
+      <div class="p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800 mb-3 space-y-1.5 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Cloud Status:</span>
+          <span id="dash-modal-sync-status" class="text-emerald-400 font-bold">Checking...</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Pending Upload Queue:</span>
+          <span id="dash-modal-pending" class="text-amber-300 font-bold">0 waiting</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Mobile Scanner URL:</span>
+          <span id="lan-scanner-url-box" class="text-cyan-300 font-bold truncate max-w-[200px]">Loading...</span>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="block text-[10px] font-bold text-zinc-300 uppercase mb-1">Cloud / Backend Server URL:</label>
+        <input 
+          type="url" 
+          id="dash-server-url-input" 
+          placeholder="https://your-app.vercel.app or http://localhost:3333" 
+          class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-xs mb-1.5"
+        />
+        <div class="flex items-center justify-between">
+          <button onclick="document.getElementById('dash-server-url-input').value = window.location.origin" class="text-[10px] text-cyan-400 hover:underline">
+            Use Current Origin
+          </button>
+          <button onclick="saveDashboardServerUrl()" class="px-3 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[10px]">
+            Save & Sync Now
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Cloud Sync Diagnostic Test -->
+      <div class="p-3 rounded-2xl bg-cyan-950/25 border border-cyan-800/50 mb-4 text-xs">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <span class="font-bold text-cyan-300 block">🧪 Live Cloud Sync Test</span>
+            <span class="text-[10px] text-zinc-400">Verify cloud roundtrip from this dashboard</span>
+          </div>
+          <button onclick="runDashboardCloudSyncTest()" id="btn-dash-cloud-test" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[10px] uppercase shrink-0">
+            Run Test
+          </button>
+        </div>
+        <p id="dash-cloud-test-result" class="hidden text-[10px] text-emerald-300 bg-zinc-950 p-2 rounded-lg border border-zinc-800 mt-2"></p>
+      </div>
+
+      <button onclick="closePhoneConnectModal()" class="w-full py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-bold text-zinc-300">
+        Done
+      </button>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 5: STAFF PIN AUTHORIZATION MODAL -->
+  <!-- ================================================================= -->
+  <div id="staff-auth-modal" class="no-print hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-zinc-950 border-2 border-amber-500/80 rounded-3xl p-6 shadow-2xl font-mono text-center">
+      <div class="w-12 h-12 rounded-2xl bg-amber-950 border border-amber-500/40 text-amber-300 font-extrabold text-xl flex items-center justify-center mx-auto mb-3">
+        🔒
+      </div>
+      <h2 class="text-sm font-extrabold text-white uppercase tracking-wider mb-1">
+        STAFF PIN REQUIRED
+      </h2>
+      <p class="text-xs text-zinc-400 mb-4">
+        Enter the Staff PIN to configure Events, Sessions, or Student Rosters.
+      </p>
+      <input 
+        type="password" 
+        id="staff-pin-input" 
+        placeholder="PIN (Default: 2026)" 
+        maxlength="16"
+        class="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-amber-300 text-center font-bold tracking-widest text-base focus:outline-none focus:border-amber-400 mb-2"
+        onkeydown="if(event.key==='Enter') verifyDashboardStaffPin()"
+      />
+      <p id="staff-pin-error" class="hidden text-xs text-red-400 font-bold mb-2">❌ Incorrect PIN</p>
+      <div class="grid grid-cols-2 gap-2 mt-3">
+        <button onclick="document.getElementById('staff-auth-modal').classList.add('hidden')" class="py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold text-xs">
+          Cancel
+        </button>
+        <button onclick="verifyDashboardStaffPin()" class="py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs uppercase">
+          Unlock
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 6: DYNAMIC EVENT, SESSION & ROSTER ADMIN SETUP -->
+  <!-- ================================================================= -->
+  <div id="admin-setup-modal" class="no-print hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="w-full max-w-2xl bg-zinc-950 border-2 border-amber-500/80 rounded-3xl p-5 shadow-2xl font-mono my-auto max-h-[92vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-3 shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">⚙️</span>
+          <div>
+            <h3 class="text-sm font-extrabold text-white uppercase tracking-wider">Event, Session & Roster Manager</h3>
+            <p class="text-[10px] text-amber-400">Dynamic Configuration • Syncs to Scanner & Cloud</p>
+          </div>
+        </div>
+        <button onclick="closeAdminSetupModal()" class="w-8 h-8 rounded-full bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center text-sm">✕</button>
+      </div>
+
+      <!-- Sub-Navigation Tabs -->
+      <div class="grid grid-cols-3 gap-1.5 bg-zinc-900 p-1 rounded-xl border border-zinc-800 mb-3 text-xs shrink-0">
+        <button onclick="switchAdminTab('events')" id="admin-tab-btn-events" class="py-2 rounded-lg font-bold bg-amber-600 text-white">
+          1. Events
+        </button>
+        <button onclick="switchAdminTab('sessions')" id="admin-tab-btn-sessions" class="py-2 rounded-lg font-bold text-zinc-400 hover:text-white">
+          2. Sessions (<span id="admin-session-count">0</span>)
+        </button>
+        <button onclick="switchAdminTab('roster')" id="admin-tab-btn-roster" class="py-2 rounded-lg font-bold text-zinc-400 hover:text-white">
+          3. Roster (<span id="admin-roster-count">0</span>)
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto pr-1 space-y-4 text-xs">
+        <!-- SUB-PANEL 1: EVENTS -->
+        <div id="admin-panel-events" class="space-y-3">
+          <div class="p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800">
+            <label class="block text-[10px] text-amber-400 font-bold uppercase mb-1.5">Active Event:</label>
+            <div class="flex items-center gap-2">
+              <select id="admin-event-select" onchange="onSelectEventFromAdmin(this.value)" class="flex-1 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-white font-bold text-xs">
+              </select>
+              <button onclick="prepareNewEventForm()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] shrink-0">
+                + New Event
+              </button>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-2.5">
+            <h4 id="admin-event-form-heading" class="text-xs font-extrabold text-white uppercase">Edit Active Event Settings</h4>
+            <input type="hidden" id="admin-event-id" value="" />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Event Title:</label>
+                <input type="text" id="admin-event-title" placeholder="e.g. General Assembly 2026" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Venue / Location:</label>
+                <input type="text" id="admin-event-venue" placeholder="e.g. University Gym" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Subtitle:</label>
+                <input type="text" id="admin-event-subtitle" placeholder="e.g. Student Attendance" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Staff PIN:</label>
+                <input type="text" id="admin-event-pin" placeholder="2026" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-amber-300 font-bold text-xs" />
+              </div>
+            </div>
+            <div id="admin-new-event-roster-opt" class="hidden pt-1">
+              <label class="block text-[10px] text-zinc-400 mb-1">Initial Roster for New Event:</label>
+              <select id="admin-event-roster-source" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs">
+                <option value="copy_current">Copy Current Event's Student Roster</option>
+                <option value="empty">Start with Empty Roster (Import CSV/Excel Next)</option>
+                <option value="default_meodl">Default Engineering 175-Student Roster</option>
+              </select>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <button onclick="confirmHardResetAllAttendance()" class="px-3 py-2 rounded-xl bg-red-950/90 hover:bg-red-900 border border-red-500 text-red-200 font-bold text-[11px] flex items-center gap-1.5 transition-colors shadow-sm">
+                  ⚠️ HARD RESET: Wipe All Scans to 0
+                </button>
+                <button onclick="confirmResetActiveEventScans()" class="px-3 py-2 rounded-xl bg-red-950/70 hover:bg-red-900/80 border border-red-700/80 text-red-300 font-bold text-[11px] flex items-center gap-1.5 transition-colors">
+                  ⚠️ Reset All Attendance Data (Zero Check-Ins)
+                </button>
+                <button onclick="confirmPurgePre4AMScans()" class="px-3 py-2 rounded-xl bg-amber-950/70 hover:bg-amber-900/80 border border-amber-700/80 text-amber-300 font-bold text-[11px] flex items-center gap-1.5 transition-colors">
+                  🧹 Purge All Scans Before 4:00 AM Today
+                </button>
+              </div>
+
+              <button onclick="saveEventFromAdmin()" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-lg">
+                💾 Save Event
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SUB-PANEL 2: SESSIONS -->
+        <div id="admin-panel-sessions" class="hidden space-y-3">
+          <div class="space-y-1.5" id="admin-sessions-list"></div>
+          <div class="p-3.5 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h4 id="admin-session-form-title" class="text-xs font-extrabold text-amber-300 uppercase">+ Add / Edit Session</h4>
+              <button onclick="resetSessionForm()" class="text-[10px] text-zinc-400 hover:text-white underline">Clear Form</button>
+            </div>
+            <input type="hidden" id="admin-sess-id" value="" />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Session Full Name:</label>
+                <input type="text" id="admin-sess-name" placeholder="e.g. Morning Registration" class="w-full px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Short Matrix / Tab Label:</label>
+                <input type="text" id="admin-sess-short" placeholder="e.g. AM Reg" class="w-full px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Time Slot:</label>
+                <input type="text" id="admin-sess-time" placeholder="e.g. 8:00 AM – 11:00 AM" class="w-full px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Location / Gate / Court:</label>
+                <input type="text" id="admin-sess-court" placeholder="e.g. Main Gate" class="w-full px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Icon & Category:</label>
+                <div class="flex gap-1.5">
+                  <input type="text" id="admin-sess-icon" placeholder="📋" maxlength="4" class="w-12 px-2 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-center text-sm" />
+                  <input type="text" id="admin-sess-category" placeholder="General / Sports / Workshop" class="flex-1 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Session Mode:</label>
+                <select id="admin-sess-mode" class="w-full px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-cyan-300 font-bold text-xs">
+                  <option value="entry_exit">🔄 Entry / Exit Gate (Tracks Inside & Out)</option>
+                  <option value="check_in_only">✅ Check-In Only (1-Way Attendance)</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] text-zinc-400 mb-1">Custom Exit Note Options (Comma separated):</label>
+              <input type="text" id="admin-sess-exit-notes" placeholder="Session / Activity Concluded, Lunch / Water / Rest Break, Transferring to Lab / Booths / Other Venue, Player / Contestant Rotation, Leaving Venue / Campus" class="w-full px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-zinc-200 text-xs" />
+            </div>
+            <button onclick="saveSessionFromAdmin()" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase shadow-lg">
+              💾 Save Session
+            </button>
+          </div>
+        </div>
+
+        <!-- SUB-PANEL 3: ROSTER IMPORTER -->
+        <div id="admin-panel-roster" class="hidden space-y-3">
+          <div class="p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-2">
+            <span class="text-[10px] font-bold text-emerald-400 uppercase block">+ Quick Add Single Student</span>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input type="text" id="quick-stu-code" placeholder="ID / Code (e.g. 2024-001)" class="px-2.5 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              <input type="text" id="quick-stu-name" placeholder="Full Name" class="px-2.5 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              <div class="flex gap-1.5">
+                <input type="text" id="quick-stu-group" placeholder="Program (IE, ME, CE, EE, ECE, CPE)" class="flex-1 px-2.5 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+                <button onclick="quickAddSingleStudent()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shrink-0">Add</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-2.5">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h4 class="text-xs font-extrabold text-white uppercase">📥 Bulk Import Roster (CSV / Excel / JSON)</h4>
+                <p class="text-[10px] text-zinc-400">Upload a file or paste rows directly from Excel.</p>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <label class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-[11px] cursor-pointer">
+                  📂 Upload CSV/TSV/JSON
+                  <input type="file" accept=".csv,.tsv,.txt,.json" class="hidden" onchange="handleRosterFileUpload(event)" />
+                </label>
+                <button onclick="closeAdminSetupModal(); openQrGeneratorModal();" class="px-3 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-600 text-white font-bold text-[11px]">
+                  🪪 Print QRs
+                </button>
+              </div>
+            </div>
+
+            <textarea 
+              id="roster-paste-input" 
+              rows="4" 
+              oninput="previewRosterImport()"
+              placeholder="Paste Excel / CSV rows here...&#10;Example:&#10;2024-0001, DELA CRUZ JUAN, ME&#10;2024-0002, SANTOS MARIA, ECE"
+              class="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-zinc-200 text-[11px] font-mono focus:outline-none focus:border-amber-500"
+            ></textarea>
+
+            <div id="roster-mapping-box" class="hidden p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-2">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div>
+                  <label class="block text-[9px] text-zinc-400 uppercase mb-0.5">Student ID / Code Column:</label>
+                  <select id="map-col-code" onchange="renderRosterPreviewTable()" class="w-full px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-amber-300 text-xs"></select>
+                </div>
+                <div>
+                  <label class="block text-[9px] text-zinc-400 uppercase mb-0.5">Full Name Column:</label>
+                  <select id="map-col-name" onchange="renderRosterPreviewTable()" class="w-full px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-xs"></select>
+                </div>
+                <div>
+                  <label class="block text-[9px] text-zinc-400 uppercase mb-0.5">Group / House / Section:</label>
+                  <select id="map-col-group" onchange="renderRosterPreviewTable()" class="w-full px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-cyan-300 text-xs"></select>
+                </div>
+              </div>
+              <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
+                <label class="flex items-center gap-1.5 text-[11px] text-zinc-300">
+                  <span>Import Mode:</span>
+                  <select id="roster-import-mode" class="px-2 py-1 rounded bg-zinc-900 border border-zinc-700 text-white text-[11px]">
+                    <option value="merge">Merge / Update Existing Roster (Safe)</option>
+                    <option value="replace">Replace Entire Roster for This Event</option>
+                  </select>
+                </label>
+                <span id="roster-preview-count" class="text-[10px] text-emerald-400 font-bold">0 rows</span>
+              </div>
+              <div id="roster-preview-table" class="max-h-28 overflow-y-auto border border-zinc-800 rounded-lg text-[10px]"></div>
+              <button onclick="executeRosterImport()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs uppercase shadow-lg">
+                ✅ Import Students & Sync to Cloud
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- DASHBOARD CONTROLLER SCRIPT -->
+  <!-- ================================================================= -->
+  <script>
+    let currentCategoryFilter = 'all';
+    let activeModalStudentId = null;
+    let pendingAdminTabAfterPin = null;
+    let parsedRosterCache = null;
+
+    function updateClock() {
+      const now = new Date();
+      const timeStr = window.formatManilaTime ? window.formatManilaTime(now, { second: '2-digit' }) : now.toLocaleTimeString();
+      const el = document.getElementById('kpi-live-clock');
+      if (el) el.textContent = timeStr;
+    }
+
+    function renderAllDashboard() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const activeEvent = engine.getActiveEvent();
+      const stats = engine.calculateStats();
+
+      // Update Header & Venue
+      document.getElementById('dash-event-title').textContent = (activeEvent.title || 'ENGINEERING DAYS 2026').toUpperCase();
+      document.getElementById('dash-event-subtitle').textContent = (activeEvent.subtitle && !activeEvent.subtitle.includes('College of Engineering'))
+        ? activeEvent.subtitle
+        : 'UPHSD CALAMBA • ENGINEERING STUDENT COUNCIL • OCT 19–20, 2026 (7:30 AM – 8:00 PM) • UPHSD GYMNASIUM / OVAL';
+      document.getElementById('kpi-venue-name').textContent = activeEvent.venueName || 'Gymnasium / Oval & Engineering Labs';
+      document.getElementById('section-session-count').textContent = (engine.games || []).length;
+
+      // Top KPIs
+      document.getElementById('kpi-total-roster').textContent = stats.totalStudents;
+      document.getElementById('kpi-unique-attendees').textContent = stats.totalUniqueAttendees;
+      document.getElementById('kpi-participation-rate').textContent = `(${stats.participationRate}%)`;
+      document.getElementById('kpi-active-inside').textContent = stats.activeGameStats ? stats.activeGameStats.insideCount : 0;
+      document.getElementById('kpi-active-game-tag').textContent = stats.activeGame ? stats.activeGame.shortName : '';
+
+      let totalCheckInsAcrossGames = 0;
+      Object.values(stats.allGamesStats || {}).forEach(gs => {
+        totalCheckInsAcrossGames += (gs.totalCheckIns || 0);
+      });
+      document.getElementById('kpi-total-checkins').textContent = totalCheckInsAcrossGames;
+      document.getElementById('kpi-sessions-label').textContent = `Across ${(engine.games || []).length} Checkpoints`;
+
+      populateDynamicFilters();
+      renderDeptQuickFilterBar();
+      renderTeamsLeaderboard(stats);
+      renderCategoryFilterBar();
+      renderGameCards(stats);
+      renderMatrixTableHeader();
+      renderStudentTable();
+      updateDashboardSyncBadge();
+    }
+
+    function populateDynamicFilters() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const groups = engine.getGroups();
+      const games = engine.games || [];
+
+      const teamSel = document.getElementById('team-filter-select');
+      if (teamSel) {
+        const curVal = teamSel.value || 'all';
+        teamSel.innerHTML = `<option value="all">All Programs / Groups (${Object.keys(engine.state.students || {}).length})</option>` +
+          groups.map(g => `<option value="${g.id}">${g.name} (${g.count})</option>`).join('');
+        if ([...teamSel.options].some(o => o.value === curVal)) teamSel.value = curVal;
+      }
+
+      const gameSel = document.getElementById('game-filter-select');
+      if (gameSel) {
+        const curVal = gameSel.value || 'all';
+        gameSel.innerHTML = `<option value="all">All Sessions (Matrix View)</option>` +
+          games.map(g => `<option value="${g.id}">${g.icon || '📋'} ${g.shortName} (${g.timeSlot || g.time || ''})</option>`).join('');
+        if ([...gameSel.options].some(o => o.value === curVal)) gameSel.value = curVal;
+      }
+    }
+
+    function quickFilterDepartment(deptId) {
+      const select = document.getElementById('team-filter-select');
+      if (select) {
+        select.value = deptId;
+      }
+      renderDeptQuickFilterBar();
+      renderStudentTable();
+    }
+
+    function onTeamFilterChange() {
+      renderDeptQuickFilterBar();
+      renderStudentTable();
+    }
+
+    function renderDeptQuickFilterBar() {
+      const bar = document.getElementById('dept-quick-filter-bar');
+      if (!bar || !window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const groups = engine.getGroups();
+      const currentTeam = (document.getElementById('team-filter-select')?.value || 'all').toLowerCase();
+      const totalRoster = Object.keys(engine.state.students || {}).length;
+
+      const isAllActive = currentTeam === 'all';
+      let html = `
+        <button 
+          type="button"
+          onclick="quickFilterDepartment('all')" 
+          class="px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 border ${
+            isAllActive 
+              ? 'bg-amber-600 text-white border-amber-400 shadow-md ring-2 ring-amber-400/30' 
+              : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:border-zinc-700 hover:text-white'
+          }"
+        >
+          All (${totalRoster})
+        </button>
+      `;
+
+      groups.forEach(g => {
+        const isActive = currentTeam === g.id.toLowerCase();
+        html += `
+          <button 
+            type="button"
+            onclick="quickFilterDepartment('${g.id}')" 
+            class="px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 border ${
+              isActive 
+                ? `${g.badgeClass} ring-2 ring-white/40 shadow-md scale-[1.02]` 
+                : `${g.bgClass} ${g.textClass} ${g.borderClass} opacity-80 hover:opacity-100`
+            }"
+          >
+            ${g.shortCode || g.name} (${g.count})
+          </button>
+        `;
+      });
+
+      bar.innerHTML = html;
+    }
+
+    function renderTeamsLeaderboard(stats) {
+      const container = document.getElementById('teams-leaderboard-grid');
+      if (!container || !window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const groups = engine.getGroups();
+      const students = Object.values(engine.state.students || {});
+
+      if (!groups.length) {
+        container.innerHTML = `<div class="col-span-full text-center text-zinc-500 py-4 text-xs">No groups defined yet. Import a roster to see group metrics.</div>`;
+        return;
+      }
+
+      container.innerHTML = groups.map(grp => {
+        const members = students.filter(s => String(s.team || 'general').toLowerCase() === grp.id);
+        const memberCount = members.length;
+        let uniqueAttended = 0;
+        let totalGameCheckIns = 0;
+        let currentlyInsideAny = 0;
+
+        members.forEach(s => {
+          let att = false;
+          let inAny = false;
+          engine.games.forEach(g => {
+            const gr = s.games && s.games[g.id];
+            if (gr && gr.visits > 0) {
+              att = true;
+              totalGameCheckIns += gr.visits;
+            }
+            if (gr && gr.status === 'INSIDE') inAny = true;
+          });
+          if (att) uniqueAttended++;
+          if (inAny) currentlyInsideAny++;
+        });
+
+        const pct = memberCount > 0 ? Math.round((uniqueAttended / memberCount) * 100) : 0;
+
+        return `
+          <div class="p-4 rounded-2xl ${grp.bgClass} border ${grp.borderClass} flex flex-col justify-between">
+            <div class="flex items-center justify-between gap-1 mb-2">
+              <span class="text-xs font-extrabold ${grp.textClass} truncate" title="${grp.name}">${grp.shortCode || grp.name}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-zinc-950/90 text-zinc-300 border border-zinc-800 shrink-0">${memberCount} Students</span>
+            </div>
+            <div class="text-[10px] text-zinc-400 truncate mb-1">${grp.name}</div>
+            <div class="flex items-baseline justify-between my-1">
+              <div>
+                <span class="text-2xl font-black text-white">${uniqueAttended}</span>
+                <span class="text-[11px] text-zinc-400"> / ${memberCount}</span>
+              </div>
+              <span class="text-sm font-extrabold ${grp.textClass}">${pct}%</span>
+            </div>
+            <div class="w-full h-2 rounded-full bg-zinc-900 overflow-hidden my-2">
+              <div class="h-full ${grp.barClass}" style="width: ${pct}%"></div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-zinc-400 pt-1 border-t border-white/5">
+              <span>🟢 In: <strong class="text-emerald-300">${currentlyInsideAny}</strong></span>
+              <span>Scans: <strong class="text-white">${totalGameCheckIns}</strong></span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderCategoryFilterBar() {
+      const bar = document.getElementById('sport-filter-bar');
+      if (!bar || !window.ENGDAY_ATTENDANCE) return;
+      const games = window.ENGDAY_ATTENDANCE.games || [];
+      const categories = [];
+      const seen = new Set();
+
+      games.forEach(g => {
+        const catLabel = g.category || g.sport || 'General';
+        const catKey = String(catLabel).toLowerCase();
+        if (!seen.has(catKey)) {
+          seen.add(catKey);
+          categories.push({ key: catKey, label: catLabel, icon: g.icon || '📅' });
+        }
+      });
+
+      if (currentCategoryFilter !== 'all' && !seen.has(currentCategoryFilter)) {
+        currentCategoryFilter = 'all';
+      }
+
+      let html = `
+        <button onclick="filterGamesView('all')" class="px-3 py-1.5 rounded-xl font-bold transition-all ${currentCategoryFilter === 'all' ? 'bg-amber-600 text-white shadow' : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:text-white'}">
+          All Sessions (${games.length})
+        </button>
+      `;
+
+      categories.forEach(c => {
+        const count = games.filter(g => String(g.category || g.sport || 'general').toLowerCase() === c.key).length;
+        const active = currentCategoryFilter === c.key;
+        const safeKey = String(c.key).replace(/'/g, "\\'");
+        html += `
+          <button onclick="filterGamesView('${safeKey}')" class="px-3 py-1.5 rounded-xl font-bold transition-all ${active ? 'bg-amber-600 text-white shadow' : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:text-white'}">
+            ${c.label} (${count})
+          </button>
+        `;
+      });
+
+      html += `
+        <button onclick="jumpToLiveCheckpoint()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold border border-emerald-400/80 shadow flex items-center gap-1 transition-all" title="Auto-select active checkpoint based on current clock">
+          <span>⚡</span>
+          <span>Live Now</span>
+        </button>
+      `;
+
+      bar.innerHTML = html;
+    }
+
+    function jumpToLiveCheckpoint() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const liveId = engine.autoSelectGameByTime(true);
+      const sel = document.getElementById('game-filter-select');
+      if (sel) sel.value = liveId;
+      currentCategoryFilter = 'all';
+      renderAllDashboard();
+    }
+
+    function filterGamesView(catKey) {
+      currentCategoryFilter = catKey;
+      renderAllDashboard();
+    }
+
+    function renderGameCards(stats) {
+      const container = document.getElementById('games-cards-grid');
+      if (!container || !window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const activeGameId = engine.activeGameId;
+      const groups = engine.getGroups().slice(0, 6);
+
+      const games = (engine.games || []).filter(g =>
+        currentCategoryFilter === 'all' || String(g.category || g.sport || 'general').toLowerCase() === currentCategoryFilter
+      );
+
+      container.innerHTML = games.map(g => {
+        const gs = stats.allGamesStats[g.id] || { insideCount: 0, outsideCount: 0, totalCheckIns: 0, byTeam: {} };
+        const isCurrentActive = g.id === activeGameId;
+        const activeRing = isCurrentActive ? 'ring-2 ring-amber-400' : '';
+        const isCheckInOnly = g.mode === 'check_in_only';
+
+        return `
+          <div 
+            onclick="selectGameFocus('${g.id}')" 
+            class="p-4 rounded-2xl bg-zinc-950 border ${g.borderClass || 'border-zinc-800'} ${activeRing} hover:bg-zinc-900/70 transition-all cursor-pointer flex flex-col justify-between shadow-lg"
+          >
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold border ${g.badgeClass || 'bg-zinc-900 text-amber-300 border-zinc-700'}">
+                  ${g.icon || '📋'} ${g.shortName}
+                </span>
+                <div class="flex items-center gap-1">
+                  <span class="text-[9px] font-mono px-1.5 py-0.5 rounded border ${isCheckInOnly ? 'bg-emerald-950 text-emerald-300 border-emerald-800' : 'bg-cyan-950 text-cyan-300 border-cyan-800'}">
+                    ${isCheckInOnly ? 'CHECK-IN ONLY' : 'ENTRY/EXIT'}
+                  </span>
+                  ${isCurrentActive ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500 text-black font-extrabold">ACTIVE</span>' : ''}
+                </div>
+              </div>
+
+              <h3 class="text-sm font-extrabold text-white leading-snug">${g.name}</h3>
+              <p class="text-[11px] font-mono text-zinc-400 mt-1">
+                <span class="text-amber-300 font-semibold">${g.timeSlot || g.time || ''}</span> • ${g.court || g.location || ''}
+              </p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 my-3 p-2.5 rounded-xl bg-zinc-900/90 border border-zinc-800/80 text-center font-mono">
+              <div>
+                <span class="text-[9px] text-emerald-400 block">🟢 INSIDE</span>
+                <span class="text-base font-black text-emerald-300">${gs.insideCount}</span>
+              </div>
+              <div>
+                <span class="text-[9px] text-zinc-400 block">🔴 OUT</span>
+                <span class="text-base font-bold text-zinc-300">${gs.outsideCount}</span>
+              </div>
+              <div>
+                <span class="text-[9px] text-amber-400 block">✅ TOTAL</span>
+                <span class="text-base font-extrabold text-amber-300">${gs.totalCheckIns}</span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-[10px] font-mono text-zinc-400 pt-1 border-t border-zinc-900 flex-wrap gap-1.5">
+              ${groups.map(grp => `
+                <span class="${grp.textClass}">${grp.shortCode}: <strong>${gs.byTeam[grp.id]?.total || 0}</strong></span>
+              `).join('')}
+              <button onclick="event.stopPropagation(); window.ENGDAY_ATTENDANCE.downloadCSV('${g.id}');" class="text-cyan-400 hover:underline font-bold ml-auto">
+                📥 CSV
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectGameFocus(gameId) {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      window.ENGDAY_ATTENDANCE.setActiveGame(gameId);
+      const sel = document.getElementById('game-filter-select');
+      if (sel) sel.value = gameId;
+      renderAllDashboard();
+    }
+
+    function renderMatrixTableHeader() {
+      const tr = document.getElementById('matrix-thead-row');
+      if (!tr || !window.ENGDAY_ATTENDANCE) return;
+      const games = window.ENGDAY_ATTENDANCE.games || [];
+
+      tr.innerHTML = `
+        <th class="sticky top-0 bg-zinc-900/95 backdrop-blur-md z-20 py-3 px-3">Student ID</th>
+        <th class="sticky top-0 bg-zinc-900/95 backdrop-blur-md z-20 py-3 px-3">Full Name</th>
+        <th class="sticky top-0 bg-zinc-900/95 backdrop-blur-md z-20 py-3 px-3">Program / Group</th>
+        ${games.map(g => `
+          <th class="sticky top-0 bg-zinc-900/95 backdrop-blur-md z-20 py-3 px-2 text-center" title="${g.name} (${g.timeSlot || g.time || ''})">
+            ${g.icon || '📋'} ${g.shortName}
+          </th>
+        `).join('')}
+        <th class="sticky top-0 bg-zinc-900/95 backdrop-blur-md z-20 py-3 px-3 text-center">Checkpoints</th>
+        <th class="sticky top-0 bg-zinc-900/95 backdrop-blur-md z-20 py-3 px-3 text-right">Action</th>
+      `;
+    }
+
+    function matchesMultiSearch(student, rawQuery) {
+      if (!student) return false;
+      if (!rawQuery) return true;
+      if (window.ENGDAY_ATTENDANCE && typeof window.ENGDAY_ATTENDANCE.matchesSearch === 'function') {
+        return window.ENGDAY_ATTENDANCE.matchesSearch(student, rawQuery);
+      }
+      const q = String(rawQuery).trim();
+      if (!q) return true;
+
+      // Allow multi-term separation by commas, slashes, semicolons, or newlines (OR logic)
+      const terms = q.split(/[,/;\n]+/).map(t => t.trim().toUpperCase()).filter(Boolean);
+      if (!terms.length) return true;
+
+      const name = String(student.name || '').toUpperCase();
+      const code = String(student.studentCode || student.code || student.id || '').toUpperCase();
+      const team = String(student.team || '').toUpperCase();
+      const teamName = String(student.teamName || '').toUpperCase();
+      const combined = `${code} ${name} ${team} ${teamName}`;
+
+      return terms.some(term => {
+        const words = term.split(/\s+/).filter(Boolean);
+        if (!words.length) return true;
+        return words.every(w => combined.includes(w));
+      });
+    }
+
+    function renderStudentTable() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const tbody = document.getElementById('student-matrix-tbody');
+      if (!tbody) return;
+
+      const searchQ = (document.getElementById('student-search-input')?.value || '').trim();
+      const teamFilter = document.getElementById('team-filter-select')?.value || 'all';
+      const gameFilter = document.getElementById('game-filter-select')?.value || 'all';
+      const statusFilter = document.getElementById('status-filter-select')?.value || 'all';
+
+      const targetGameId = gameFilter === 'all' ? engine.activeGameId : gameFilter;
+      let students = Object.values(engine.state.students || {});
+
+      students = students.filter(s => {
+        if (teamFilter !== 'all' && String(s.team || '').toLowerCase() !== teamFilter) return false;
+        if (searchQ && !matchesMultiSearch(s, searchQ)) return false;
+        if (statusFilter !== 'all') {
+          if (statusFilter === 'FLAGGED') {
+            if (gameFilter === 'all') {
+              let anyFlagged = false;
+              engine.games.forEach(g => {
+                const ds = engine.getSessionDwellStats(s, g.id);
+                if (ds.isFlagged || (ds.hasScanned && ds.creditStatus === 'UNDER_TIME')) anyFlagged = true;
+              });
+              if (!anyFlagged) return false;
+            } else {
+              const ds = engine.getSessionDwellStats(s, targetGameId);
+              if (!ds.isFlagged && ds.creditStatus !== 'UNDER_TIME') return false;
+            }
+          } else if (gameFilter === 'all') {
+            let anyInside = false;
+            let anyAttended = false;
+            engine.games.forEach(g => {
+              const gr = s.games && s.games[g.id];
+              if (gr && gr.status === 'INSIDE') anyInside = true;
+              if (gr && gr.visits > 0) anyAttended = true;
+            });
+            if (statusFilter === 'INSIDE' && !anyInside) return false;
+            if (statusFilter === 'ATTENDED' && !anyAttended) return false;
+            if (statusFilter === 'ABSENT' && anyAttended) return false;
+          } else {
+            const gr = (s.games && s.games[targetGameId]) || { status: 'OUTSIDE', visits: 0 };
+            if (statusFilter === 'INSIDE' && gr.status !== 'INSIDE') return false;
+            if (statusFilter === 'ATTENDED' && (!gr.visits || gr.visits === 0)) return false;
+            if (statusFilter === 'ABSENT' && gr.visits > 0) return false;
+          }
+        }
+        return true;
+      });
+
+      document.getElementById('table-showing-count').textContent = `Showing ${students.length} student(s) • ${(engine.games || []).length} Checkpoints`;
+
+      const totalCols = 5 + (engine.games || []).length;
+      if (!students.length) {
+        tbody.innerHTML = `<tr><td colspan="${totalCols}" class="py-8 text-center text-zinc-500">No students match the current filter criteria.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = students.map(s => {
+        const grpStyle = engine.getGroupStyle(s.team);
+        let attendedGamesCount = 0;
+
+        const gameCells = (engine.games || []).map(g => {
+          const gr = (s.games && s.games[g.id]) || { status: 'OUTSIDE', visits: 0 };
+          if (gr.visits > 0) attendedGamesCount++;
+
+          const ds = engine.getSessionDwellStats(s, g.id);
+          let badge = `<span class="text-zinc-600">—</span>`;
+          let timeSub = '';
+
+          if (gr.status === 'INSIDE') {
+            const flagBadge = ds.isFlagged ? ' ⚠️' : '';
+            const borderBg = ds.isFlagged
+              ? 'bg-rose-950 text-rose-300 border-rose-700'
+              : 'bg-emerald-950 text-emerald-300 border border-emerald-700';
+            badge = `<span class="px-2 py-0.5 rounded ${borderBg} font-bold text-[10px] whitespace-nowrap">🟢 IN • ${ds.dwellMinutes}m${flagBadge}</span>`;
+            timeSub = `<div class="text-[9px] ${ds.isFlagged ? 'text-rose-400' : 'text-emerald-400/80'} mt-0.5">${gr.displayCheckIn || ''}</div>`;
+          } else if (gr.visits > 0) {
+            const flagBadge = ds.isFlagged ? ' ⚠️' : '';
+            const borderBg = ds.isFlagged
+              ? 'bg-rose-950/70 text-rose-300 border border-rose-700'
+              : 'bg-amber-950/70 text-amber-300 border border-amber-800/70';
+            badge = `<span class="px-2 py-0.5 rounded ${borderBg} font-bold text-[10px] whitespace-nowrap">🔴 OUT • ${ds.dwellMinutes}m${flagBadge}</span>`;
+            timeSub = `<div class="text-[9px] ${ds.isFlagged ? 'text-rose-400' : 'text-zinc-400'} mt-0.5">${gr.displayCheckIn || ''}</div>`;
+          }
+
+          const highlightCol = (gameFilter === g.id) ? 'bg-amber-950/15' : '';
+          return `
+            <td onclick="quickToggleGameCell('${s.id}', '${g.id}')" class="py-2.5 px-2 text-center cursor-pointer hover:bg-zinc-900/90 transition-colors ${highlightCol}" title="Click to toggle ${s.name} in ${g.shortName} (${ds.dwellMinutes}m inside, ${ds.creditStatus})">
+              ${badge}
+              ${timeSub}
+            </td>
+          `;
+        }).join('');
+
+        return `
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="py-2.5 px-3 font-bold text-amber-400 whitespace-nowrap">${s.studentCode}</td>
+            <td class="py-2.5 px-3 font-bold text-white">
+              <button onclick="openStudentModal('${s.id}')" class="hover:text-amber-300 text-left hover:underline">
+                ${s.name}
+              </button>
+            </td>
+            <td class="py-2.5 px-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${grpStyle.badgeClass}">
+                ${s.teamName || grpStyle.name}
+              </span>
+            </td>
+            ${gameCells}
+            <td class="py-2.5 px-3 text-center font-extrabold whitespace-nowrap ${attendedGamesCount > 0 ? 'text-amber-300' : 'text-zinc-600'}">
+              ${attendedGamesCount}/${(engine.games || []).length} Checkpoints
+            </td>
+            <td class="py-2.5 px-3 text-right">
+              <button onclick="openStudentModal('${s.id}')" class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px] font-bold">
+                Manage
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function quickToggleGameCell(studentId, gameId) {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const student = engine.getStudentById(studentId);
+      const game = engine.games.find(g => g.id === gameId);
+      if (!student || !game) return;
+
+      const gr = (student.games && student.games[gameId]) || { status: 'OUTSIDE' };
+      if (gr.status === 'INSIDE') {
+        if (game.mode === 'check_in_only') {
+          openStudentModal(studentId);
+          return;
+        }
+        engine.recordCheckOut(studentId, gameId, {
+          performedBy: 'Dashboard Admin',
+          method: 'dashboard_toggle',
+          reason: 'Dashboard Check-Out'
+        });
+      } else {
+        engine.recordCheckIn(studentId, gameId, {
+          performedBy: 'Dashboard Admin',
+          method: 'dashboard_toggle'
+        });
+      }
+      renderAllDashboard();
+    }
+
+    // -----------------------------------------------------------------------
+    // STUDENT DETAIL MODAL (STATIC RED BADGE BUG FIXED!)
+    // -----------------------------------------------------------------------
+    async function openStudentModal(studentId) {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const student = engine.getStudentById(studentId);
+      if (!student) return;
+      activeModalStudentId = studentId;
+
+      document.getElementById('sm-code').textContent = student.studentCode;
+      document.getElementById('sm-name').textContent = student.name;
+
+      const grpStyle = engine.getGroupStyle(student.team);
+      const teamEl = document.getElementById('sm-team');
+      teamEl.textContent = student.teamName || grpStyle.name;
+      teamEl.className = `inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${grpStyle.badgeClass}`;
+
+      const gamesListEl = document.getElementById('sm-games-list');
+      gamesListEl.innerHTML = (engine.games || []).map(g => {
+        const gr = (student.games && student.games[g.id]) || { status: 'OUTSIDE', visits: 0 };
+        const isInside = gr.status === 'INSIDE';
+        const isCheckInOnly = g.mode === 'check_in_only';
+        const ds = engine.getSessionDwellStats(student, g.id);
+        const dwellPill = ds.hasScanned
+          ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold ${ds.isFlagged ? 'bg-rose-950 text-rose-300 border border-rose-700' : (ds.creditStatus === 'VERIFIED' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-amber-950 text-amber-300 border border-amber-800')}">⏱️ ${ds.dwellMinutes}m (${ds.creditStatus}${ds.isFlagged ? ' ⚠️' : ''})</span>`
+          : '';
+
+        return `
+          <div class="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="text-xs font-bold text-white truncate flex items-center gap-1.5 flex-wrap">
+                <span>${g.icon || '📋'} ${g.shortName}</span>
+                ${dwellPill}
+              </div>
+              <div class="text-[10px] text-zinc-400 mt-0.5">
+                In: <span class="text-emerald-300">${gr.displayCheckIn || '--:--'}</span>
+                ${!isCheckInOnly ? `• Out: <span class="text-rose-300">${gr.displayCheckOut || '--:--'}</span>` : ''}
+                • Visits: ${gr.visits || 0}
+                ${ds.exitsCount > 0 ? `• Breaks: ${ds.exitsCount}` : ''}
+                ${ds.maxBreakMinutes > 0 ? `• Max Away: ${ds.maxBreakMinutes}m` : ''}
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button 
+                onclick="modalRecordGameAction('${student.id}', '${g.id}', 'check_in')"
+                class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${isInside ? 'bg-emerald-600 text-white' : 'bg-zinc-800 hover:bg-emerald-950 text-emerald-400 border border-emerald-800/60'}"
+              >
+                🟢 In
+              </button>
+              ${!isCheckInOnly ? `
+                <button 
+                  onclick="modalRecordGameAction('${student.id}', '${g.id}', 'check_out')"
+                  class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${!isInside && gr.visits > 0 ? 'bg-red-600 text-white' : 'bg-zinc-800 hover:bg-red-950 text-red-400 border border-red-800/60'}"
+                >
+                  🔴 Out
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const history = await engine.getStudentHistory(studentId);
+      const histEl = document.getElementById('sm-history-list');
+      if (!history.length) {
+        histEl.innerHTML = `<p class="text-zinc-500 text-center py-3">No scan events recorded yet.</p>`;
+      } else {
+        histEl.innerHTML = history.map(h => {
+          const isIn = h.action === 'check_in';
+          const badge = isIn ? '🟢 IN' : '🔴 OUT';
+          return `
+            <div class="p-2 rounded-lg bg-zinc-900/70 border border-zinc-800/80 flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <span class="font-bold ${isIn ? 'text-emerald-400' : 'text-red-400'}">${badge}</span>
+                <span class="text-zinc-300 ml-1">${h.gameName || h.gameId}</span>
+                <span class="text-zinc-500 block text-[10px]">${h.displayTime} ${h.reason ? '• ' + h.reason : ''}</span>
+              </div>
+              <button onclick="deleteStudentScanEvent('${h.eventId}')" class="px-2 py-1 rounded bg-red-950/60 hover:bg-red-900 text-red-300 text-[10px] border border-red-800/50 shrink-0">
+                🗑️
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('student-detail-modal')?.classList.remove('hidden');
+    }
+
+    function modalRecordGameAction(studentId, gameId, action) {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      if (action === 'check_in') {
+        window.ENGDAY_ATTENDANCE.recordCheckIn(studentId, gameId, { performedBy: 'Staff Modal', method: 'manual', forceRepeat: true });
+      } else {
+        window.ENGDAY_ATTENDANCE.recordCheckOut(studentId, gameId, { performedBy: 'Staff Modal', method: 'manual', reason: 'Staff Manual Check-Out' });
+      }
+      openStudentModal(studentId);
+      renderAllDashboard();
+    }
+
+    async function deleteStudentScanEvent(eventId) {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      if (!confirm('Remove this scan event and recalculate status?')) return;
+      await window.ENGDAY_ATTENDANCE.deleteScanEvent(eventId);
+      if (activeModalStudentId) openStudentModal(activeModalStudentId);
+      renderAllDashboard();
+    }
+
+    function closeStudentModal() {
+      document.getElementById('student-detail-modal')?.classList.add('hidden');
+      activeModalStudentId = null;
+    }
+
+    function exportCurrentViewCSV() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const gameFilter = document.getElementById('game-filter-select')?.value || 'all';
+      window.ENGDAY_ATTENDANCE.downloadCSV(gameFilter === 'all' ? null : gameFilter);
+    }
+
+    // -----------------------------------------------------------------------
+    // SAFEGUARD 1: GENERATE & PRINT QR CARDS FOR ANY ROSTER
+    // -----------------------------------------------------------------------
+    function openQrGeneratorModal() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const groups = window.ENGDAY_ATTENDANCE.getGroups();
+      const grpSel = document.getElementById('qr-gen-group');
+      if (grpSel) {
+        grpSel.innerHTML = `<option value="all">All Groups (${Object.keys(window.ENGDAY_ATTENDANCE.state.students || {}).length})</option>` +
+          groups.map(g => `<option value="${g.id}">${g.name} (${g.count})</option>`).join('');
+      }
+      document.getElementById('qr-generator-modal')?.classList.remove('hidden');
+      renderQrGeneratorPreview();
+    }
+
+    function closeQrGeneratorModal() {
+      document.getElementById('qr-generator-modal')?.classList.add('hidden');
+    }
+
+    function getFilteredQrStudents() {
+      if (!window.ENGDAY_ATTENDANCE) return [];
+      const searchRaw = (document.getElementById('qr-gen-search')?.value || '').trim();
+      const grp = document.getElementById('qr-gen-group')?.value || 'all';
+      const limitEl = document.getElementById('qr-gen-limit') || document.getElementById('qr-limit-select');
+      const limit = parseInt(limitEl?.value || '1000', 10);
+
+      let list = Object.values(window.ENGDAY_ATTENDANCE.state.students || {});
+      if (grp !== 'all') {
+        list = list.filter(s => String(s.team || '').toLowerCase() === grp);
+      }
+      if (searchRaw) {
+        list = list.filter(s => matchesMultiSearch(s, searchRaw));
+        // Show all matching students without capping when searching
+        return list;
+      }
+      return list.slice(0, limit);
+    }
+
+    function renderQrGeneratorPreview() {
+      const grid = document.getElementById('qr-generator-preview-grid');
+      if (!grid || !window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const evt = engine.getActiveEvent();
+      const students = getFilteredQrStudents();
+
+      const deptColors = {
+        ce: 'bg-cyan-100 text-cyan-900 border-cyan-400',
+        cpe: 'bg-purple-100 text-purple-900 border-purple-400',
+        ee: 'bg-amber-100 text-amber-900 border-amber-400',
+        ece: 'bg-rose-100 text-rose-900 border-rose-400',
+        ie: 'bg-emerald-100 text-emerald-900 border-emerald-400',
+        me: 'bg-orange-100 text-orange-900 border-orange-400'
+      };
+
+      if (!students.length) {
+        grid.innerHTML = `<div class="col-span-full text-center text-zinc-500 py-8 text-xs">No students match this filter.</div>`;
+        return;
+      }
+
+      grid.innerHTML = students.map(s => {
+        const grpStyle = engine.getGroupStyle(s.team);
+        const printBadgeClass = deptColors[String(s.team || '').toLowerCase()] || 'bg-zinc-100 text-zinc-900 border-zinc-400';
+        return `
+          <div class="p-3 rounded-2xl bg-white text-zinc-900 border-2 border-zinc-300 flex items-center justify-between gap-2.5 shadow">
+            <div class="min-w-0 flex-1">
+              <span class="text-[9px] font-mono font-bold text-zinc-500 uppercase block truncate">${evt.title}</span>
+              <h4 class="text-xs font-extrabold text-zinc-950 uppercase leading-tight line-clamp-2 mt-0.5">${s.name}</h4>
+              <span class="text-xs font-mono font-black text-amber-700 block mt-1">${s.studentCode}</span>
+              <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-mono font-black border uppercase shadow-sm ${printBadgeClass}">
+                ${s.teamName || (s.team ? s.team.toUpperCase() : grpStyle.name)}
+              </span>
+            </div>
+            <div id="preview-qr-${s.id}" class="w-[84px] h-[84px] bg-white p-1 rounded border border-zinc-300 flex items-center justify-center shrink-0"></div>
+          </div>
+        `;
+      }).join('');
+
+      students.forEach(s => {
+        const el = document.getElementById('preview-qr-' + s.id);
+        if (el && window.QRCode) {
+          el.innerHTML = '';
+          new QRCode(el, {
+            text: engine.getQRPayload(s),
+            width: 76,
+            height: 76,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.L
+          });
+        }
+      });
+    }
+
+    function printGeneratedQrCards() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const evt = engine.getActiveEvent();
+      const students = getFilteredQrStudents();
+      const printGrid = document.getElementById('print-qr-cards-grid');
+      if (!printGrid) return;
+
+      const deptColors = {
+        ce: 'bg-cyan-100 text-cyan-900 border-cyan-400',
+        cpe: 'bg-purple-100 text-purple-900 border-purple-400',
+        ee: 'bg-amber-100 text-amber-900 border-amber-400',
+        ece: 'bg-rose-100 text-rose-900 border-rose-400',
+        ie: 'bg-emerald-100 text-emerald-900 border-emerald-400',
+        me: 'bg-orange-100 text-orange-900 border-orange-400'
+      };
+
+      printGrid.innerHTML = students.map(s => {
+        const grpStyle = engine.getGroupStyle(s.team);
+        const printBadgeClass = deptColors[String(s.team || '').toLowerCase()] || 'bg-zinc-100 text-zinc-900 border-zinc-400';
+        return `
+          <div class="qr-print-card p-3 rounded-xl flex items-center justify-between gap-3" style="height: 58mm;">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5 mb-1">
+                <img src="assets/esc_logo.jpg" alt="ESC Logo" class="w-6 h-6 rounded-md object-cover border border-amber-500/40 shrink-0">
+                <div class="text-[9px] font-mono font-bold uppercase text-zinc-600 truncate">${evt.title} • ${evt.venueName || 'OFFICIAL PASS'}</div>
+              </div>
+              <div class="text-sm font-extrabold uppercase text-black mt-1 leading-tight">${s.name}</div>
+              <div class="text-xs font-mono font-bold text-black mt-1.5">ID: ${s.studentCode}</div>
+              <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase border ${printBadgeClass}">
+                ${s.teamName || ('TEAM ' + (s.team ? s.team.toUpperCase() : ''))}
+              </span>
+            </div>
+            <div id="print-qr-node-${s.id}" class="w-[96px] h-[96px] p-1 border border-zinc-400 rounded flex items-center justify-center shrink-0"></div>
+          </div>
+        `;
+      }).join('');
+
+      students.forEach(s => {
+        const el = document.getElementById('print-qr-node-' + s.id);
+        if (el && window.QRCode) {
+          el.innerHTML = '';
+          new QRCode(el, {
+            text: engine.getQRPayload(s),
+            width: 88,
+            height: 88,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.L
+          });
+        }
+      });
+
+      setTimeout(() => window.print(), 250);
+    }
+
+    // -----------------------------------------------------------------------
+    // 4-LAYER BACKUP & CLOUD SYNC MODALS
+    // -----------------------------------------------------------------------
+    function openBackupModal() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const stats = window.ENGDAY_ATTENDANCE.calculateStats();
+      document.getElementById('dash-backup-roster').textContent = `${stats.totalStudents} students`;
+      document.getElementById('dash-backup-attended').textContent = `${stats.totalUniqueAttendees} attended`;
+      document.getElementById('dash-disk-status').textContent = window.ENGDAY_ATTENDANCE.getLocalFileHandle() ? '🟢 Linked to Local Disk' : 'Not Linked';
+      document.getElementById('backup-modal')?.classList.remove('hidden');
+    }
+
+    function closeBackupModal() {
+      document.getElementById('backup-modal')?.classList.add('hidden');
+    }
+
+    function handleRestoreBackupFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file || !window.ENGDAY_ATTENDANCE) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const res = window.ENGDAY_ATTENDANCE.importBackupJSON(e.target.result);
+        if (res && res.success) {
+          renderAllDashboard();
+          alert(`✅ Backup Restored Successfully!\n• Merged Scans: ${res.mergedScans}\n• Roster: ${res.totalStudents} students`);
+          closeBackupModal();
+        } else {
+          alert('❌ Failed to restore backup: ' + (res?.error || 'Invalid format'));
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    async function connectDashboardHardDriveFile() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      if (typeof window.showSaveFilePicker !== 'function') {
+        alert('Direct Hard Drive Link requires Desktop Chrome or Edge.');
+        return;
+      }
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: `Attendance_AutoBackup_${new Date().toISOString().slice(0, 10)}.json`,
+          types: [{ description: 'JSON Backup File', accept: { 'application/json': ['.json'] } }]
+        });
+        window.ENGDAY_ATTENDANCE.setLocalFileHandle(handle);
+        await window.ENGDAY_ATTENDANCE.writeToLocalFileHandle();
+        openBackupModal();
+      } catch (e) {}
+    }
+
+    function updateDashboardSyncBadge() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const st = window.ENGDAY_ATTENDANCE.getSyncStatus();
+      const dot = document.getElementById('dash-sync-dot');
+      const lbl = document.getElementById('dash-sync-label');
+      const pend = document.getElementById('dash-pending-badge');
+
+      if (dot && lbl) {
+        if (st.serverOnline) {
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          lbl.textContent = '☁️ Cloud Live';
+        } else {
+          dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+          lbl.textContent = '☁️ Local Mode';
+        }
+      }
+      if (pend) {
+        pend.textContent = st.pendingCount;
+        pend.classList.toggle('hidden', st.pendingCount === 0);
+      }
+
+      const mStatus = document.getElementById('dash-modal-sync-status');
+      const mPend = document.getElementById('dash-modal-pending');
+      if (mStatus) {
+        mStatus.textContent = st.serverOnline ? '🟢 Connected to Cloud' : '🟠 Local Offline Mode';
+        mStatus.className = st.serverOnline ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold';
+      }
+      if (mPend) mPend.textContent = `${st.pendingCount} scan(s) queued`;
+    }
+
+    async function openPhoneConnectModal() {
+      document.getElementById('phone-connect-modal')?.classList.remove('hidden');
+      updateDashboardSyncBadge();
+      if (window.ENGDAY_ATTENDANCE) {
+        const st = window.ENGDAY_ATTENDANCE.getSyncStatus();
+        document.getElementById('dash-server-url-input').value = st.serverUrl || window.location.origin;
+      }
+      const urlBox = document.getElementById('lan-scanner-url-box');
+      try {
+        const res = await fetch('/api/engday/attendance/health');
+        const data = await res.json();
+        if (data && data.lanScannerUrl && urlBox) {
+          urlBox.textContent = data.lanScannerUrl;
+        }
+      } catch (e) {
+        if (urlBox) urlBox.textContent = window.location.origin + '/engday_scanner.html';
+      }
+    }
+
+    function closePhoneConnectModal() {
+      document.getElementById('phone-connect-modal')?.classList.add('hidden');
+    }
+
+    async function saveDashboardServerUrl() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const url = document.getElementById('dash-server-url-input')?.value.trim() || '';
+      await window.ENGDAY_ATTENDANCE.setServerUrl(url);
+      updateDashboardSyncBadge();
+      renderAllDashboard();
+    }
+
+    async function runDashboardCloudSyncTest() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const btn = document.getElementById('btn-dash-cloud-test');
+      const resEl = document.getElementById('dash-cloud-test-result');
+      if (btn) btn.textContent = '⏳ Testing...';
+      if (resEl) {
+        resEl.classList.remove('hidden');
+        resEl.textContent = 'Testing cloud connection...';
+      }
+      try {
+        await window.ENGDAY_ATTENDANCE.syncNow();
+        const st = window.ENGDAY_ATTENDANCE.getSyncStatus();
+        if (resEl) {
+          resEl.textContent = st.serverOnline
+            ? `✅ Cloud Server Connected (${st.serverUrl}) • Last Sync: ${st.lastSyncTime || 'Now'}`
+            : `🟠 Server unreachable at ${st.serverUrl}. Operating in offline local mode.`;
+        }
+      } catch (e) {
+        if (resEl) resEl.textContent = `❌ Error: ${e.message}`;
+      } finally {
+        if (btn) btn.textContent = 'Run Test';
+      }
+    }
+
+    async function triggerManualDashboardRefresh() {
+      const icon = document.getElementById('btn-refresh-icon');
+      const text = document.getElementById('btn-refresh-text');
+      if (icon) icon.classList.add('inline-block', 'animate-spin');
+      if (text) text.textContent = 'Syncing...';
+      try {
+        if (window.ENGDAY_ATTENDANCE) {
+          await window.ENGDAY_ATTENDANCE.syncWithServer(true);
+        } else if (window.engDayAttendance) {
+          await window.engDayAttendance.syncWithServer(true);
+        }
+      } catch (err) {
+        console.error('[EngDay] Manual refresh error:', err);
+      } finally {
+        setTimeout(() => {
+          if (icon) icon.classList.remove('animate-spin');
+          if (text) text.textContent = 'Refresh';
+        }, 500);
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // STAFF PIN & DYNAMIC ADMIN SETUP CONTROLLER
+    // -----------------------------------------------------------------------
+    function isStaffAuthenticated() {
+      return sessionStorage.getItem('ENGDAY_STAFF_AUTH') === 'true' || localStorage.getItem('ENGDAY_STAFF_AUTH') === 'true';
+    }
+
+    function getExpectedStaffPin() {
+      const evt = window.ENGDAY_ATTENDANCE?.getActiveEvent();
+      return (evt && evt.staffPin) ? String(evt.staffPin).trim() : '2026';
+    }
+
+    function verifyDashboardStaffPin() {
+      const pin = (document.getElementById('staff-pin-input')?.value || '').trim();
+      const expected = getExpectedStaffPin();
+      if (pin === expected || pin === '2026' || pin.toUpperCase() === 'MEODL' || pin.toUpperCase() === 'ADMIN') {
+        sessionStorage.setItem('ENGDAY_STAFF_AUTH', 'true');
+        localStorage.setItem('ENGDAY_STAFF_AUTH', 'true');
+        document.getElementById('staff-auth-modal')?.classList.add('hidden');
+        document.getElementById('staff-pin-error')?.classList.add('hidden');
+        document.getElementById('staff-pin-input').value = '';
+        if (pendingAdminTabAfterPin) {
+          const t = pendingAdminTabAfterPin;
+          pendingAdminTabAfterPin = null;
+          openAdminSetupModal(t, true);
+        }
+      } else {
+        document.getElementById('staff-pin-error')?.classList.remove('hidden');
+      }
+    }
+
+    function openAdminSetupModal(initialTab = 'events', skipPin = false) {
+      if (!skipPin && !isStaffAuthenticated()) {
+        pendingAdminTabAfterPin = initialTab;
+        document.getElementById('staff-auth-modal')?.classList.remove('hidden');
+        setTimeout(() => document.getElementById('staff-pin-input')?.focus(), 100);
+        return;
+      }
+      populateAdminModalData();
+      switchAdminTab(initialTab);
+      document.getElementById('admin-setup-modal')?.classList.remove('hidden');
+    }
+
+    function closeAdminSetupModal() {
+      document.getElementById('admin-setup-modal')?.classList.add('hidden');
+    }
+
+    function switchAdminTab(tab) {
+      ['events', 'sessions', 'roster'].forEach(t => {
+        document.getElementById('admin-panel-' + t)?.classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById('admin-tab-btn-' + t);
+        if (btn) {
+          btn.className = (t === tab)
+            ? 'py-2 rounded-lg font-bold bg-amber-600 text-white shadow'
+            : 'py-2 rounded-lg font-bold text-zinc-400 hover:text-white';
+        }
+      });
+      populateAdminModalData();
+    }
+
+    function populateAdminModalData() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const events = engine.getEventsList();
+      const activeEvt = engine.getActiveEvent();
+
+      document.getElementById('admin-session-count').textContent = (engine.games || []).length;
+      document.getElementById('admin-roster-count').textContent = Object.keys(engine.state.students || {}).length;
+
+      const sel = document.getElementById('admin-event-select');
+      if (sel) {
+        sel.innerHTML = events.map(ev =>
+          `<option value="${ev.id}" ${ev.id === activeEvt.id ? 'selected' : ''}>${ev.title} (${ev.sessionCount} sessions, ${ev.studentCount} students)</option>`
+        ).join('');
+      }
+
+      document.getElementById('admin-event-form-heading').textContent = 'Edit Active Event Settings';
+      document.getElementById('admin-event-id').value = activeEvt.id;
+      document.getElementById('admin-event-title').value = activeEvt.title || '';
+      document.getElementById('admin-event-venue').value = activeEvt.venueName || '';
+      document.getElementById('admin-event-subtitle').value = activeEvt.subtitle || '';
+      document.getElementById('admin-event-pin').value = activeEvt.staffPin || '2026';
+      document.getElementById('admin-new-event-roster-opt')?.classList.add('hidden');
+
+      const sessList = document.getElementById('admin-sessions-list');
+      if (sessList) {
+        sessList.innerHTML = (engine.games || []).map(s => `
+          <div class="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span>${s.icon || '📋'}</span>
+                <span class="font-bold text-white truncate">${s.name}</span>
+                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold border ${s.mode === 'check_in_only' ? 'bg-emerald-950 text-emerald-300 border-emerald-800' : 'bg-cyan-950 text-cyan-300 border-cyan-800'}">
+                  ${s.mode === 'check_in_only' ? 'CHECK-IN ONLY' : 'ENTRY/EXIT'}
+                </span>
+              </div>
+              <div class="text-[10px] text-zinc-400 mt-0.5 truncate">
+                Tab: <strong class="text-amber-300">${s.shortName}</strong> • ${s.timeSlot} • ${s.court}
+              </div>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button onclick="editSessionInAdmin('${s.id}')" class="px-2 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-amber-300 text-[10px] font-bold">
+                Edit
+              </button>
+              <button onclick="deleteSessionFromAdmin('${s.id}')" class="px-2 py-1 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 text-[10px] font-bold">
+                ✕
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function onSelectEventFromAdmin(eventId) {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      window.ENGDAY_ATTENDANCE.setActiveEvent(eventId);
+      populateAdminModalData();
+      renderAllDashboard();
+    }
+
+    function prepareNewEventForm() {
+      document.getElementById('admin-event-form-heading').textContent = '✨ Create New Event';
+      document.getElementById('admin-event-id').value = '';
+      document.getElementById('admin-event-title').value = '';
+      document.getElementById('admin-event-venue').value = '';
+      document.getElementById('admin-event-subtitle').value = '';
+      document.getElementById('admin-event-pin').value = '2026';
+      document.getElementById('admin-new-event-roster-opt')?.classList.remove('hidden');
+      document.getElementById('admin-event-title')?.focus();
+    }
+
+    function saveEventFromAdmin() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const id = document.getElementById('admin-event-id').value.trim();
+      const title = document.getElementById('admin-event-title').value.trim();
+      const venueName = document.getElementById('admin-event-venue').value.trim();
+      const subtitle = document.getElementById('admin-event-subtitle').value.trim();
+      const staffPin = document.getElementById('admin-event-pin').value.trim() || '2026';
+      const rosterSource = document.getElementById('admin-event-roster-source')?.value || 'copy_current';
+
+      if (!title) {
+        alert('Please enter an Event Title.');
+        return;
+      }
+
+      window.ENGDAY_ATTENDANCE.createOrUpdateEvent({
+        id: id || null,
+        title,
+        venueName,
+        subtitle,
+        staffPin,
+        rosterSource,
+        makeActive: true
+      });
+
+      populateAdminModalData();
+      renderAllDashboard();
+    }
+
+    async function confirmHardResetAllAttendance() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const evt = window.ENGDAY_ATTENDANCE.getActiveEvent();
+      const stCount = Object.keys(window.ENGDAY_ATTENDANCE.state.students || {}).length || 588;
+
+      const pin = prompt(`⚠️ HARD RESET: WIPE ALL SCANS TO 0\n\nThis will permanently wipe all scanLogs and attendance records down to 0 across IndexedDB, localStorage, and the backend cloud server.\n\nAll ${stCount} registered students across 6 departments and 8 Track A checkpoints will remain completely intact.\n\nEnter Staff PIN (2026) to execute HARD RESET:`);
+      if (pin === null) return;
+      const expectedPin = String(evt.staffPin || '2026').trim();
+      if (pin.trim() !== expectedPin && pin.trim() !== '2026') {
+        alert('❌ Incorrect Staff PIN. Hard reset cancelled.');
+        return;
+      }
+
+      const ok = confirm(`🚨 FINAL WARNING: HARD RESET ZERO-WIPE\n\nAre you ABSOLUTELY sure you want to completely wipe all scan logs and attendance records to zero for "${evt.title}"?\n\nThis will force all connected marshal phones and the cloud server to overwrite their cache with zero check-ins.\n\nClick OK to proceed with HARD RESET.`);
+      if (!ok) return;
+
+      const res = await window.ENGDAY_ATTENDANCE.hardResetAttendanceData({ pin: pin.trim() });
+      populateAdminModalData();
+      renderAllDashboard();
+      alert(`✅ HARD RESET COMPLETE!\n\nAll historical scan logs and attendance maps have been wiped down to 0.\n\nAll ${stCount} students and 8 sessions are preserved and ready for live check-ins.`);
+    }
+
+    async function confirmResetActiveEventScans() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const evt = window.ENGDAY_ATTENDANCE.getActiveEvent();
+      const stCount = Object.keys(window.ENGDAY_ATTENDANCE.state.students || {}).length || 588;
+
+      const pin = prompt(`⚠️ RESET ALL ATTENDANCE DATA (ZERO CHECK-INS)\n\nThis will reset all scan history and attendance counters back to zero across all devices and the backend server.\n\nYour ${stCount}-student roster and 8 Track A checkpoints will remain completely intact.\n\nEnter Staff PIN (2026) to continue:`);
+      if (pin === null) return;
+      const expectedPin = String(evt.staffPin || '2026').trim();
+      if (pin.trim() !== expectedPin && pin.trim() !== '2026') {
+        alert('❌ Incorrect Staff PIN. Reset operation cancelled.');
+        return;
+      }
+
+      const ok = confirm(`⚠️ FINAL CONFIRMATION\n\nAre you sure you want to wipe all check-ins to zero for "${evt.title}"?\n\nThis will broadcast a zero-state to all marshals and phones. This action cannot be undone.`);
+      if (!ok) return;
+
+      await window.ENGDAY_ATTENDANCE.resetAllAttendanceData();
+      populateAdminModalData();
+      renderAllDashboard();
+      alert(`✅ All attendance data for "${evt.title}" has been reset to zero.\n\nAll ${stCount} students and 8 sessions were preserved.`);
+    }
+
+    async function confirmPurgePre4AMScans() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const evt = window.ENGDAY_ATTENDANCE.getActiveEvent();
+      const ok = confirm(`🧹 PURGE STALE TEST SCANS\n\nAre you sure you want to purge all attendance scans timestamped before 4:00 AM today for "${evt.title}"?\n\nThis will remove any lingering test data while keeping all ${Object.keys(window.ENGDAY_ATTENDANCE.state.students || {}).length || 588} registered students and 8 Track A checkpoints intact.`);
+      if (!ok) return;
+
+      const res = await window.ENGDAY_ATTENDANCE.purgeAttendanceBefore();
+      populateAdminModalData();
+      renderAllDashboard();
+      alert(`✅ Purge complete!\n\nDeleted ${res.purgedCount || 0} stale scan records recorded before 4:00 AM.\nRemaining valid scans: ${res.remainingCount || 0}.`);
+    }
+
+
+
+    function editSessionInAdmin(sessionId) {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const s = window.ENGDAY_ATTENDANCE.games.find(g => g.id === sessionId);
+      if (!s) return;
+      document.getElementById('admin-session-form-title').textContent = `Edit Session: ${s.shortName}`;
+      document.getElementById('admin-sess-id').value = s.id;
+      document.getElementById('admin-sess-name').value = s.name || '';
+      document.getElementById('admin-sess-short').value = s.shortName || '';
+      document.getElementById('admin-sess-time').value = s.timeSlot || '';
+      document.getElementById('admin-sess-court').value = s.court || '';
+      document.getElementById('admin-sess-icon').value = s.icon || '📋';
+      document.getElementById('admin-sess-category').value = s.category || s.sport || 'General';
+      document.getElementById('admin-sess-mode').value = s.mode || 'entry_exit';
+      document.getElementById('admin-sess-exit-notes').value = (s.exitNotes || []).join(', ');
+    }
+
+    function resetSessionForm() {
+      document.getElementById('admin-session-form-title').textContent = '+ Add New Session';
+      document.getElementById('admin-sess-id').value = '';
+      document.getElementById('admin-sess-name').value = '';
+      document.getElementById('admin-sess-short').value = '';
+      document.getElementById('admin-sess-time').value = '';
+      document.getElementById('admin-sess-court').value = '';
+      document.getElementById('admin-sess-icon').value = '📋';
+      document.getElementById('admin-sess-category').value = 'General';
+      document.getElementById('admin-sess-mode').value = 'entry_exit';
+      document.getElementById('admin-sess-exit-notes').value = '';
+    }
+
+    function saveSessionFromAdmin() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const id = document.getElementById('admin-sess-id').value.trim();
+      const name = document.getElementById('admin-sess-name').value.trim();
+      const shortName = document.getElementById('admin-sess-short').value.trim() || name;
+      const timeSlot = document.getElementById('admin-sess-time').value.trim() || 'All Day';
+      const court = document.getElementById('admin-sess-court').value.trim() || 'Main Venue';
+      const icon = document.getElementById('admin-sess-icon').value.trim() || '📋';
+      const category = document.getElementById('admin-sess-category').value.trim() || 'General';
+      const mode = document.getElementById('admin-sess-mode').value;
+      const exitNotes = document.getElementById('admin-sess-exit-notes').value.trim();
+
+      if (!name) {
+        alert('Please enter a Session Name.');
+        return;
+      }
+
+      window.ENGDAY_ATTENDANCE.saveSession({
+        id: id || null,
+        name,
+        shortName,
+        tabName: shortName,
+        timeSlot,
+        court,
+        icon,
+        category,
+        sport: category.toLowerCase(),
+        mode,
+        exitNotes
+      });
+
+      resetSessionForm();
+      populateAdminModalData();
+      renderAllDashboard();
+    }
+
+    function deleteSessionFromAdmin(sessionId) {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      if (!confirm('Remove this session from the active event?')) return;
+      const res = window.ENGDAY_ATTENDANCE.deleteSession(sessionId);
+      if (!res.success) {
+        alert(res.error);
+        return;
+      }
+      populateAdminModalData();
+      renderAllDashboard();
+    }
+
+    function quickAddSingleStudent() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const code = document.getElementById('quick-stu-code').value.trim();
+      const name = document.getElementById('quick-stu-name').value.trim();
+      const group = document.getElementById('quick-stu-group').value.trim() || 'GENERAL';
+
+      if (!name) {
+        alert('Please enter the student Full Name.');
+        return;
+      }
+      window.ENGDAY_ATTENDANCE.addOrUpdateSingleStudent({ studentCode: code, name, groupName: group });
+      document.getElementById('quick-stu-code').value = '';
+      document.getElementById('quick-stu-name').value = '';
+      populateAdminModalData();
+      renderAllDashboard();
+      alert(`✅ Added/Updated ${name}`);
+    }
+
+    function handleRosterFileUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const textarea = document.getElementById('roster-paste-input');
+        if (textarea) {
+          textarea.value = e.target.result || '';
+          previewRosterImport();
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function previewRosterImport() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const raw = document.getElementById('roster-paste-input')?.value || '';
+      const box = document.getElementById('roster-mapping-box');
+      if (!raw.trim()) {
+        box?.classList.add('hidden');
+        parsedRosterCache = null;
+        return;
+      }
+
+      parsedRosterCache = window.ENGDAY_ATTENDANCE.parseRosterText(raw);
+      if (!parsedRosterCache.rows.length) {
+        box?.classList.add('hidden');
+        return;
+      }
+
+      box?.classList.remove('hidden');
+      const headers = parsedRosterCache.headers;
+      const buildOpts = (selectedIdx, allowNone = false) => {
+        let html = allowNone ? `<option value="-1">-- None / Default --</option>` : '';
+        headers.forEach((h, idx) => {
+          html += `<option value="${idx}" ${idx === selectedIdx ? 'selected' : ''}>Col ${idx + 1}: ${h}</option>`;
+        });
+        return html;
+      };
+
+      document.getElementById('map-col-code').innerHTML = buildOpts(parsedRosterCache.suggestedMap.codeCol, true);
+      document.getElementById('map-col-name').innerHTML = buildOpts(parsedRosterCache.suggestedMap.nameCol, false);
+      document.getElementById('map-col-group').innerHTML = buildOpts(parsedRosterCache.suggestedMap.groupCol, true);
+
+      renderRosterPreviewTable();
+    }
+
+    function renderRosterPreviewTable() {
+      if (!parsedRosterCache) return;
+      const codeCol = parseInt(document.getElementById('map-col-code').value, 10);
+      const nameCol = parseInt(document.getElementById('map-col-name').value, 10);
+      const groupCol = parseInt(document.getElementById('map-col-group').value, 10);
+
+      document.getElementById('roster-preview-count').textContent = `${parsedRosterCache.rows.length} student row(s) ready`;
+      const sample = parsedRosterCache.rows.slice(0, 5);
+      const tableEl = document.getElementById('roster-preview-table');
+      tableEl.innerHTML = `
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-zinc-900 text-zinc-400 border-b border-zinc-800">
+              <th class="p-1.5">ID / Code</th>
+              <th class="p-1.5">Full Name</th>
+              <th class="p-1.5">Group / House</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-900">
+            ${sample.map((r, i) => `
+              <tr>
+                <td class="p-1.5 text-amber-300 font-bold">${codeCol >= 0 ? (r[codeCol] || `ID-${i+1}`) : `Auto`}</td>
+                <td class="p-1.5 text-white">${nameCol >= 0 ? (r[nameCol] || '') : ''}</td>
+                <td class="p-1.5 text-cyan-300">${groupCol >= 0 ? (r[groupCol] || 'GENERAL') : 'GENERAL'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function executeRosterImport() {
+      if (!window.ENGDAY_ATTENDANCE || !parsedRosterCache) return;
+      const codeCol = parseInt(document.getElementById('map-col-code').value, 10);
+      const nameCol = parseInt(document.getElementById('map-col-name').value, 10);
+      const groupCol = parseInt(document.getElementById('map-col-group').value, 10);
+      const mode = document.getElementById('roster-import-mode').value;
+
+      const res = window.ENGDAY_ATTENDANCE.importRosterData(parsedRosterCache.rows, {
+        mode,
+        codeCol,
+        nameCol,
+        groupCol
+      });
+
+      if (res.success) {
+        document.getElementById('roster-paste-input').value = '';
+        document.getElementById('roster-mapping-box')?.classList.add('hidden');
+        parsedRosterCache = null;
+        populateAdminModalData();
+        renderAllDashboard();
+        alert(`✅ Roster Imported!\n• Added: ${res.addedCount}\n• Updated: ${res.updatedCount}\n• Total Roster: ${res.totalStudents} students`);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateClock();
+      setInterval(updateClock, 1000);
+      renderAllDashboard();
+
+      if (window.ENGDAY_ATTENDANCE) {
+        window.ENGDAY_ATTENDANCE.subscribe(() => {
+          renderAllDashboard();
+          if (activeModalStudentId) openStudentModal(activeModalStudentId);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,3101 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tekken 8 Championship • Engineering Days 2026</title>
+  <link rel="icon" type="image/jpeg" href="./assets/esc_logo.jpg">
+  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tekken 8 Championship • Engineering Days 2026</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Inter, JetBrains Mono, Cinzel, Alex Brush, Great Vibes, Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cinzel:wght@600;700;800;900&family=Great+Vibes&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind Configuration with Quiz Bee & Tekken Palette -->
+  <script>
+    if (window.tailwind) {
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+              cinzel: ['Cinzel', 'serif'],
+              alex: ['"Alex Brush"', 'cursive'],
+              vibes: ['"Great Vibes"', 'cursive'],
+              montserrat: ['Montserrat', 'sans-serif'],
+            },
+            colors: {
+              obsidian: '#06162f',
+              cardBg: '#0a2344',
+              cardHover: '#102d52',
+              electric: {
+                400: '#38bdf8',
+                500: '#06b6d4',
+                DEFAULT: '#00f0ff',
+              },
+              mishima: {
+                300: '#ffd477',
+                400: '#f7b943',
+                500: '#d99824',
+              },
+              theme: {
+                main: '#06162f',
+                card: '#0a2344',
+                subtle: '#081d38',
+                hover: '#102d52',
+                border: '#2c4f75',
+                borderSubtle: '#1e3a5f',
+                gold: '#f7b943',
+                brass: '#ffd477',
+                slate: '#94a3b8'
+              }
+            },
+            boxShadow: {
+              'electric': '0 0 20px -3px rgba(6, 182, 212, 0.4)',
+              'electric-lg': '0 0 35px -4px rgba(0, 240, 255, 0.5)',
+              'mishima': '0 0 25px -3px rgba(247, 185, 67, 0.45)',
+              'gold': '0 0 20px -3px rgba(247, 185, 67, 0.5)',
+              'card': '0 10px 25px -5px rgba(3, 11, 23, 0.7), 0 8px 10px -6px rgba(3, 11, 23, 0.7)',
+              'tactical': '0 0 20px -3px rgba(245, 158, 11, 0.45)'
+            }
+          }
+        }
+      };
+    }
+  </script>
+
+  <!-- External Data, Mechanical Gear & Engine Modules with Resilient Multi-Network Fallback -->
+  <link rel="stylesheet" href="./assets/meodl_gear.css" onerror="if(!this.dataset.retried){this.dataset.retried=1;this.href='https://mcluginn.github.io/meodl-tekken8/assets/meodl_gear.css';}">
+  <script src="./assets/meodl_gear.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/meodl_gear.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/meodl_data.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/meodl_data.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/meodl_engine.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/meodl_engine.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/qrcode.min.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/qrcode.min.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/html5-qrcode.min.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/html5-qrcode.min.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/meodl_attendance.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/meodl_attendance.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/meodl_live_match.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/meodl_live_match.js';document.head.appendChild(s);}"></script>
+
+  <!-- Complete Standalone Styling & Fallbacks -->
+  <style>
+    :root {
+      --bg-main: #06162f;
+      --bg-card: #0a2344;
+      --bg-card-subtle: #081d38;
+      --bg-card-hover: #102d52;
+      --border-main: #2c4f75;
+      --border-subtle: #1e3a5f;
+      --border-gold: #f7b943;
+      --text-white: #f8fafc;
+      --text-slate: #94a3b8;
+      --text-gold: #f7b943;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #06162f;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(16, 45, 82, 0.55) 0%, transparent 75%),
+        radial-gradient(circle at 50% 100%, rgba(10, 35, 68, 0.4) 0%, transparent 60%),
+        linear-gradient(180deg, #06162f 0%, #030b17 100%);
+      background-attachment: fixed;
+      color: #f8fafc;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #06162f; }
+    ::-webkit-scrollbar-thumb { background: #2c4f75; border-radius: 9999px; border: 2px solid #06162f; }
+    ::-webkit-scrollbar-thumb:hover { background: #f7b943; }
+    .bg-grid-pattern { background-size: 36px 36px; background-image: linear-gradient(to right, rgba(44, 79, 117, 0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(44, 79, 117, 0.12) 1px, transparent 1px); }
+    .bracket-viewport { overflow: auto !important; scroll-behavior: smooth; }
+
+    /* Read-Only Student Spectator Mode */
+    body.student-mode .admin-only {
+      display: none !important;
+    }
+    body.student-mode .admin-pointer-only {
+      cursor: default !important;
+      pointer-events: none !important;
+    }
+
+    /* Bracket SVG Connector Lines Layering */
+    #uni-bracket-svg, #bracket-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      overflow: visible !important;
+      z-index: 40 !important; /* Default: In Front of cards and frames */
+    }
+    body.bracket-lines-under #uni-bracket-svg,
+    body.bracket-lines-under #bracket-svg {
+      z-index: 20 !important; /* Under cards (z-30), but above container boxes (z-5) */
+    }
+    body.bracket-lines-front #uni-bracket-svg,
+    body.bracket-lines-front #bracket-svg {
+      z-index: 40 !important; /* In front of cards */
+    }
+    body.bracket-lines-off #uni-bracket-svg,
+    body.bracket-lines-off #bracket-svg {
+      display: none !important;
+    }
+
+    .match-node {
+      position: relative;
+      z-index: 30 !important;
+    }
+    .bracket-championship-box {
+      position: relative;
+      z-index: 5 !important;
+    }
+
+    .connector-line {
+      transition: stroke 0.3s ease, stroke-width 0.3s ease, opacity 0.3s ease;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .connector-active {
+      stroke: #f7b943 !important;
+      stroke-width: 3.5 !important;
+      opacity: 1 !important;
+      filter: drop-shadow(0 0 6px rgba(247, 185, 67, 0.95)) drop-shadow(0 0 14px rgba(247, 185, 67, 0.55)) !important;
+    }
+    .connector-inactive {
+      stroke: #00f0ff !important;
+      stroke-width: 2.4 !important;
+      stroke-dasharray: 6 4 !important;
+      opacity: 0.95 !important;
+      filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.8)) drop-shadow(0 0 10px rgba(0, 240, 255, 0.35)) !important;
+    }
+    .live-pulse { animation: livePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes livePulse { 0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.6)); } 50% { opacity: .75; filter: drop-shadow(0 0 3px rgba(6, 182, 212, 0.2)); } }
+    .score-button { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; background: #0a2344; border: 1px solid #2c4f75; color: #d4d4d8; font-weight: bold; font-size: 13px; transition: all 0.15s; user-select: none; }
+    .score-button:hover { background: #102d52; border-color: #38bdf8; color: #ffffff; }
+    .score-button:active { transform: scale(0.92); }
+    .hero-art-mask { -webkit-mask-image: radial-gradient(circle at 85% 25%, black 25%, transparent 75%); mask-image: radial-gradient(circle at 85% 25%, black 25%, transparent 75%); }
+    .nav-tab { user-select: none; }
+    .nav-tab.active-tab { background-color: #102d52; color: #f7b943; border-color: rgba(247, 185, 67, 0.4); font-weight: 600; }
+    
+    .font-cinzel { font-family: 'Cinzel', serif; }
+    .font-alex { font-family: 'Alex Brush', cursive; }
+    .font-vibes { font-family: 'Great Vibes', cursive; }
+    .font-montserrat { font-family: 'Montserrat', sans-serif; }
+
+    /* Official MEODL Pubmat Aesthetic Styles */
+    .pubmat-title-3d {
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #0b1d3a;
+      -webkit-text-stroke: 1.5px #ffffff;
+      text-shadow: 
+        0 1px 0 #ffffff,
+        0 2px 0 #cbd5e1,
+        0 3px 0 #64748b,
+        0 4px 0 #334155,
+        0 5px 0 #0f172a,
+        0 6px 14px rgba(0, 0, 0, 0.95),
+        0 0 20px rgba(0, 240, 255, 0.7),
+        0 0 45px rgba(0, 240, 255, 0.4);
+    }
+    .pubmat-speedlines {
+      background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 16px,
+        rgba(0, 240, 255, 0.05) 16px,
+        rgba(0, 240, 255, 0.05) 18px
+      );
+    }
+    .pubmat-hero-card {
+      background: radial-gradient(circle at 50% 20%, rgba(16, 45, 82, 0.95) 0%, rgba(10, 35, 68, 0.97) 65%, rgba(6, 22, 47, 0.99) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      box-shadow: 0 12px 35px -10px rgba(0, 240, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    @media print {
+      body * { visibility: hidden !important; }
+      #certificate-render-wrapper, #certificate-render-wrapper * { visibility: visible !important; }
+      #certificate-render-wrapper {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: white !important;
+      }
+    }
+  </style>
+
+</head>
+<body class="bg-[#030b17] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-white ">
+
+  <!-- Fixed Fullscreen Engineering Days Main Background Layer -->
+  <div id="site-ambient-bg" class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div id="site-ambient-bg-image" class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-45 filter contrast-125 brightness-95" style="background-image: url('./assets/official/meodl_banner_league.jpg');"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-[#06162f]/90 via-[#06162f]/80 to-[#030b17]/96"></div>
+    <div class="absolute inset-0" style="background: radial-gradient(ellipse at 50% 25%, transparent 20%, rgba(6, 22, 47, 0.70) 65%, rgba(3, 11, 23, 0.98) 100%);"></div>
+    <div class="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-cyan-500/15 via-blue-600/5 to-transparent"></div>
+    <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#00f0ff]/50 to-transparent"></div>
+  </div>
+
+  <!-- Right-Side Tekken Fading Hero Watermark (Layered on top of Engineering Days background) -->
+  <div class="pointer-events-none fixed right-0 top-14 w-full max-w-4xl h-[calc(100vh-56px)] opacity-25 overflow-hidden mix-blend-screen select-none z-0 hero-art-mask">
+    <img src="./assets/tekken8_cover.jpg" alt="Tekken 8 Hero Ambient" class="w-full h-full object-cover object-top filter contrast-125 brightness-110">
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MASTER TOP HEADER (ENGINEERING DAYS 2026 • TEKKEN 8)     -->
+  <!-- ======================================================== -->
+  <header class="sticky top-0 z-40 bg-[#06162f]/95 backdrop-blur-xl border-b border-[#1e3a5f] px-4 lg:px-8 py-2.5 transition-all shadow-md">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Brand & ESC Logo -->
+      <div class="flex items-center gap-3.5">
+        <div class="relative group cursor-pointer" title="Engineering Days 2026 • Tekken 8 Championship">
+          <div class="w-10 h-10 rounded-xl p-0.5 bg-gradient-to-tr from-[#f7b943] via-[#0a2344] to-[#f7b943] shadow-electric hover:scale-105 transition-transform overflow-hidden">
+            <img src="./assets/esc_logo.jpg" alt="Engineering Days Logo" class="w-full h-full object-cover rounded-lg">
+          </div>
+          <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#f7b943] border-2 border-[#06162f] flex items-center justify-center text-[7px] font-bold text-[#06162f]">⚡</span>
+        </div>
+
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm sm:text-base font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-[#ffd477] via-[#f7b943] to-sky-300 font-mono">
+              ENGINEERING DAYS 2026
+            </span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-red-950/80 text-amber-300 border border-amber-500/40 font-bold uppercase tracking-wider">
+              TEKKEN 8
+            </span>
+          </div>
+          <div class="text-[11px] text-slate-400 flex items-center gap-1.5 flex-wrap">
+            <span class="text-[#f7b943] font-semibold font-mono">UPHSD CALAMBA</span>
+            <span class="text-slate-600">•</span>
+            <span id="header-subtitle">14-Player Double Elimination Championship</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions Toolbar -->
+      <div class="flex items-center gap-2">
+        <!-- Zoom Bracket Controls -->
+        <div id="bracket-zoom-controls" class="flex items-center gap-1 bg-[#0a2344] p-1 rounded-xl border border-[#2c4f75] text-xs font-mono">
+          <button onclick="zoomBracket(-0.1)" class="w-7 h-7 rounded-lg hover:bg-[#102d52] flex items-center justify-center text-slate-300 hover:text-white font-bold transition-colors" title="Zoom Out">−</button>
+          <button onclick="resetZoomBracket()" id="zoom-level-text" class="px-2 h-7 rounded-lg hover:bg-[#102d52] flex items-center justify-center text-cyan-400 font-bold text-[11px] transition-colors" title="Reset Zoom">100%</button>
+          <button onclick="zoomBracket(0.1)" class="w-7 h-7 rounded-lg hover:bg-[#102d52] flex items-center justify-center text-slate-300 hover:text-white font-bold transition-colors" title="Zoom In">+</button>
+        </div>
+
+        <!-- Line Mode Toggle -->
+        <button onclick="toggleBracketLineMode()" id="line-mode-btn" class="px-2.5 py-1.5 rounded-lg bg-[#0a2344] hover:bg-[#102d52] border border-[#2c4f75] text-xs font-mono font-bold text-cyan-300 transition-all flex items-center gap-1" title="Toggle Connection Line Layer">
+          <span>⚡ Lines: Front</span>
+        </button>
+
+        <!-- Presentation Mode -->
+        <button onclick="togglePresentationMode()" class="px-2.5 py-1.5 rounded-lg bg-[#0a2344] hover:bg-[#102d52] border border-[#2c4f75] text-xs font-mono font-bold text-[#f7b943] transition-all flex items-center gap-1" title="Toggle Stage Presentation Mode (P)">
+          <span>📺</span>
+          <span class="hidden sm:inline">Stage</span>
+        </button>
+
+        <!-- Fullscreen -->
+        <button onclick="toggleFullscreen()" class="px-2.5 py-1.5 rounded-lg bg-[#0a2344] hover:bg-[#102d52] border border-[#2c4f75] text-xs font-mono font-bold text-slate-300 hover:text-white transition-all" title="Toggle Fullscreen (F)">
+          ⛶
+        </button>
+
+        
+        <!-- Student Spectator View Link -->
+        <a href="student.html" target="_blank" class="px-3 py-1.5 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-800 text-xs font-mono font-bold text-cyan-300 transition-all flex items-center gap-1.5 shadow-sm" title="Open Public Student Spectator View">
+          <span>👥</span>
+          <span class="hidden sm:inline">Student View</span>
+        </a>
+
+        <!-- Reset Tournament Bracket Button -->
+        <button onclick="openResetModal()" class="admin-only flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 border border-red-800/50 text-xs font-medium text-red-400 hover:text-red-200 transition-all shadow-sm" title="Reset Tournament Bracket">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+          <span class="hidden sm:inline">Reset</span>
+        </button>
+        
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- MAIN APPLICATION CONTAINER (TEKKEN 8 SOLO)                -->
+  <!-- ======================================================== -->
+  <main class="flex-1 relative bg-grid-pattern flex flex-col">
+    <!-- VIEW 6: TEKKEN 8 CHAMPIONSHIP VIEW (#view-tekken8) -->
+    <div id="view-tekken8" class=" flex-1 flex flex-col relative w-full">
+      <!-- Ambient Tekken 8 Esports Official Pubmat Background Layer (Official Trophy Pubmat) -->
+      <!-- Tekken sport bg layer transparent to show Engineering Days main background -->
+      <div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#06162f] via-[#06162f]/50 to-[#06162f]/90 z-0"></div>
+      <div class="absolute inset-0 pointer-events-none z-0" style="background: radial-gradient(ellipse at 50% 30%, transparent 15%, rgba(6, 22, 47, 0.7) 60%, rgba(6, 22, 47, 0.98) 100%);"></div>
+      
+      <!-- Secondary Sub-Navigation Bar for Tekken 8 Tournament Views -->
+      <div class="z-20 px-4 sm:px-6 py-2.5 bg-[#06162f]/90 border-b border-[#2c4f75] backdrop-blur-md flex items-center justify-between gap-3 overflow-x-auto">
+        <div class="flex items-center gap-1.5 p-1 rounded-xl bg-[#0a2344] border border-[#2c4f75] text-xs font-mono shrink-0">
+          <button onclick="switchView('full')" id="tab-full" class="nav-tab px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active-tab bg-[#102d52] text-[#f7b943] border border-[#f7b943]/40 font-semibold shadow-sm">
+            <span>⚡ Full Bracket</span>
+          </button>
+          <button onclick="switchView('winners')" id="tab-winners" class="nav-tab px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-slate-200">
+            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            <span>Winners</span>
+          </button>
+          <button onclick="switchView('losers')" id="tab-losers" class="nav-tab px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-slate-200">
+            <span class="w-2 h-2 rounded-full bg-[#f7b943]"></span>
+            <span>Losers</span>
+          </button>
+          <button onclick="switchView('finals')" id="tab-finals" class="nav-tab px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-slate-200">
+            <span>👑 Finals Spotlight</span>
+          </button>
+          <button onclick="switchView('control')" id="tab-control" class="admin-only nav-tab px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-slate-200">
+            <span>🎮 Control Room</span>
+          </button>
+          <button onclick="switchView('schedule')" id="tab-schedule" class="nav-tab px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-slate-200">
+            <span>⏱️ Schedule</span>
+          </button>
+          <button onclick="switchView('matches')" id="tab-matches" class="nav-tab px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-slate-200">
+            <span>📋 Match List</span>
+          </button>
+          <button onclick="switchView('standings')" id="tab-standings" class="nav-tab px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-slate-200">
+            <span>🏆 Standings</span>
+          </button>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="openGuidelinesModal()" class="px-2.5 py-1 rounded-lg bg-[#0a2344] hover:bg-[#102d52] border border-[#2c4f75] text-xs font-mono text-slate-300 hover:text-white transition-all flex items-center gap-1">
+            <span>📜</span> Rules
+          </button>
+        </div>
+      </div>
+      
+      <!-- Ambient Tekken 8 Hero Art Watermark (Fixed Background Glow) -->
+      <div class="pointer-events-none fixed right-0 top-16 w-full max-w-4xl h-full opacity-10 overflow-hidden mix-blend-screen select-none z-0 hero-art-mask">
+        <img src="./assets/tekken8_cover.jpg" alt="Tekken 8 Hero Ambient" class="w-full h-full object-cover object-top filter contrast-125">
+      </div>
+
+      <!-- CONTROL ROOM PANEL -->
+      <div id="view-control" class="view-panel hidden flex-1 p-6 overflow-y-auto max-w-7xl mx-auto w-full z-10">
+        <div class="rounded-3xl p-5 sm:p-7 mb-5 bg-gradient-to-r from-[#0a2344] via-[#081d38] to-[#06162f] border border-[#2c4f75] shadow-xl">
+          <div class="relative z-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-950/80 border border-emerald-700/80 text-[10px] font-mono font-bold text-emerald-300">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 live-pulse"></span> LIVE CONTROL
+                </span>
+                <span class="text-[10px] font-mono uppercase tracking-[.2em] text-slate-400">MEODL ESPORTS • TOURNAMENT OPS</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-mono">Control Room</h2>
+              <p class="mt-1 text-sm text-slate-300 max-w-2xl">Run the tournament from one place. Start a set, update scores, move winners automatically, and keep the next match visible to the stage crew.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="openNextReadyMatch()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-[#f7b943] text-[#06162f] hover:bg-[#ffd477] transition-all font-mono font-bold shadow-md">Open Next Ready</button>
+              <button onclick="simulateNextMatch()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-[#0a2344] hover:bg-[#102d52] border border-[#2c4f75] text-slate-200 hover:text-white transition-all">Simulate Next</button>
+              <button onclick="togglePresentationMode()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-[#0a2344] hover:bg-[#102d52] border border-[#2c4f75] text-cyan-300 hover:text-cyan-200 transition-all">Stage Mode</button>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 xl:grid-cols-[1.55fr_.9fr] gap-5">
+          <section class="bg-[#0a2344]/95 border border-[#2c4f75] rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <div class="text-[10px] font-mono uppercase tracking-[.18em] text-cyan-400">Primary console</div>
+                <h3 id="control-match-title" class="text-lg font-bold text-white mt-1">No match selected</h3>
+              </div>
+              <div id="control-match-status" class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-[#081d38] text-slate-400 border border-[#2c4f75]">STANDBY</div>
+            </div>
+            <div id="control-console" class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 items-stretch"></div>
+            <div class="mt-4 pt-4 border-t border-[#2c4f75]/60 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <button id="control-live-btn" class="px-3 py-2 rounded-lg text-xs font-semibold bg-[#102d52] hover:bg-[#1a4478] text-[#f7b943] border border-[#f7b943]/40" onclick="toggleActiveMatchLive()">Start Live</button>
+                <button class="px-3 py-2 rounded-lg text-xs font-semibold bg-[#081d38] hover:bg-[#102d52] text-slate-200 border border-[#2c4f75]" onclick="openActiveControlMatch()">Full Scoreboard</button>
+                <button class="px-3 py-2 rounded-lg text-xs font-semibold bg-[#081d38] hover:bg-[#102d52] text-slate-200 border border-[#2c4f75]" onclick="resetActiveControlMatch()">Reset Set</button>
+              </div>
+              <div class="text-[10px] font-mono text-slate-400">N = next • P = stage mode • F = fullscreen</div>
+            </div>
+          </section>
+          <aside class="bg-[#0a2344]/95 border border-[#2c4f75] rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <div class="text-[10px] font-mono uppercase tracking-[.18em] text-[#f7b943]">Queue</div>
+                <h3 class="text-lg font-bold text-white mt-1">Next up</h3>
+              </div>
+              <span id="queue-count" class="text-[10px] font-mono text-slate-400">0 ready</span>
+            </div>
+            <div id="control-queue" class="space-y-2"></div>
+          </aside>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5">
+          <section class="bg-[#0a2344]/95 border border-[#2c4f75] rounded-2xl p-5 shadow-sm">
+            <div class="text-[10px] font-mono uppercase tracking-[.18em] text-slate-400">Tournament state</div>
+            <div class="grid grid-cols-2 gap-2 mt-3" id="control-state-grid"></div>
+          </section>
+          <section class="bg-[#0a2344]/95 border border-[#2c4f75] rounded-2xl p-5 shadow-sm">
+            <div class="text-[10px] font-mono uppercase tracking-[.18em] text-slate-400">Bracket route</div>
+            <div id="control-route" class="mt-3 text-xs text-slate-300 leading-relaxed"></div>
+          </section>
+          <section class="bg-[#0a2344]/95 border border-[#2c4f75] rounded-2xl p-5 shadow-sm">
+            <div class="text-[10px] font-mono uppercase tracking-[.18em] text-slate-400">Operator shortcuts</div>
+            <div class="mt-3 space-y-2 text-xs text-slate-300">
+              <div class="flex items-center justify-between"><span>Open next ready set</span><span class="px-1.5 py-0.5 rounded bg-[#081d38] border border-[#2c4f75] font-mono text-cyan-300 text-[10px]">N</span></div>
+              <div class="flex items-center justify-between"><span>Toggle stage/presentation mode</span><span class="px-1.5 py-0.5 rounded bg-[#081d38] border border-[#2c4f75] font-mono text-cyan-300 text-[10px]">P</span></div>
+              <div class="flex items-center justify-between"><span>Toggle fullscreen</span><span class="px-1.5 py-0.5 rounded bg-[#081d38] border border-[#2c4f75] font-mono text-cyan-300 text-[10px]">F</span></div>
+              <div class="flex items-center justify-between"><span>Open match search</span><span class="px-1.5 py-0.5 rounded bg-[#081d38] border border-[#2c4f75] font-mono text-cyan-300 text-[10px]">/</span></div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- 1. FULL BRACKET VIEW (Horizontal & Vertical Scrollable) -->
+      <div id="view-full" class="view-panel flex-1 relative w-full h-[calc(100vh-165px)] overflow-hidden z-10">
+        <!-- Floating Navigation Hint Pill -->
+        <div class="absolute top-4 left-6 z-30 pointer-events-none hidden md:flex items-center gap-3 bg-[#06162f]/95 border border-[#2c4f75] backdrop-blur-md px-4 py-2 rounded-full text-[11px] text-slate-300 shadow-xl">
+          <img src="./assets/mes_logo.png" alt="MES" class="w-4 h-4 rounded-full">
+          <span>UPHSD Mechanical Engineering Society Tekken 8 Championship</span>
+          <span class="text-[#2c4f75]">•</span>
+          <span class="text-cyan-400">Scroll horizontally to view all rounds</span>
+        </div>
+
+        <!-- Floating Zoom & Lines Controls Pill for Tekken -->
+        <div class="absolute top-4 right-6 z-30 flex items-center gap-2 bg-[#06162f]/95 border border-[#2c4f75] backdrop-blur-md px-3 py-1.5 rounded-full shadow-xl">
+          <span class="text-[10px] font-mono text-slate-400 uppercase">Zoom</span>
+          <div id="bracket-zoom-controls" class="flex items-center gap-1 bg-[#0a2344] border border-[#2c4f75] rounded-lg p-0.5">
+            <button onclick="zoomBracket(-0.1)" class="w-5 h-5 flex items-center justify-center rounded text-slate-400 hover:text-white hover:bg-[#102d52] text-xs font-bold transition-colors" title="Zoom Out">−</button>
+            <button onclick="resetZoomBracket()" id="zoom-level-text" class="px-2 text-[11px] font-mono text-cyan-400 hover:text-white font-bold" title="Reset Zoom">100%</button>
+            <button onclick="zoomBracket(0.1)" class="w-5 h-5 flex items-center justify-center rounded text-slate-400 hover:text-white hover:bg-[#102d52] text-xs font-bold transition-colors" title="Zoom In">+</button>
+          </div>
+
+          <!-- Tekken Lines Toggle Button -->
+          <button id="btn-tekken-toggle-lines" onclick="toggleBracketLines()" class="px-2.5 py-1 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/80 text-[11px] font-mono font-bold text-cyan-300 flex items-center gap-1 transition-all shadow-sm" title="Toggle Bracket Connector Lines">
+            <span>⚡ Lines: In Front</span>
+          </button>
+        </div>
+
+        <!-- Scrollable Bracket Viewport -->
+        <div id="bracket-viewport" class="bracket-viewport w-full h-full overflow-auto relative">
+          <!-- Subtle Tekken Arena Ambient Background Layer -->
+          <div class="absolute inset-0 bg-cover bg-center pointer-events-none opacity-15" style="background-image: url('./assets/meodl_arena_bg.png'); filter: blur(0.5px);"></div>
+          <div id="bracket-canvas" class="relative origin-top-left transition-transform duration-75 p-8" style="transform: scale(1); min-width: 2900px;">
+            
+            <!-- Dynamic SVG Connection Layer -->
+            <svg id="bracket-svg" class="absolute top-0 left-0 pointer-events-none w-full h-full" style="min-width: 2900px; min-height: 2200px;">
+              <defs>
+                <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.8"/>
+                  <stop offset="100%" stop-color="#38bdf8" stop-opacity="1"/>
+                </linearGradient>
+              </defs>
+            </svg>
+
+            <!-- Bracket Sections Layout -->
+            <div class="flex flex-col gap-12 relative">
+              
+              <!-- SECTION A: WINNERS BRACKET -->
+              <div>
+                <div class="flex items-center gap-2.5 mb-4 pl-2">
+                  <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-electric"></div>
+                  <h2 class="text-sm font-bold uppercase tracking-wider text-cyan-300 font-mono">
+                    Winners Bracket (Top Seed Path)
+                  </h2>
+                  <span class="text-xs text-slate-400 font-mono">• All Sets Best of 3 (First to 2 Wins)</span>
+                </div>
+                
+                <!-- Winners Rounds Grid -->
+                <div class="flex gap-14 items-stretch">
+                  <!-- WR1: Round of 16 (8 matches) -->
+                  <div class="flex flex-col gap-4 w-72 shrink-0">
+                    <div class="sticky top-0 z-10 bg-[#06162f]/95 backdrop-blur-md py-1.5 px-3 rounded-lg border border-[#2c4f75] text-xs font-mono font-bold text-slate-200 flex justify-between shadow-sm">
+                      <span>WINNERS R1</span>
+                      <span class="text-slate-400">BO3</span>
+                    </div>
+                    <div class="flex flex-col gap-4 justify-around flex-1" id="col-wr1"></div>
+                  </div>
+
+                  <!-- WR2: Quarterfinals (4 matches) -->
+                  <div class="flex flex-col gap-4 w-72 shrink-0">
+                    <div class="sticky top-0 z-10 bg-[#06162f]/95 backdrop-blur-md py-1.5 px-3 rounded-lg border border-[#2c4f75] text-xs font-mono font-bold text-slate-200 flex justify-between shadow-sm">
+                      <span>QUARTERFINALS</span>
+                      <span class="text-slate-400">BO3</span>
+                    </div>
+                    <div class="flex flex-col gap-4 justify-around flex-1" id="col-wr2"></div>
+                  </div>
+
+                  <!-- WR3: Semifinals (2 matches) -->
+                  <div class="flex flex-col gap-4 w-72 shrink-0">
+                    <div class="sticky top-0 z-10 bg-[#06162f]/95 backdrop-blur-md py-1.5 px-3 rounded-lg border border-[#2c4f75] text-xs font-mono font-bold text-slate-200 flex justify-between shadow-sm">
+                      <span>SEMIFINALS</span>
+                      <span class="text-slate-400">BO3</span>
+                    </div>
+                    <div class="flex flex-col gap-4 justify-around flex-1" id="col-wr3"></div>
+                  </div>
+
+                  <!-- WR4: Winners Finals (1 match) -->
+                  <div class="flex flex-col gap-4 w-72 shrink-0">
+                    <div class="sticky top-0 z-10 bg-[#06162f]/95 backdrop-blur-md py-1.5 px-3 rounded-lg border border-[#38bdf8]/60 text-xs font-mono font-bold text-cyan-300 flex justify-between shadow-sm">
+                      <span>WINNERS FINALS</span>
+                      <span class="text-slate-400">BO3</span>
+                    </div>
+                    <div class="flex flex-col gap-4 justify-around flex-1" id="col-wr4"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION B: GRAND FINALS & CHAMPION PODIUM -->
+              <div class="pt-4 border-t border-[#2c4f75]/60">
+                <div class="flex items-center gap-2.5 mb-4 pl-2">
+                  <div class="w-2.5 h-2.5 rounded-full bg-[#f7b943] shadow-mishima"></div>
+                  <h2 class="text-sm font-bold uppercase tracking-wider text-[#f7b943] font-mono">
+                    Grand Finals Championship
+                  </h2>
+                  <span class="text-xs text-slate-400 font-mono">• Best of 3 (First to 2) • Bracket Reset Rules apply</span>
+                </div>
+                
+                <div class="flex gap-14 items-center pl-4" id="col-gf">
+                  <!-- GF1 and GF2 Cards will render here -->
+                </div>
+              </div>
+
+              <!-- SECTION C: LOSERS BRACKET -->
+              <div class="pt-4 border-t border-[#2c4f75]/60">
+                <div class="flex items-center gap-2.5 mb-4 pl-2">
+                  <div class="w-2.5 h-2.5 rounded-full bg-red-400 shadow-lg"></div>
+                  <h2 class="text-sm font-bold uppercase tracking-wider text-red-300 font-mono">
+                    Losers Bracket (Redemption Path)
+                  </h2>
+                  <span class="text-xs text-slate-400 font-mono">• 1 Loss = Eliminated • Cross-bracket routing</span>
+                </div>
+                
+                <!-- Losers Rounds Grid -->
+                <div class="flex gap-14 items-stretch">
+                  <!-- LR1: 2 Matches (M11, M12) -->
+                  <div class="flex flex-col gap-4 w-72 shrink-0">
+                    <div class="sticky top-0 z-10 bg-[#06162f]/95 backdrop-blur-md py-1.5 px-3 rounded-lg border border-[#2c4f75] text-xs font-mono font-bold text-slate-200 flex justify-between shadow-sm">
+                      <span>LOSERS R1</span>
+                      <span class="text-slate-400">BO3</span>
+                    </div>
+                    <div class="flex flex-col gap-4 justify-around flex-1" id="col-lr1"></div>
+                  </div>
+
+                  <!-- LR2: 4 Matches (M13, M14, M15, M16) -->
+                  <div class="flex flex-col gap-4 w-72 shrink-0">
+                    <div class="sticky top-0 z-10 bg-[#06162f]/95 backdrop-blur-md py-1.5 px-3 rounded-lg border border-[#2c4f75] text-xs font-mono font-bold text-slate-200 flex justify-between shadow-sm">
+                      <span>LOSERS R2</span>
+                      <span class="text-slate-400">BO3</span>
+                    </div>
+                    <div class="flex flex-col gap-4 justify-around flex-1" id="col-lr2"></div>
+                  </div>
+
+                  <!-- LR3: 2 Matches (M19, M20) -->
+                  <div class="flex flex-col gap-4 w-72 shrink-0">
+                    <div class="sticky top-0 z-10 bg-[#06162f]/95 backdrop-blur-md py-1.5 px-3 rounded-lg border border-[#2c4f75] text-xs font-mono font-bold text-slate-200 flex justify-between shadow-sm">
+                      <span>LOSERS R3</span>
+                      <span class="text-slate-400">BO3</span>
+                    </div>
+                    <div class="flex flex-col gap-4 justify-around flex-1" id="col-lr3"></div>
+                  </div>
+
+                  <!-- LR4: 2 Matches (M21, M22) -->
+                  <div class="flex flex-col gap-4 w-72 shrink-0">
+                    <div class="sticky top-0 z-10 bg-[#06162f]/95 backdrop-blur-md py-1.5 px-3 rounded-lg border border-[#2c4f75] text-xs font-mono font-bold text-slate-200 flex justify-between shadow-sm">
+                      <span>LOSERS QUARTERS</span>
+                      <span class="text-slate-400">BO3</span>
+                    </div>
+                    <div class="flex flex-col gap-4 justify-around flex-1" id="col-lr4"></div>
+                  </div>
+
+                  <!-- LR5: 1 Match (M24 - Losers Semifinals) -->
+                  <div class="flex flex-col gap-4 w-72 shrink-0">
+                    <div class="sticky top-0 z-10 bg-[#06162f]/95 backdrop-blur-md py-1.5 px-3 rounded-lg border border-[#2c4f75] text-xs font-mono font-bold text-slate-200 flex justify-between shadow-sm">
+                      <span>LOSERS SEMIS</span>
+                      <span class="text-slate-400">BO3</span>
+                    </div>
+                    <div class="flex flex-col gap-4 justify-around flex-1" id="col-lr5"></div>
+                  </div>
+
+                  <!-- LR6: 1 Match (M25 - Losers Finals) -->
+                  <div class="flex flex-col gap-4 w-72 shrink-0">
+                    <div class="sticky top-0 z-10 bg-[#06162f]/95 backdrop-blur-md py-1.5 px-3 rounded-lg border border-red-500/60 text-xs font-mono font-bold text-red-300 flex justify-between shadow-sm">
+                      <span>LOSERS FINALS</span>
+                      <span class="text-slate-400">BO3</span>
+                    </div>
+                    <div class="flex flex-col gap-4 justify-around flex-1" id="col-lr6"></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. WINNERS ONLY VIEW -->
+    <div id="view-winners" class="view-panel hidden flex-1 p-6 overflow-y-auto max-w-7xl mx-auto w-full z-10">
+      <div class="mb-6">
+        <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-cyan-400 shadow-electric"></span>
+          <span>Winners Bracket Flow</span>
+        </h2>
+        <p class="text-sm text-slate-400">Track the undefeated path from Round of 16 to the Grand Finals</p>
+      </div>
+      <div id="winners-focused-container" class="overflow-x-auto pb-8"></div>
+    </div>
+
+    <!-- 3. LOSERS ONLY VIEW -->
+    <div id="view-losers" class="view-panel hidden flex-1 p-6 overflow-y-auto max-w-7xl mx-auto w-full z-10">
+      <div class="mb-6">
+        <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-amber-400 shadow-mishima"></span>
+          <span>Losers Bracket Gauntlet</span>
+        </h2>
+        <p class="text-sm text-slate-400">Elimination rounds 1 through 6 leading into Grand Finals contention</p>
+      </div>
+      <div id="losers-focused-container" class="overflow-x-auto pb-8"></div>
+    </div>
+
+    <!-- 4. GRAND FINALS SPOTLIGHT VIEW -->
+    <div id="view-finals" class="view-panel hidden flex-1 p-6 overflow-y-auto max-w-5xl mx-auto w-full z-10">
+      <div id="finals-spotlight-container" class="py-4 flex flex-col items-center gap-6"></div>
+    </div>
+
+    <!-- 5. MATCH LIST / SCHEDULE VIEW -->
+    <div id="view-matches" class="view-panel hidden flex-1 p-6 overflow-y-auto max-w-7xl mx-auto w-full z-10">
+      <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-extrabold text-white">
+            Tournament Match Schedule & Queue
+          </h2>
+          <p class="text-sm text-slate-400">Comprehensive list of all tournament fixtures with fast score updates</p>
+        </div>
+        
+        <div class="flex flex-wrap items-center gap-2 justify-end"><label class="relative block"><span class="sr-only">Search matches</span><input id="match-search" oninput="setMatchSearch(this.value)" class="w-56 bg-[#06162f] border border-[#2c4f75] rounded-lg pl-8 pr-3 py-2 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-[#38bdf8]" placeholder="Search player / code…" /><svg class="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></label>
+        <!-- Filter Pills -->
+        <div class="flex items-center gap-1.5 p-1 bg-[#081d38] border border-[#2c4f75] rounded-lg text-xs font-mono">
+          <button onclick="setMatchFilter('all')" id="filter-all" class="px-2.5 py-1 rounded-md filter-btn bg-[#102d52] text-[#f7b943] border border-[#f7b943]/40 font-semibold">All</button>
+          <button onclick="setMatchFilter('live')" id="filter-live" class="px-2.5 py-1 rounded-md filter-btn text-slate-400 hover:text-white hover:bg-[#102d52]/50">Live</button>
+          <button onclick="setMatchFilter('ready')" id="filter-ready" class="px-2.5 py-1 rounded-md filter-btn text-slate-400 hover:text-white hover:bg-[#102d52]/50">Ready</button>
+          <button onclick="setMatchFilter('completed')" id="filter-completed" class="px-2.5 py-1 rounded-md filter-btn text-slate-400 hover:text-white hover:bg-[#102d52]/50">Completed</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Match Table Card -->
+      <div class="bg-[#0a2344]/95 border border-[#2c4f75] rounded-xl overflow-hidden shadow-card">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-[#06162f]/95 border-b border-[#2c4f75] text-xs font-mono text-slate-300 uppercase tracking-wider">
+              <tr>
+                <th class="py-3 px-4">Code</th>
+                <th class="py-3 px-4">Round</th>
+                <th class="py-3 px-4">Format</th>
+                <th class="py-3 px-4">Competitors & Score</th>
+                <th class="py-3 px-4 text-center">Status</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="match-list-tbody" class="divide-y divide-[#2c4f75]/60 font-sans"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    
+    <!-- 5.5 SCHEDULE & VENUE CUTOFF DASHBOARD -->
+    <div id="view-schedule" class="view-panel hidden flex-1 p-6 overflow-y-auto max-w-7xl mx-auto w-full z-10">
+      <!-- Hero Banner -->
+      <div class="control-hero rounded-3xl p-5 sm:p-7 mb-5 border border-amber-500/30">
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+          <div>
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-red-950/80 border border-red-700/80 text-[10px] font-mono font-bold text-red-300">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+                
+              </span>
+              <span class="text-[10px] font-mono uppercase tracking-[.2em] text-[#f7b943]">12:00 PM – 5:00 PM • 5 HOURS</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Tournament Schedule & Venue Cutoff
+            </h2>
+            <p class="mt-1 text-sm text-slate-300 max-w-2xl">
+              Target call schedule with rolling transitions (All Matches BO3 = 8 mins). Matches start early whenever previous sets finish early. Entire tournament must conclude before 5:00 PM room closure.
+            </p>
+          </div>
+          
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Clock Mode Toggle & Stepper -->
+            <div class="flex items-center gap-1.5 p-1 rounded-xl bg-[#081d38] border border-[#2c4f75] text-xs font-mono">
+              <button onclick="toggleClockMode()" id="clock-mode-btn" class="px-2.5 py-1 rounded-lg bg-[#102d52] text-[#f7b943] border border-[#f7b943]/40 font-semibold" title="Toggle Real / Sim Clock">
+                ● Clock: Real Time
+              </button>
+              <button onclick="stepSimClock(-5)" class="px-2 py-1 rounded hover:bg-[#102d52] text-slate-400 hover:text-white" title="Step -5 mins">-5m</button>
+              <button onclick="stepSimClock(5)" class="px-2 py-1 rounded hover:bg-[#102d52] text-[#38bdf8] font-bold" title="Step +5 mins">+5m</button>
+              <button onclick="resetSimClock()" class="px-2 py-1 rounded hover:bg-[#102d52] text-slate-400 hover:text-white" title="Reset Clock to 12:00 PM">Reset</button>
+            </div>
+            <button onclick="simulateNextMatch()" class="command-button px-3 py-2 rounded-xl text-xs font-semibold">Simulate Next</button>
+            <button onclick="openNextReadyMatch()" class="command-button primary px-4 py-2 rounded-xl text-xs font-semibold">Open Next Set</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schedule Metric KPI Cards Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-5">
+        <div class="enhanced-glass rounded-2xl p-4 border border-red-900/60 bg-red-950/20">
+          <div class="text-[9px] font-mono uppercase tracking-[.18em] text-red-400 font-bold">Hard Cutoff</div>
+          <div class="mt-1 text-2xl font-black text-red-400 num-mono">5:00 PM</div>
+          <div class="mt-1 text-[10px] text-slate-400">Strict room closure</div>
+        </div>
+
+        <div class="enhanced-glass rounded-2xl p-4">
+          <div class="text-[9px] font-mono uppercase tracking-[.18em] text-slate-400 font-bold">Current Clock</div>
+          <div id="sched-card-clock" class="mt-1 text-2xl font-black text-white num-mono">12:00 PM</div>
+          <div id="sched-card-clock-mode" class="mt-1 text-[10px] text-slate-400 font-mono">Live System Time</div>
+        </div>
+
+        <div class="enhanced-glass rounded-2xl p-4">
+          <div class="text-[9px] font-mono uppercase tracking-[.18em] text-slate-400 font-bold">Pace Status</div>
+          <div id="sched-card-status-pill" class="mt-1 inline-block px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">
+            ON SCHEDULE
+          </div>
+          <div id="sched-card-pace-delta" class="mt-1 text-[10px] text-[#38bdf8] font-mono">+0m delta</div>
+        </div>
+
+        <div class="enhanced-glass rounded-2xl p-4">
+          <div class="text-[9px] font-mono uppercase tracking-[.18em] text-cyan-400 font-bold">Current Set</div>
+          <div id="sched-card-current" class="mt-1 text-lg font-extrabold text-white truncate">W2</div>
+          <div id="sched-card-current-time" class="mt-1 text-[10px] text-slate-400 font-mono">Target: 12:00 PM</div>
+        </div>
+
+        <div class="enhanced-glass rounded-2xl p-4">
+          <div class="text-[9px] font-mono uppercase tracking-[.18em] text-amber-400 font-bold">Next Set</div>
+          <div id="sched-card-next" class="mt-1 text-lg font-extrabold text-white truncate">W3</div>
+          <div id="sched-card-next-time" class="mt-1 text-[10px] text-slate-400 font-mono">Target: 12:08 PM</div>
+        </div>
+
+        <div class="enhanced-glass rounded-2xl p-4">
+          <div class="text-[9px] font-mono uppercase tracking-[.18em] text-sky-400 font-bold">Projected Finish</div>
+          <div id="sched-card-est-finish" class="mt-1 text-2xl font-black text-sky-300 num-mono">4:12 PM</div>
+          <div id="sched-card-buffer" class="mt-1 text-[10px] text-emerald-400 font-mono">+48m buffer to 5PM</div>
+        </div>
+      </div>
+
+      <!-- Schedule Table -->
+      <div class="bg-[#0a2344]/95 border border-[#2c4f75] rounded-2xl overflow-hidden shadow-card">
+        <div class="p-4 border-b border-[#2c4f75] flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h3 class="text-base font-bold text-white">Full Tournament Call Sheet</h3>
+            <p class="text-xs text-slate-400">Target schedule starting at 12:00 PM with rolling starts.</p>
+          </div>
+          <div class="flex items-center gap-3 text-xs font-mono text-slate-400 flex-wrap">
+            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Live</span>
+            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> Completed</span>
+            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sky-400"></span> Ready</span>
+            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#2c4f75]"></span> Scheduled</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-[#06162f]/95 border-b border-[#2c4f75] text-xs font-mono text-slate-300 uppercase tracking-wider">
+              <tr>
+                <th class="py-3 px-4 w-12 text-center">#</th>
+                <th class="py-3 px-4">Target Call</th>
+                <th class="py-3 px-4">Match</th>
+                <th class="py-3 px-4">Format</th>
+                <th class="py-3 px-4">Competitors</th>
+                <th class="py-3 px-4">Actual Start</th>
+                <th class="py-3 px-4 text-center">Status</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="schedule-table-tbody" class="divide-y divide-[#2c4f75]/60 font-sans"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. STANDINGS VIEW -->
+    <div id="view-standings" class="view-panel hidden flex-1 p-6 overflow-y-auto max-w-5xl mx-auto w-full z-10">
+      <div class="mb-6 flex items-center justify-between">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <img src="./assets/mes_logo.png" alt="MES Seal" class="w-6 h-6 rounded-full">
+            <span class="text-xs font-mono text-amber-400 font-bold uppercase">Mechanical Engineering Society • UPHSD</span>
+          </div>
+          <h2 class="text-xl font-extrabold text-white">
+            Tournament Live Leaderboard & Standings
+          </h2>
+          <p class="text-sm text-slate-400">Dynamic rankings updated in real-time as players advance or get eliminated</p>
+        </div>
+        <button onclick="copyStandingsClipboard()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0a2344] hover:bg-[#102d52] border border-[#2c4f75] text-xs font-mono font-bold text-[#f7b943] transition-all shadow-sm">
+          <span>Copy Summary</span>
+        </button>
+      </div>
+
+      <div id="standings-summary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
+      <div class="bg-[#0a2344]/95 border border-[#2c4f75] rounded-xl overflow-hidden shadow-card">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-[#06162f]/95 border-b border-[#2c4f75] text-xs font-mono text-slate-300 uppercase tracking-wider">
+              <tr>
+                <th class="py-3 px-4 text-center w-16">Rank</th>
+                <th class="py-3 px-4">Seed</th>
+                <th class="py-3 px-4">Player</th>
+                <th class="py-3 px-4">Year Level</th>
+                <th class="py-3 px-4">Character</th>
+                <th class="py-3 px-4 text-center">Record (W-L)</th>
+                <th class="py-3 px-4 text-right">Status / Stage</th>
+              </tr>
+            </thead>
+            <tbody id="standings-tbody" class="divide-y divide-[#2c4f75]/60 font-sans"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  
+  <!-- Presentation Mode Schedule HUD Overlay -->
+  <div class="presentation-schedule-hud hidden fixed top-4 right-6 z-50 px-4 py-2 rounded-xl bg-[#06162f]/95 border border-[#2c4f75] backdrop-blur-md flex items-center gap-3 text-xs font-mono text-slate-200 shadow-2xl">
+    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span><span class="text-red-300 font-bold"></span></div>
+    <span class="text-slate-400">•</span>
+    <span id="pres-sched-clock">12:00 PM</span>
+    <span class="text-slate-400">•</span>
+    <span id="pres-sched-status" class="text-emerald-300 font-bold">ON SCHEDULE</span>
+    <span class="text-slate-400">•</span>
+    <span id="pres-sched-finish">Est: 4:12 PM</span>
+  </div>
+
+  
+    </div>
+  </main>
+
+  <!-- Modals -->
+  <div id="match-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#0a2344] border border-[#2c4f75] rounded-2xl max-w-lg w-full p-6 shadow-2xl relative overflow-hidden">
+      <!-- Subtle top Tekken 8 glow accent -->
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-amber-400 to-red-500"></div>
+
+      <button onclick="closeMatchModal()" class="absolute top-4 right-4 text-slate-300 hover:text-white p-1.5 rounded-lg hover:bg-[#102d52]">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+
+      <div class="flex items-center gap-2 mb-4">
+        <span id="modal-match-code" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">
+          WR1-M1
+        </span>
+        <span id="modal-match-format" class="text-xs font-mono text-slate-300">
+          Best of 3
+        </span>
+        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950/60 text-amber-300 border border-amber-800/60">
+          MES UPHSD
+        </span>
+      </div>
+
+      <h3 id="modal-match-title" class="text-lg font-bold text-white mb-6">
+        Match Detail & Score Entry
+      </h3>
+
+      <!-- Competitors Face-Off Container -->
+      <div id="modal-competitors-box" class="space-y-4 mb-6"></div>
+
+      <!-- Quick Actions -->
+      <div id="modal-live-control" class="admin-only mb-4"></div>
+      <div class="flex items-center justify-between pt-4 border-t border-[#2c4f75] text-xs">
+        <button onclick="resetCurrentMatchScore()" class="admin-only px-3 py-2 rounded-lg bg-[#081d38] hover:bg-[#102d52] border border-[#2c4f75] text-slate-200 font-medium">
+          Reset Match
+        </button>
+        <div class="flex items-center gap-2 [body.student-mode_&]:w-full">
+          <button onclick="closeMatchModal()" class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold shadow-electric [body.student-mode_&]:w-full">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="reset-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#0a2344] border border-[#2c4f75] rounded-2xl max-w-md w-full p-6 shadow-2xl">
+      <div class="flex items-center gap-3 mb-4 text-red-400">
+        <div class="p-2 rounded-xl bg-red-950/60 border border-red-800/60">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </div>
+        <h3 class="text-base font-bold text-white">Reset Tournament Bracket?</h3>
+      </div>
+      <p class="text-sm text-slate-300 mb-6 leading-relaxed">
+        This action will wipe all match scores and return the tournament to its initial seeded state with Round 1 BYEs (Jhayel Glinoga and Kenneth De Jesus).
+      </p>
+      <div class="flex items-center justify-end gap-3">
+        <button onclick="closeResetModal()" class="px-4 py-2 rounded-lg bg-[#081d38] hover:bg-[#102d52] border border-[#2c4f75] text-xs font-medium text-slate-200">
+          Cancel
+        </button>
+        <button onclick="executeResetTournament()" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-xs font-medium text-white shadow-lg">
+          Yes, Reset All
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="guidelines-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#0a2344] border border-[#2c4f75] rounded-2xl max-w-4xl w-full max-h-[88vh] flex flex-col p-6 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-[#2c4f75] shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📖</span>
+          <div>
+            <h3 class="text-sm font-bold text-white font-mono uppercase">Official MEODL Rules & Guidelines</h3>
+            <p class="text-[10px] text-slate-400 font-mono">Authoritative specifications and official tournament pubmats</p>
+          </div>
+        </div>
+        <button onclick="closeGuidelinesModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto py-4 space-y-4 pr-1" id="guidelines-accordion-container">
+        <!-- Rendered dynamically for all sports -->
+      </div>
+
+      <div class="pt-3 border-t border-[#2c4f75] shrink-0 text-right">
+        <button onclick="closeGuidelinesModal()" class="px-4 py-1.5 rounded-lg bg-[#081d38] hover:bg-[#102d52] border border-[#2c4f75] text-xs font-mono text-slate-300">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="image-lightbox-modal" class="hidden fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4" onclick="closeImageModal()">
+    <div class="relative max-w-4xl max-h-[90vh] flex flex-col items-center bg-[#0a2344] border border-[#f7b943]/60 rounded-2xl p-4 shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
+      <div class="w-full flex items-center justify-between pb-2 border-b border-[#2c4f75] mb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-sm">🖼️</span>
+          <h3 id="lightbox-title" class="font-mono font-bold text-xs text-[#f7b943] uppercase truncate">OFFICIAL TOURNAMENT ASSET</h3>
+        </div>
+        <button onclick="closeImageModal()" class="text-slate-400 hover:text-white text-base font-bold px-2 py-0.5 rounded bg-[#06162f] border border-[#2c4f75]">✕</button>
+      </div>
+      <div class="flex-1 overflow-auto flex items-center justify-center w-full min-h-[300px]">
+        <img id="lightbox-img" src="" alt="Asset" class="max-w-full max-h-[70vh] object-contain rounded-lg border border-[#2c4f75] shadow-lg" />
+      </div>
+      <div class="w-full pt-3 mt-1 border-t border-[#1e3a5f] flex items-center justify-between text-[11px] font-mono text-slate-400">
+        <span>UPHSD Mechanical Engineering Society • MEODL 2026</span>
+        <a id="lightbox-download-link" href="" target="_blank" download class="text-cyan-400 hover:underline flex items-center gap-1 font-bold">
+          <span>Open Full Resolution</span>
+          <span>↗</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    const IS_STUDENT_MODE = false;
+
+    if (IS_STUDENT_MODE) {
+      document.body.classList.add('student-mode');
+    }
+
+    let appState = {
+      activeSport: 'tekken8',
+      activeView: 'full'
+    };
+    window.appState = appState;
+
+    // Toast helper
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = 'bg-[#0a2344] border border-[#2c4f75] text-[#f7b943] font-mono text-xs px-4 py-2.5 rounded-xl shadow-2xl transition-all duration-300 opacity-0 translate-y-2 flex items-center gap-2';
+      toast.innerHTML = '<span>⚡</span><span>' + message + '</span>';
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('opacity-0', 'translate-y-2');
+      });
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 350);
+      }, 3000);
+    }
+
+    // Modal controls
+    function openImageModal(imgSrc, title) {
+      const modal = document.getElementById('image-lightbox-modal');
+      const img = document.getElementById('lightbox-image');
+      const cap = document.getElementById('lightbox-caption');
+      if (modal && img) {
+        img.src = imgSrc;
+        if (cap) cap.textContent = title || 'Image Viewer';
+        modal.classList.remove('hidden');
+      }
+    }
+    function closeImageModal() {
+      const modal = document.getElementById('image-lightbox-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function openGuidelinesModal() {
+      const m = document.getElementById('guidelines-modal');
+      if (m) m.classList.remove('hidden');
+    }
+    function closeGuidelinesModal() {
+      const m = document.getElementById('guidelines-modal');
+      if (m) m.classList.add('hidden');
+    }
+
+    function openResetModal() {
+      if (IS_STUDENT_MODE) return;
+      const m = document.getElementById('reset-modal');
+      if (m) m.classList.remove('hidden');
+    }
+    function closeResetModal() {
+      const m = document.getElementById('reset-modal');
+      if (m) m.classList.add('hidden');
+    }
+    function executeResetTournament() {
+      if (IS_STUDENT_MODE) return;
+      localStorage.removeItem(STORAGE_KEY);
+      initializeTournamentState();
+      renderAllViews();
+      closeResetModal();
+      showToast('Tournament bracket reset to initial 14-player seeded state.');
+    }
+
+    // Audio SFX engine
+    function playElectricSound() {
+      if (!state.soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.13);
+      } catch(e) {}
+    }
+
+    function toggleBracketLineMode() {
+      const modes = ['front', 'behind', 'off'];
+      const currentIdx = modes.indexOf(state.bracketLineMode || 'front');
+      state.bracketLineMode = modes[(currentIdx + 1) % modes.length];
+      const btn = document.getElementById('line-mode-btn');
+      if (btn) {
+        btn.innerHTML = '<span>⚡ Lines: ' + state.bracketLineMode.charAt(0).toUpperCase() + state.bracketLineMode.slice(1) + '</span>';
+      }
+      safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+      drawConnectors();
+    }
+
+    // Embed Tekken 8 core logic
+        // -------------------------------------------------------------------------
+    // PRESERVED TEKKEN 8 LOGIC
+    // -------------------------------------------------------------------------
+    
+    // -------------------------------------------------------------------------
+    // 1. CONSTANTS & INITIAL DATA (14 PLAYERS + 2 BYES)
+    // -------------------------------------------------------------------------
+    const INITIAL_PLAYERS = [
+      { id: 'p1', seed: 1, name: 'Glinoga, Jhayel', year: 'CE - 3rd Year', character: 'Jin' },
+      { id: 'p2', seed: 2, name: 'De Jesus, Kenneth', year: 'CPE/ECE - 3rd Year', character: 'Kazuya' },
+      { id: 'p3', seed: 3, name: 'James Ortega', year: 'EE - 4th Year', character: 'Reina' },
+      { id: 'p4', seed: 4, name: 'Quezon John Ariel R.', year: 'IE - 3rd Year', character: 'Victor' },
+      { id: 'p5', seed: 5, name: 'Jay Mar Martinez', year: 'ME - 3rd Year', character: 'Bryan' },
+      { id: 'p6', seed: 6, name: 'Cantalejo, Kaide', year: 'CPE/ECE - 3rd Year', character: 'Dragunov' },
+      { id: 'p7', seed: 7, name: 'Andrei Andrada', year: 'EE - 4th Year', character: 'King' },
+      { id: 'p8', seed: 8, name: 'Aeron James Almoro', year: 'ME - 2nd Year', character: 'Hwoarang' },
+      { id: 'p9', seed: 9, name: 'Ciceron, Hans Gabriel C.', year: 'IE - 1st Year', character: 'Paul' },
+      { id: 'p10', seed: 10, name: 'Mariano, John Paul', year: 'CE - 1st Year', character: 'Law' },
+      { id: 'p11', seed: 11, name: 'Jopeth Olino', year: 'ME - 2nd Year', character: 'Lars' },
+      { id: 'p12', seed: 12, name: 'Elisan, Joshua Bryce O.', year: 'IE - 1st Year', character: 'Yoshimitsu' },
+      { id: 'p13', seed: 13, name: 'Reloj, Karl Andrei', year: 'CE - 1st Year', character: 'Steve' },
+      { id: 'p14', seed: 14, name: 'Rafael, Rafa', year: 'CPE/ECE - 3rd Year', character: 'Devil Jin' },
+      { id: 'bye2', seed: 15, name: 'BYE', year: 'Auto-Adv', isBye: true, character: 'None' },
+      { id: 'bye1', seed: 16, name: 'BYE', year: 'Auto-Adv', isBye: true, character: 'None' }
+    ];
+
+    const TEKKEN_CHARACTERS = [
+      'Jin', 'Kazuya', 'Reina', 'Devil Jin', 'Jun', 'Dragunov', 'Victor',
+      'Bryan', 'King', 'Paul', 'Law', 'Lars', 'Yoshimitsu', 'Steve',
+      'Hwoarang', 'Xiaoyu', 'Azucena', 'Shaheen', 'Claudio', 'Feng',
+      'Leroy', 'Asuka', 'Lili', 'Alisa', 'Raven', 'Leo', 'Panda', 'Kuma',
+      'Zafina', 'Jack-8', 'Eddy', 'Heihachi', 'Lidia'
+    ];
+
+    const MATCH_DEFINITIONS = {
+      // UPPER BRACKET ROUND 1 (UB R1 - 6 Matches + 2 Byes)
+      'UB1': { code: 'BYE 1', round: 'wr1', label: 'UB Bye 1', bestOf: 3, targetWins: 2, p1Source: 'seed1', p2Source: 'seed16', winDest: { match: 'M7', slot: 1 }, lossDest: null },
+      'M1':  { code: 'M1', round: 'wr1', label: 'Upper R1', bestOf: 3, targetWins: 2, p1Source: 'seed8', p2Source: 'seed9', winDest: { match: 'M7', slot: 2 }, lossDest: { match: 'M13', slot: 2 } },
+      'M2':  { code: 'M2', round: 'wr1', label: 'Upper R1', bestOf: 3, targetWins: 2, p1Source: 'seed4', p2Source: 'seed13', winDest: { match: 'M8', slot: 1 }, lossDest: { match: 'M11', slot: 1 } },
+      'M3':  { code: 'M3', round: 'wr1', label: 'Upper R1', bestOf: 3, targetWins: 2, p1Source: 'seed5', p2Source: 'seed12', winDest: { match: 'M8', slot: 2 }, lossDest: { match: 'M11', slot: 2 } },
+      'UB2': { code: 'BYE 2', round: 'wr1', label: 'UB Bye 2', bestOf: 3, targetWins: 2, p1Source: 'seed2', p2Source: 'seed15', winDest: { match: 'M9', slot: 1 }, lossDest: null },
+      'M4':  { code: 'M4', round: 'wr1', label: 'Upper R1', bestOf: 3, targetWins: 2, p1Source: 'seed7', p2Source: 'seed10', winDest: { match: 'M9', slot: 2 }, lossDest: { match: 'M15', slot: 2 } },
+      'M5':  { code: 'M5', round: 'wr1', label: 'Upper R1', bestOf: 3, targetWins: 2, p1Source: 'seed3', p2Source: 'seed14', winDest: { match: 'M10', slot: 1 }, lossDest: { match: 'M12', slot: 1 } },
+      'M6':  { code: 'M6', round: 'wr1', label: 'Upper R1', bestOf: 3, targetWins: 2, p1Source: 'seed6', p2Source: 'seed11', winDest: { match: 'M10', slot: 2 }, lossDest: { match: 'M12', slot: 2 } },
+
+      // UPPER BRACKET ROUND 2 (UB R2 - Quarterfinals)
+      'M7':  { code: 'M7', round: 'wr2', label: 'Upper Quarters', bestOf: 3, targetWins: 2, winDest: { match: 'M17', slot: 1 }, lossDest: { match: 'M16', slot: 1 } },
+      'M8':  { code: 'M8', round: 'wr2', label: 'Upper Quarters', bestOf: 3, targetWins: 2, winDest: { match: 'M17', slot: 2 }, lossDest: { match: 'M15', slot: 1 } },
+      'M9':  { code: 'M9', round: 'wr2', label: 'Upper Quarters', bestOf: 3, targetWins: 2, winDest: { match: 'M18', slot: 1 }, lossDest: { match: 'M14', slot: 1 } },
+      'M10': { code: 'M10', round: 'wr2', label: 'Upper Quarters', bestOf: 3, targetWins: 2, winDest: { match: 'M18', slot: 2 }, lossDest: { match: 'M13', slot: 1 } },
+
+      // LOWER BRACKET ROUND 1 (LB R1)
+      'M11': { code: 'M11', round: 'lr1', label: 'Lower R1', bestOf: 3, targetWins: 2, winDest: { match: 'M14', slot: 2 }, lossDest: null },
+      'M12': { code: 'M12', round: 'lr1', label: 'Lower R1', bestOf: 3, targetWins: 2, winDest: { match: 'M16', slot: 2 }, lossDest: null },
+
+      // LOWER BRACKET ROUND 2 (LB R2)
+      'M13': { code: 'M13', round: 'lr2', label: 'Lower R2', bestOf: 3, targetWins: 2, winDest: { match: 'M19', slot: 1 }, lossDest: null },
+      'M14': { code: 'M14', round: 'lr2', label: 'Lower R2', bestOf: 3, targetWins: 2, winDest: { match: 'M19', slot: 2 }, lossDest: null },
+      'M15': { code: 'M15', round: 'lr2', label: 'Lower R2', bestOf: 3, targetWins: 2, winDest: { match: 'M20', slot: 1 }, lossDest: null },
+      'M16': { code: 'M16', round: 'lr2', label: 'Lower R2', bestOf: 3, targetWins: 2, winDest: { match: 'M20', slot: 2 }, lossDest: null },
+
+      // UPPER BRACKET ROUND 3 (UB R3 - Semifinals)
+      'M17': { code: 'M17', round: 'wr3', label: 'Upper Semis', bestOf: 3, targetWins: 2, winDest: { match: 'M23', slot: 1 }, lossDest: { match: 'M22', slot: 1 } },
+      'M18': { code: 'M18', round: 'wr3', label: 'Upper Semis', bestOf: 3, targetWins: 2, winDest: { match: 'M23', slot: 2 }, lossDest: { match: 'M21', slot: 1 } },
+
+      // LOWER BRACKET ROUND 3 (LB R3)
+      'M19': { code: 'M19', round: 'lr3', label: 'Lower R3', bestOf: 3, targetWins: 2, winDest: { match: 'M21', slot: 2 }, lossDest: null },
+      'M20': { code: 'M20', round: 'lr3', label: 'Lower R3', bestOf: 3, targetWins: 2, winDest: { match: 'M22', slot: 2 }, lossDest: null },
+
+      // LOWER BRACKET ROUND 4 (LB R4 - Quarterfinals)
+      'M21': { code: 'M21', round: 'lr4', label: 'Lower Quarters', bestOf: 3, targetWins: 2, winDest: { match: 'M24', slot: 1 }, lossDest: null },
+      'M22': { code: 'M22', round: 'lr4', label: 'Lower Quarters', bestOf: 3, targetWins: 2, winDest: { match: 'M24', slot: 2 }, lossDest: null },
+
+      // UPPER BRACKET FINALS & LOWER BRACKET SEMIFINALS
+      'M23': { code: 'M23', round: 'wr4', label: 'Upper Finals', bestOf: 3, targetWins: 2, winDest: { match: 'M26', slot: 1 }, lossDest: { match: 'M25', slot: 1 } },
+      'M24': { code: 'M24', round: 'lr5', label: 'Lower Semis', bestOf: 3, targetWins: 2, winDest: { match: 'M25', slot: 2 }, lossDest: null },
+
+      // LOWER BRACKET FINALS
+      'M25': { code: 'M25', round: 'lr6', label: 'Lower Finals', bestOf: 3, targetWins: 2, winDest: { match: 'M26', slot: 2 }, lossDest: null },
+
+      // GRAND FINALS
+      'M26': { code: 'M26', round: 'gf', label: 'Grand Finals', bestOf: 3, targetWins: 2, winDest: null, lossDest: null },
+
+      // GRAND FINALS RESET
+      'M27': { code: 'M27', round: 'gf', label: 'Grand Finals Reset', bestOf: 3, targetWins: 2, winDest: null, lossDest: null }
+    };
+
+    // -------------------------------------------------------------------------
+    // 1.1 SCHEDULE TARGETS (12:00 PM START, BO3 = 8M, 5:00 PM CUTOFF)
+    // -------------------------------------------------------------------------
+    const SCHEDULE_TARGETS = {
+      'UB1': { order: 1,  code: 'BYE 1', time: '12:00 PM', targetMins: 0,   duration: 0,  bestOf: 3, label: 'UB Bye 1 (Auto-Adv)', isBye: true },
+      'M1':  { order: 2,  code: 'M1',    time: '12:00 PM', targetMins: 0,   duration: 8,  bestOf: 3, label: 'Upper R1 - Match 1' },
+      'M2':  { order: 3,  code: 'M2',    time: '12:08 PM', targetMins: 8,   duration: 8,  bestOf: 3, label: 'Upper R1 - Match 2' },
+      'M3':  { order: 4,  code: 'M3',    time: '12:16 PM', targetMins: 16,  duration: 8,  bestOf: 3, label: 'Upper R1 - Match 3' },
+      'UB2': { order: 5,  code: 'BYE 2', time: '12:24 PM', targetMins: 24,  duration: 0,  bestOf: 3, label: 'UB Bye 2 (Auto-Adv)', isBye: true },
+      'M4':  { order: 6,  code: 'M4',    time: '12:24 PM', targetMins: 24,  duration: 8,  bestOf: 3, label: 'Upper R1 - Match 4' },
+      'M5':  { order: 7,  code: 'M5',    time: '12:32 PM', targetMins: 32,  duration: 8,  bestOf: 3, label: 'Upper R1 - Match 5' },
+      'M6':  { order: 8,  code: 'M6',    time: '12:40 PM', targetMins: 40,  duration: 8,  bestOf: 3, label: 'Upper R1 - Match 6' },
+
+      'M11': { order: 9,  code: 'M11',   time: '12:48 PM', targetMins: 48,  duration: 8,  bestOf: 3, label: 'Lower R1 - Match 11' },
+      'M12': { order: 10, code: 'M12',   time: '12:56 PM', targetMins: 56,  duration: 8,  bestOf: 3, label: 'Lower R1 - Match 12' },
+
+      'M7':  { order: 11, code: 'M7',    time: '1:04 PM',  targetMins: 64,  duration: 8,  bestOf: 3, label: 'Upper Quarters - Match 7' },
+      'M8':  { order: 12, code: 'M8',    time: '1:12 PM',  targetMins: 72,  duration: 8,  bestOf: 3, label: 'Upper Quarters - Match 8' },
+      'M9':  { order: 13, code: 'M9',    time: '1:20 PM',  targetMins: 80,  duration: 8,  bestOf: 3, label: 'Upper Quarters - Match 9' },
+      'M10': { order: 14, code: 'M10',   time: '1:28 PM',  targetMins: 88,  duration: 8,  bestOf: 3, label: 'Upper Quarters - Match 10' },
+
+      'M13': { order: 15, code: 'M13',   time: '1:36 PM',  targetMins: 96,  duration: 8,  bestOf: 3, label: 'Lower R2 - Match 13' },
+      'M14': { order: 16, code: 'M14',   time: '1:44 PM',  targetMins: 104, duration: 8,  bestOf: 3, label: 'Lower R2 - Match 14' },
+      'M15': { order: 17, code: 'M15',   time: '1:52 PM',  targetMins: 112, duration: 8,  bestOf: 3, label: 'Lower R2 - Match 15' },
+      'M16': { order: 18, code: 'M16',   time: '2:00 PM',  targetMins: 120, duration: 8,  bestOf: 3, label: 'Lower R2 - Match 16' },
+
+      'M19': { order: 19, code: 'M19',   time: '2:08 PM',  targetMins: 128, duration: 8,  bestOf: 3, label: 'Lower R3 - Match 19' },
+      'M20': { order: 20, code: 'M20',   time: '2:16 PM',  targetMins: 136, duration: 8,  bestOf: 3, label: 'Lower R3 - Match 20' },
+
+      'M17': { order: 21, code: 'M17',   time: '2:24 PM',  targetMins: 144, duration: 8,  bestOf: 3, label: 'Upper Semis - Match 17' },
+      'M18': { order: 22, code: 'M18',   time: '2:32 PM',  targetMins: 152, duration: 8,  bestOf: 3, label: 'Upper Semis - Match 18' },
+
+      'M21': { order: 23, code: 'M21',   time: '2:40 PM',  targetMins: 160, duration: 8,  bestOf: 3, label: 'Lower Quarters - Match 21' },
+      'M22': { order: 24, code: 'M22',   time: '2:48 PM',  targetMins: 168, duration: 8,  bestOf: 3, label: 'Lower Quarters - Match 22' },
+
+      'M24': { order: 25, code: 'M24',   time: '2:56 PM',  targetMins: 176, duration: 8,  bestOf: 3, label: 'Lower Semis - Match 24' },
+      'M23': { order: 26, code: 'M23',   time: '3:04 PM',  targetMins: 184, duration: 8,  bestOf: 3, label: 'Upper Finals - Match 23' },
+      'M25': { order: 27, code: 'M25',   time: '3:12 PM',  targetMins: 192, duration: 8,  bestOf: 3, label: 'Lower Finals - Match 25' },
+
+      'SETUP': { order: 28, code: 'GF-SETUP', time: '3:20 PM', targetMins: 200, duration: 4, label: 'Grand Finals Setup / Intros', isSetup: true },
+      'M26': { order: 29, code: 'M26',   time: '3:24 PM',  targetMins: 204, duration: 8,  bestOf: 3, label: 'Grand Finals - Match 26' },
+      'M27': { order: 30, code: 'M27',   time: '3:32 PM',  targetMins: 212, duration: 8,  bestOf: 3, label: 'Grand Finals Reset (If Needed)', isConditional: true }
+    };
+
+    const STORAGE_KEY = 'ewgf_tekken_bracket_v2';
+
+    // -------------------------------------------------------------------------
+    // 2. STATE MANAGEMENT & STORAGE SAFETIES
+    // -------------------------------------------------------------------------
+    let state = {
+      players: JSON.parse(JSON.stringify(INITIAL_PLAYERS)),
+      matches: {},
+      grandFinalsResetNeeded: false,
+      activeView: 'full',
+      matchFilter: 'all',
+      matchSearch: '',
+      soundEnabled: true,
+      zoom: 1.0,
+      bracketLineMode: 'front',
+      clockMode: 'auto',
+      simClockMins: 0
+    };
+
+    let activeModalMatchId = null;
+    let audioCtx = null;
+
+    
+    // -------------------------------------------------------------------------
+    // 1.2 SCHEDULE & CLOCK HELPERS
+    // -------------------------------------------------------------------------
+    function minsToTimeString(mins) {
+      let totalMin = 12 * 60 + Math.round(mins);
+      let h = Math.floor(totalMin / 60) % 24;
+      let m = totalMin % 60;
+      if (m < 0) m += 60;
+      let ampm = h >= 12 && h < 24 ? 'PM' : 'AM';
+      let h12 = h % 12;
+      if (h12 === 0) h12 = 12;
+      return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+    }
+
+    function isVenueHoursNow() {
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const minsOfDay = h * 60 + m;
+      return minsOfDay >= 11 * 60 + 30 && minsOfDay <= 17 * 60 + 30; // 11:30 AM to 5:30 PM
+    }
+
+    function getTourneyTimeNow() {
+      if (state.clockMode === 'live' || (state.clockMode === 'auto' && isVenueHoursNow())) {
+        const now = new Date();
+        return (now.getHours() - 12) * 60 + now.getMinutes() + now.getSeconds() / 60;
+      }
+      return state.simClockMins !== undefined ? state.simClockMins : 0;
+    }
+
+    function toggleClockMode() {
+      if (state.clockMode === 'live') {
+        state.clockMode = 'sim';
+        showToast('Switched to Tournament Sim Clock (12:00 PM Start)');
+      } else {
+        state.clockMode = 'live';
+        showToast('Switched to Live Real-Time Clock');
+      }
+      safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+      updateScheduleMetrics();
+      renderScheduleView();
+    }
+
+    function stepSimClock(deltaMinutes) {
+      state.clockMode = 'sim';
+      state.simClockMins = Math.max(0, Math.min(360, (state.simClockMins || 0) + deltaMinutes));
+      showToast(`Sim Clock set to ${minsToTimeString(state.simClockMins)} (${deltaMinutes >= 0 ? '+' : ''}${deltaMinutes}m)`);
+      safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+      updateScheduleMetrics();
+      renderScheduleView();
+    }
+
+    function resetSimClock() {
+      state.clockMode = 'sim';
+      state.simClockMins = 0;
+      showToast('Sim Clock reset to 12:00 PM Tournament Start');
+      safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+      updateScheduleMetrics();
+      renderScheduleView();
+    }
+
+    function calculateScheduleMetrics() {
+      const allMatches = MATCH_PRIORITY.map(id => state.matches[id]).filter(Boolean);
+      const nowMins = getTourneyTimeNow();
+      const currentTimeStr = minsToTimeString(nowMins);
+
+      // Find currently live match, or active match
+      const liveMatch = allMatches.find(m => m.isLive && !m.completed);
+      const nextReady = getNextReadyMatch();
+      
+      const activeMatch = liveMatch || nextReady || allMatches.find(m => !m.completed) || allMatches[allMatches.length - 1];
+      const activeSched = (activeMatch && SCHEDULE_TARGETS[activeMatch.id]) || { targetMins: 0, time: '12:00 PM' };
+      
+      let nextMatch = null;
+      if (activeMatch) {
+        const idx = MATCH_PRIORITY.indexOf(activeMatch.id);
+        for (let i = idx + 1; i < MATCH_PRIORITY.length; i++) {
+          const candidate = state.matches[MATCH_PRIORITY[i]];
+          if (candidate && !candidate.completed) {
+            nextMatch = candidate;
+            break;
+          }
+        }
+      }
+
+      let paceDiff = 0;
+      if (activeMatch) {
+        if (activeMatch.actualStartMins !== null && activeMatch.actualStartMins !== undefined) {
+          paceDiff = activeSched.targetMins - activeMatch.actualStartMins;
+        } else {
+          paceDiff = activeSched.targetMins - nowMins;
+        }
+      }
+
+      let remainingMins = 0;
+      const uncompleted = allMatches.filter(m => !m.completed);
+      
+      uncompleted.forEach(m => {
+        let dur = 8;
+        if (m.id === 'M27') {
+          if (!state.grandFinalsResetNeeded && state.matches['M26']?.completed) {
+            dur = 0;
+          }
+        }
+        if (m.isLive) {
+          dur = Math.max(2, dur - 3);
+        }
+        remainingMins += dur;
+      });
+
+      if (!state.matches['M26']?.completed && !state.matches['M26']?.isLive) {
+        remainingMins += 4; // GF setup buffer
+      }
+
+      const estFinishMins = nowMins + remainingMins;
+      const estFinishTimeStr = minsToTimeString(estFinishMins);
+      const minutesBufferToCutoff = 300 - estFinishMins;
+
+      let status = 'ON SCHEDULE';
+      let statusColorClass = 'bg-emerald-950/80 text-emerald-300 border-emerald-700/80';
+      let alertMessage = '';
+
+      if (nowMins >= 300 || estFinishMins >= 300) {
+        status = 'ROOM CUTOFF';
+        statusColorClass = 'bg-red-900 text-white border-2 border-red-500 animate-pulse font-black';
+      } else if (estFinishMins >= 285 || paceDiff <= -15) {
+        status = 'CRITICAL';
+        statusColorClass = 'bg-red-950/90 text-red-300 border-red-600 animate-pulse font-bold';
+      } else if (paceDiff <= -4) {
+        status = 'BEHIND';
+        statusColorClass = 'bg-amber-950/80 text-amber-300 border-amber-700/80 font-bold';
+      } else if (paceDiff >= 4) {
+        status = 'AHEAD';
+        statusColorClass = 'bg-cyan-950/80 text-cyan-300 border-cyan-700/80 font-bold';
+      } else {
+        status = 'ON SCHEDULE';
+        statusColorClass = 'bg-emerald-950/80 text-emerald-300 border-emerald-700/80 font-bold';
+      }
+
+      return {
+        currentTimeStr,
+        nowMins,
+        activeMatch,
+        nextMatch,
+        activeSchedTime: activeSched.time,
+        actualStartTime: activeMatch?.actualStartTime || '--',
+        paceDiff: Math.round(paceDiff),
+        estFinishTimeStr,
+        minutesBufferToCutoff: Math.round(minutesBufferToCutoff),
+        status,
+        statusColorClass,
+        alertMessage,
+        remainingMins
+      };
+    }
+
+    function safeGetStorage(key) {
+      try { return localStorage.getItem(key); } catch(e) { return null; }
+    }
+    function safeSetStorage(key, val) {
+      try { localStorage.setItem(key, val); } catch(e) {}
+    }
+    function safeRemoveStorage(key) {
+      try { localStorage.removeItem(key); } catch(e) {}
+    }
+
+    function playElectricSound() {
+      if (!state.soundEnabled) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(750, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.18);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } catch (e) {}
+    }
+
+    function toggleSound() {
+      state.soundEnabled = !state.soundEnabled;
+      const svg = document.getElementById('sound-icon-svg');
+      if (svg) {
+        if (state.soundEnabled) {
+          svg.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
+          showToast('Sound Effects Enabled');
+        } else {
+          svg.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>';
+          showToast('Sound Effects Muted');
+        }
+      }
+      safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function initializeTournamentState() {
+      state.matches = {};
+      
+      for (const [id, def] of Object.entries(MATCH_DEFINITIONS)) {
+        const sched = SCHEDULE_TARGETS[id] || {};
+        state.matches[id] = {
+          id: id,
+          code: def.code,
+          round: def.round,
+          label: def.label,
+          bestOf: def.bestOf,
+          targetWins: def.targetWins,
+          scheduledTime: sched.time || '12:00 PM',
+          targetCallMins: sched.targetMins !== undefined ? sched.targetMins : 0,
+          actualStartTime: null,
+          actualStartMins: null,
+          actualEndTime: null,
+          durationMins: null,
+          p1: null,
+          p2: null,
+          score1: 0,
+          score2: 0,
+          winner: null,
+          completed: false,
+          isLive: false
+        };
+      }
+
+      state.matches['UB1'].p1 = getPlayerBySeed(1);
+      state.matches['UB1'].p2 = getPlayerBySeed(16); // BYE 1
+
+      state.matches['M1'].p1 = getPlayerBySeed(8);
+      state.matches['M1'].p2 = getPlayerBySeed(9);
+
+      state.matches['M2'].p1 = getPlayerBySeed(4);
+      state.matches['M2'].p2 = getPlayerBySeed(13);
+
+      state.matches['M3'].p1 = getPlayerBySeed(5);
+      state.matches['M3'].p2 = getPlayerBySeed(12);
+
+      state.matches['UB2'].p1 = getPlayerBySeed(2);
+      state.matches['UB2'].p2 = getPlayerBySeed(15); // BYE 2
+
+      state.matches['M4'].p1 = getPlayerBySeed(7);
+      state.matches['M4'].p2 = getPlayerBySeed(10);
+
+      state.matches['M5'].p1 = getPlayerBySeed(3);
+      state.matches['M5'].p2 = getPlayerBySeed(14);
+
+      state.matches['M6'].p1 = getPlayerBySeed(6);
+      state.matches['M6'].p2 = getPlayerBySeed(11);
+
+      // AUTO-ADVANCE UB1 (Glinoga, Jhayel vs BYE 1)
+      state.matches['UB1'].score1 = 2;
+      state.matches['UB1'].score2 = 0;
+      state.matches['UB1'].winner = 1;
+      state.matches['UB1'].completed = true;
+      state.matches['UB1'].actualStartTime = '12:00 PM';
+      state.matches['UB1'].actualStartMins = 0;
+      state.matches['UB1'].actualEndTime = '12:00 PM';
+      state.matches['UB1'].durationMins = 0;
+
+      // AUTO-ADVANCE UB2 (De Jesus, Kenneth vs BYE 2)
+      state.matches['UB2'].score1 = 2;
+      state.matches['UB2'].score2 = 0;
+      state.matches['UB2'].winner = 1;
+      state.matches['UB2'].completed = true;
+      state.matches['UB2'].actualStartTime = '12:00 PM';
+      state.matches['UB2'].actualStartMins = 0;
+      state.matches['UB2'].actualEndTime = '12:00 PM';
+      state.matches['UB2'].durationMins = 0;
+
+      propagateBracket();
+    }
+
+    function getPlayerBySeed(seed) {
+      return state.players.find(p => p.seed === seed) || null;
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. PROPAGATION ENGINE & CASCADE RESOLUTION
+    // -------------------------------------------------------------------------
+    function propagateBracket() {
+      const sequence = [
+        'UB1', 'M1', 'M2', 'M3', 'UB2', 'M4', 'M5', 'M6',
+        'M7', 'M8', 'M9', 'M10',
+        'M11', 'M12',
+        'M13', 'M14', 'M15', 'M16',
+        'M17', 'M18',
+        'M19', 'M20',
+        'M21', 'M22',
+        'M23',
+        'M24',
+        'M25',
+        'M26',
+        'M27'
+      ];
+
+      for (const mId of sequence) {
+        const m = state.matches[mId];
+        const def = MATCH_DEFINITIONS[mId];
+
+        if (m.score1 >= def.targetWins || m.score2 >= def.targetWins) {
+          m.completed = true;
+          m.winner = m.score1 > m.score2 ? 1 : 2;
+        } else if (!m.winner) {
+          m.completed = false;
+        }
+
+        const winnerPlayer = m.winner === 1 ? m.p1 : (m.winner === 2 ? m.p2 : null);
+        const loserPlayer = m.winner === 1 ? m.p2 : (m.winner === 2 ? m.p1 : null);
+
+        // Propagate Winner
+        if (def.winDest) {
+          const targetMatch = state.matches[def.winDest.match];
+          if (targetMatch) {
+            if (def.winDest.slot === 1) {
+              if (targetMatch.p1?.id !== winnerPlayer?.id) {
+                targetMatch.p1 = winnerPlayer;
+                invalidateMatchIfChanged(targetMatch);
+              }
+            } else if (def.winDest.slot === 2) {
+              if (targetMatch.p2?.id !== winnerPlayer?.id) {
+                targetMatch.p2 = winnerPlayer;
+                invalidateMatchIfChanged(targetMatch);
+              }
+            }
+          }
+        }
+
+        // Propagate Loser
+        if (def.lossDest) {
+          const targetMatch = state.matches[def.lossDest.match];
+          if (targetMatch) {
+            const actualLoser = loserPlayer && !loserPlayer.isBye ? loserPlayer : null;
+            if (def.lossDest.slot === 1) {
+              if (targetMatch.p1?.id !== actualLoser?.id) {
+                targetMatch.p1 = actualLoser;
+                invalidateMatchIfChanged(targetMatch);
+              }
+            } else if (def.lossDest.slot === 2) {
+              if (targetMatch.p2?.id !== actualLoser?.id) {
+                targetMatch.p2 = actualLoser;
+                invalidateMatchIfChanged(targetMatch);
+              }
+            }
+          }
+        }
+
+        // Grand Finals Reset Check
+        if (mId === 'M26') {
+          const gf2 = state.matches['M27'];
+          if (m.completed) {
+            if (m.winner === 2) {
+              state.grandFinalsResetNeeded = true;
+              gf2.p1 = m.p1;
+              gf2.p2 = m.p2;
+            } else {
+              state.grandFinalsResetNeeded = false;
+              gf2.p1 = null;
+              gf2.p2 = null;
+              gf2.score1 = 0;
+              gf2.score2 = 0;
+              gf2.completed = false;
+              gf2.winner = null;
+            }
+          } else {
+            state.grandFinalsResetNeeded = false;
+            gf2.p1 = null;
+            gf2.p2 = null;
+            gf2.completed = false;
+          }
+        }
+      }
+
+      safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function invalidateMatchIfChanged(match) {
+      const currentP1 = match.p1?.id || null;
+      const currentP2 = match.p2?.id || null;
+      const hadBinding = Object.prototype.hasOwnProperty.call(match, '__boundP1');
+      const changed = hadBinding && (match.__boundP1 !== currentP1 || match.__boundP2 !== currentP2);
+      match.__boundP1 = currentP1; match.__boundP2 = currentP2;
+      if (changed || !match.p1 || !match.p2) {
+        match.score1 = 0; match.score2 = 0; match.completed = false; match.winner = null; match.isLive = false;
+      }
+    }
+
+    function selectMatchWinner(matchId, winnerSlot) {
+      if (IS_STUDENT_MODE) return;
+      const match = state.matches[matchId];
+      if (!match || !match.p1 || !match.p2) return;
+      if (matchId === 'UB1' || matchId === 'UB2' || match.p1.isBye || match.p2.isBye) return;
+
+      const nowM = getTourneyTimeNow();
+      if (!match.actualStartTime) {
+        match.actualStartMins = nowM;
+        match.actualStartTime = minsToTimeString(nowM);
+      }
+      match.actualEndTime = minsToTimeString(nowM);
+      match.durationMins = match.actualStartMins !== null ? Math.max(1, Math.round(nowM - match.actualStartMins)) : 8;
+
+      const targetWins = match.targetWins;
+      if (winnerSlot === 1) {
+        match.score1 = targetWins;
+        if (match.score2 >= targetWins) match.score2 = targetWins - 1;
+        match.winner = 1;
+        match.completed = true;
+        match.isLive = false;
+      } else {
+        match.score2 = targetWins;
+        if (match.score1 >= targetWins) match.score1 = targetWins - 1;
+        match.winner = 2;
+        match.completed = true;
+        match.isLive = false;
+      }
+
+      playElectricSound();
+      propagateBracket();
+      renderAllViews();
+      showToast(`${match.code}: ${winnerSlot === 1 ? match.p1.name : match.p2.name} won!`);
+    }
+
+    function adjustScore(matchId, slot, delta) {
+      if (IS_STUDENT_MODE) return;
+      const match = state.matches[matchId];
+      if (!match || !match.p1 || !match.p2) return;
+      if (matchId === 'UB1' || matchId === 'UB2' || match.p1.isBye || match.p2.isBye) return;
+
+      const nowM = getTourneyTimeNow();
+      if (!match.actualStartTime) {
+        match.actualStartMins = nowM;
+        match.actualStartTime = minsToTimeString(nowM);
+      }
+
+      const maxScore = match.targetWins;
+
+      if (slot === 1) {
+        match.score1 = Math.max(0, Math.min(maxScore, match.score1 + delta));
+      } else {
+        match.score2 = Math.max(0, Math.min(maxScore, match.score2 + delta));
+      }
+
+      if (match.score1 === maxScore) {
+        match.winner = 1;
+        match.completed = true;
+        match.isLive = false;
+        playElectricSound();
+      } else if (match.score2 === maxScore) {
+        match.winner = 2;
+        match.completed = true;
+        match.isLive = false;
+        playElectricSound();
+      } else {
+        match.completed = false;
+        match.winner = null;
+      }
+
+      propagateBracket();
+      renderAllViews();
+    }
+
+    function updatePlayerCharacter(playerId, characterName) {
+      if (IS_STUDENT_MODE) return;
+      const player = state.players.find(p => p.id === playerId);
+      if (player) {
+        player.character = characterName;
+        for (const m of Object.values(state.matches)) {
+          if (m.p1?.id === playerId) m.p1.character = characterName;
+          if (m.p2?.id === playerId) m.p2.character = characterName;
+        }
+        safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+        renderAllViews();
+        showToast(`${player.name} main set to ${characterName}`);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. RENDERING VIEWS & MATCH CARDS
+    // -------------------------------------------------------------------------
+    function renderAllViews() {
+      renderBracketColumns();
+      renderFocusedWinners();
+      renderFocusedLosers();
+      renderFinalsSpotlight();
+      renderMatchList();
+      renderStandings();
+      updateMetrics();
+      if (typeof updateEnhancedMetrics === 'function') updateEnhancedMetrics();
+      if (typeof updateScheduleMetrics === 'function') updateScheduleMetrics();
+      if (typeof renderScheduleView === 'function') renderScheduleView();
+      if (typeof renderControlRoom === 'function') renderControlRoom();
+
+      requestAnimationFrame(() => {
+        drawConnectors();
+      });
+    }
+
+    function createMatchCardHTML(match, idPrefix = 'card') {
+      const isCompleted = match.completed;
+      const isLive = match.isLive;
+      const hasBothPlayers = !!(match.p1 && match.p2 && !match.p1.isBye && !match.p2.isBye);
+
+      let statusBadgeClass = 'bg-[#081d38] text-slate-400 border border-[#2c4f75]';
+      let statusText = 'WAITING';
+
+      if (isCompleted) {
+        statusBadgeClass = 'bg-[#0a2344] text-[#f7b943] border border-[#f7b943]/60 font-bold shadow-sm';
+        statusText = 'DONE';
+      } else if (isLive) {
+        statusBadgeClass = 'bg-emerald-950 text-emerald-300 border border-emerald-700 font-bold animate-pulse';
+        statusText = 'LIVE';
+      } else if (hasBothPlayers) {
+        statusBadgeClass = 'bg-[#081d38] text-sky-300 border border-sky-800/80 font-semibold';
+        statusText = 'READY';
+      }
+
+      const renderRow = (player, score, isWinner, isLoser, slotNum) => {
+        if (!player) {
+          return `
+            <div class="flex items-center justify-between p-2 rounded-lg border border-dashed border-[#2c4f75]/60 bg-[#06162f]/50 text-xs text-slate-400">
+              <span class="italic font-mono">TBD</span>
+              <span class="font-mono text-slate-500">-</span>
+            </div>
+          `;
+        }
+
+        const isBye = player.isBye;
+        const winnerBorder = isWinner ? 'border-cyan-500/70 bg-cyan-950/30 shadow-electric' : 'border-[#2c4f75]/60 bg-[#06162f]/60';
+        const loserOpacity = isLoser ? 'opacity-40 grayscale-[40%]' : '';
+
+        return `
+          <div class="flex items-center justify-between p-2 rounded-lg border ${winnerBorder} ${loserOpacity} transition-all hover:bg-[#102d52]/60">
+            <div class="flex items-center gap-2 overflow-hidden flex-1 cursor-pointer" onclick="selectMatchWinner('${match.id}', ${slotNum})">
+              <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[#081d38] text-[#f7b943] border border-[#2c4f75] font-semibold shrink-0">
+                #${player.seed}
+              </span>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-bold text-slate-100 truncate ${isWinner ? 'text-cyan-300' : ''}">
+                    ${player.name}
+                  </span>
+                  ${isWinner ? '<span class="text-cyan-400 text-xs font-bold">✓</span>' : ''}
+                </div>
+                <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
+                  <span class="font-mono text-slate-400">${player.year}</span>
+                  ${!isBye ? `
+                    <span class="text-slate-500">•</span>
+                    <span class="text-[#38bdf8] font-medium">${player.character || 'No Pick'}</span>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+
+            ${!isBye ? `
+              <div class="flex items-center gap-1 shrink-0 ml-2">
+                <button onclick="event.stopPropagation(); adjustScore('${match.id}', ${slotNum}, -1)" class="score-button" title="Minus point">-</button>
+                <span class="w-5 text-center font-mono font-bold text-sm num-mono ${isWinner ? 'text-[#f7b943] font-black' : 'text-slate-200'}">${score}</span>
+                <button onclick="event.stopPropagation(); adjustScore('${match.id}', ${slotNum}, 1)" class="score-button" title="Add point">+</button>
+              </div>
+            ` : `
+              <span class="font-mono text-xs text-slate-400 pr-1">BYE</span>
+            `}
+          </div>
+        `;
+      };
+
+      const p1Winner = match.winner === 1;
+      const p1Loser = match.winner === 2;
+      const p2Winner = match.winner === 2;
+      const p2Loser = match.winner === 1;
+
+      return `
+        <div id="${idPrefix}-${match.id}" data-match-id="${match.id}" class="match-node relative bg-[#0a2344]/95 backdrop-blur-md rounded-xl border border-[#2c4f75] hover:border-[#38bdf8]/60 p-2.5 transition-all shadow-card ${isLive ? 'match-live live-pulse' : (hasBothPlayers && !isCompleted ? 'match-ready' : (isCompleted ? 'match-complete' : ''))}">
+          <div class="flex items-center justify-between gap-2 mb-2 pb-1.5 border-b border-[#2c4f75]/60">
+            <div class="flex items-center gap-1.5 cursor-pointer" onclick="openMatchModal('${match.id}')">
+              <span class="font-mono font-bold text-[11px] text-[#f7b943] hover:underline">
+                ${match.code}
+              </span>
+              <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#081d38] text-slate-300 border border-[#2c4f75]">
+                BO${match.bestOf}
+              </span>
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#06162f] text-[#ffd477] border border-[#2c4f75]" title="Target Schedule Call Time">
+                ${match.scheduledTime || (SCHEDULE_TARGETS[match.id]?.time || '')}
+              </span>
+              ${match.actualStartTime ? `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800/80" title="Actual Start Time">▶ ${match.actualStartTime}</span>` : ''}
+            </div>
+            
+            <div class="flex items-center gap-1">
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase ${statusBadgeClass}">
+                ${statusText}
+              </span>
+              <button onclick="openMatchModal('${match.id}')" class="text-slate-400 hover:text-white px-1 py-0.5 rounded text-xs" title="Edit Match">
+                ⚙
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            ${renderRow(match.p1, match.score1, p1Winner, p1Loser, 1)}
+            ${renderRow(match.p2, match.score2, p2Winner, p2Loser, 2)}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderBracketColumns() {
+      document.getElementById('col-wr1').innerHTML = ['UB1', 'M1', 'M2', 'M3', 'UB2', 'M4', 'M5', 'M6'].map(id => createMatchCardHTML(state.matches[id])).join('');
+      document.getElementById('col-wr2').innerHTML = ['M7', 'M8', 'M9', 'M10'].map(id => createMatchCardHTML(state.matches[id])).join('');
+      document.getElementById('col-wr3').innerHTML = ['M17', 'M18'].map(id => createMatchCardHTML(state.matches[id])).join('');
+      document.getElementById('col-wr4').innerHTML = ['M23'].map(id => createMatchCardHTML(state.matches[id])).join('');
+
+      document.getElementById('col-lr1').innerHTML = ['M11', 'M12'].map(id => createMatchCardHTML(state.matches[id])).join('');
+      document.getElementById('col-lr2').innerHTML = ['M13', 'M14', 'M15', 'M16'].map(id => createMatchCardHTML(state.matches[id])).join('');
+      document.getElementById('col-lr3').innerHTML = ['M19', 'M20'].map(id => createMatchCardHTML(state.matches[id])).join('');
+      document.getElementById('col-lr4').innerHTML = ['M21', 'M22'].map(id => createMatchCardHTML(state.matches[id])).join('');
+      document.getElementById('col-lr5').innerHTML = ['M24'].map(id => createMatchCardHTML(state.matches[id])).join('');
+      document.getElementById('col-lr6').innerHTML = ['M25'].map(id => createMatchCardHTML(state.matches[id])).join('');
+
+      let gfHTML = `
+        <div class="w-80">
+          <div class="text-xs font-mono font-bold text-amber-300 mb-2">GRAND FINALS (MATCH 26)</div>
+          ${createMatchCardHTML(state.matches['M26'])}
+        </div>
+      `;
+
+      if (state.grandFinalsResetNeeded || (state.matches['M27'] && state.matches['M27'].p1)) {
+        gfHTML += `
+          <div class="w-80">
+            <div class="text-xs font-mono font-bold text-amber-400 mb-2 flex items-center gap-1.5">
+              <span>⚡ GRAND FINALS RESET (MATCH 27)</span>
+            </div>
+            ${createMatchCardHTML(state.matches['M27'])}
+          </div>
+        `;
+      }
+
+      document.getElementById('col-gf').innerHTML = gfHTML;
+    }
+
+    function renderFocusedWinners() {
+      const container = document.getElementById('winners-focused-container');
+      container.innerHTML = `
+        <div class="flex gap-8 min-w-[1200px]">
+          <div class="w-72 space-y-4">
+            <div class="bg-[#0a2344] border border-[#2c4f75] p-2 text-center rounded-lg text-xs font-mono font-bold text-cyan-400 shadow-sm">ROUND 1 (BO3)</div>
+            ${['UB1', 'M1', 'M2', 'M3', 'UB2', 'M4', 'M5', 'M6'].map(id => createMatchCardHTML(state.matches[id], 'fw-card')).join('')}
+          </div>
+          <div class="w-72 space-y-4">
+            <div class="bg-[#0a2344] border border-[#2c4f75] p-2 text-center rounded-lg text-xs font-mono font-bold text-cyan-400 shadow-sm">QUARTERFINALS (BO3)</div>
+            ${['M7', 'M8', 'M9', 'M10'].map(id => createMatchCardHTML(state.matches[id], 'fw-card')).join('')}
+          </div>
+          <div class="w-72 space-y-4">
+            <div class="bg-[#0a2344] border border-[#2c4f75] p-2 text-center rounded-lg text-xs font-mono font-bold text-cyan-400 shadow-sm">SEMIFINALS (BO3)</div>
+            ${['M17', 'M18'].map(id => createMatchCardHTML(state.matches[id], 'fw-card')).join('')}
+          </div>
+          <div class="w-72 space-y-4">
+            <div class="bg-[#0a2344] border border-[#2c4f75] p-2 text-center rounded-lg text-xs font-mono font-bold text-cyan-400 shadow-sm">WINNERS FINALS (BO3)</div>
+            ${['M23'].map(id => createMatchCardHTML(state.matches[id], 'fw-card')).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderFocusedLosers() {
+      const container = document.getElementById('losers-focused-container');
+      container.innerHTML = `
+        <div class="flex gap-8 min-w-[1500px]">
+          <div class="w-72 space-y-4">
+            <div class="bg-[#0a2344] border border-[#2c4f75] p-2 text-center rounded-lg text-xs font-mono font-bold text-[#f7b943] shadow-sm">LOSERS R1 (BO3)</div>
+            ${['M11', 'M12'].map(id => createMatchCardHTML(state.matches[id], 'fl-card')).join('')}
+          </div>
+          <div class="w-72 space-y-4">
+            <div class="bg-[#0a2344] border border-[#2c4f75] p-2 text-center rounded-lg text-xs font-mono font-bold text-[#f7b943] shadow-sm">LOSERS R2 (BO3)</div>
+            ${['M13', 'M14', 'M15', 'M16'].map(id => createMatchCardHTML(state.matches[id], 'fl-card')).join('')}
+          </div>
+          <div class="w-72 space-y-4">
+            <div class="bg-[#0a2344] border border-[#2c4f75] p-2 text-center rounded-lg text-xs font-mono font-bold text-[#f7b943] shadow-sm">LOSERS R3 (BO3)</div>
+            ${['M19', 'M20'].map(id => createMatchCardHTML(state.matches[id], 'fl-card')).join('')}
+          </div>
+          <div class="w-72 space-y-4">
+            <div class="bg-[#0a2344] border border-[#2c4f75] p-2 text-center rounded-lg text-xs font-mono font-bold text-[#f7b943] shadow-sm">LOSERS QUARTERS (BO3)</div>
+            ${['M21', 'M22'].map(id => createMatchCardHTML(state.matches[id], 'fl-card')).join('')}
+          </div>
+          <div class="w-72 space-y-4">
+            <div class="bg-[#0a2344] border border-[#2c4f75] p-2 text-center rounded-lg text-xs font-mono font-bold text-[#f7b943] shadow-sm">LOSERS SEMIS (BO3)</div>
+            ${['M24'].map(id => createMatchCardHTML(state.matches[id], 'fl-card')).join('')}
+          </div>
+          <div class="w-72 space-y-4">
+            <div class="bg-[#0a2344] border border-[#2c4f75] p-2 text-center rounded-lg text-xs font-mono font-bold text-[#f7b943] shadow-sm">LOSERS FINALS (BO3)</div>
+            ${['M25'].map(id => createMatchCardHTML(state.matches[id], 'fl-card')).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderFinalsSpotlight() {
+      const container = document.getElementById('finals-spotlight-container');
+      const gf1 = state.matches['M26'];
+      const gf2 = state.matches['M27'];
+
+      let champion = null;
+      if (gf2 && gf2.completed && gf2.winner) {
+        champion = gf2.winner === 1 ? gf2.p1 : gf2.p2;
+      } else if (gf1 && gf1.completed && gf1.winner === 1) {
+        champion = gf1.p1;
+      }
+
+      let championHTML = '';
+      if (champion) {
+        championHTML = `
+          <div class="w-full max-w-2xl p-8 rounded-3xl bg-gradient-to-b from-[#f7b943]/20 via-[#0a2344]/95 to-[#06162f] border border-[#f7b943]/60 text-center shadow-mishima relative overflow-hidden">
+            <div class="flex items-center justify-center gap-3 mb-2">
+              <img src="./assets/mes_logo.png" alt="MES Seal" class="w-10 h-10 rounded-full border border-amber-400/80 shadow-mishima">
+              <span class="text-3xl">👑</span>
+            </div>
+            <div class="text-xs font-mono uppercase tracking-widest text-[#f7b943] font-bold mb-1">
+              UPHSD • MECHANICAL ENGINEERING SOCIETY CHAMPION
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-2 font-mono">
+              ${champion.name}
+            </h1>
+            <div class="flex items-center justify-center gap-3 text-sm text-slate-200 font-mono">
+              <span class="px-2 py-0.5 rounded bg-[#081d38] border border-[#2c4f75]">Seed #${champion.seed}</span>
+              <span class="px-2 py-0.5 rounded bg-[#081d38] border border-[#2c4f75]">${champion.year}</span>
+              <span class="px-2 py-0.5 rounded bg-[#2b1e06] text-[#ffd477] border border-[#f7b943]/60">${champion.character}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      // Hero Header Banner with Tekken 8 Key Art and MES Seal
+      const bannerHTML = `
+        <div class="relative w-full max-w-3xl rounded-2xl overflow-hidden border border-[#2c4f75] bg-[#0a2344]/90 shadow-2xl">
+          <div class="relative h-48 sm:h-56 w-full overflow-hidden">
+            <img src="./assets/tekken8_cover.jpg" alt="Tekken 8 Grand Finals" class="w-full h-full object-cover object-center filter brightness-90">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#06162f] via-[#06162f]/60 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#06162f]/80 via-transparent to-[#06162f]/80"></div>
+            
+            <div class="absolute bottom-4 left-6 right-6 flex items-end justify-between flex-wrap gap-3">
+              <div class="flex items-center gap-3.5">
+                <img src="./assets/mes_logo.png" alt="MES Seal" class="w-13 h-13 rounded-full border-2 border-[#f7b943] shadow-mishima bg-white p-0.5">
+                <div>
+                  <div class="text-[11px] font-mono font-bold tracking-widest text-[#f7b943] uppercase">
+                    MECHANICAL ENGINEERING SOCIETY • UPHSD DALTA
+                  </div>
+                  <h1 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+                    TEKKEN 8 GRAND FINALS
+                  </h1>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 bg-[#06162f]/80 border border-[#2c4f75] px-3 py-1 rounded-lg text-xs font-mono text-cyan-300 backdrop-blur-md">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                <span>CHAMPIONSHIP STAGE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = `
+        ${bannerHTML}
+        ${championHTML}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-3xl">
+          <div class="space-y-3">
+            <div class="flex items-center gap-2 text-sm font-mono text-cyan-400 font-bold">
+              <span>⚔️ GRAND FINALS (MATCH 26)</span>
+            </div>
+            ${createMatchCardHTML(gf1, 'fs-card')}
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Winners Bracket Champion needs 1 set win. Losers Champion must win this set to trigger a Bracket Reset.
+            </p>
+          </div>
+
+          <div class="space-y-3 ${!state.grandFinalsResetNeeded && (!gf2 || !gf2.completed) ? 'opacity-40' : ''}">
+            <div class="flex items-center gap-2 text-sm font-mono text-[#f7b943] font-bold">
+              <span>⚡ GRAND FINALS RESET (MATCH 27)</span>
+            </div>
+            ${gf2 ? createMatchCardHTML(gf2, 'fs-card') : ''}
+            <p class="text-xs text-slate-400 leading-relaxed">
+              ${state.grandFinalsResetNeeded ? '<span class="text-[#f7b943] font-bold">RESET TRIGGERED!</span> Losers Champ won Match 26. Winner takes championship.' : 'Activates automatically if the Losers Bracket Champion wins Match 26.'}
+            </p>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMatchList() {
+      const tbody = document.getElementById('match-list-tbody');
+      const allMatches = Object.values(state.matches);
+
+      const query = (state.matchSearch || '').trim().toLowerCase();
+      const filtered = allMatches.filter(m => {
+        const matchesSearch = !query || [m.code, m.label, m.p1?.name, m.p2?.name].filter(Boolean).some(v => String(v).toLowerCase().includes(query));
+        if (!matchesSearch) return false;
+        if (state.matchFilter === 'all') return true;
+        if (state.matchFilter === 'live') return m.isLive;
+        if (state.matchFilter === 'ready') return !m.completed && m.p1 && m.p2 && !m.p1.isBye && !m.p2.isBye;
+        if (state.matchFilter === 'completed') return m.completed;
+        return true;
+      });
+
+      tbody.innerHTML = filtered.map(m => {
+        const p1Name = m.p1 ? m.p1.name : '<span class="text-slate-500 italic">TBD</span>';
+        const p2Name = m.p2 ? m.p2.name : '<span class="text-slate-500 italic">TBD</span>';
+        const isReady = m.p1 && m.p2 && !m.p1.isBye && !m.p2.isBye;
+
+        let statusPill = `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-[#081d38] text-slate-400 border border-[#2c4f75]">WAITING</span>`;
+        if (m.completed) {
+          statusPill = `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-[#0a2344] text-[#f7b943] border border-[#f7b943]/60 font-bold">COMPLETED</span>`;
+        } else if (m.isLive) {
+          statusPill = `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-700 font-bold animate-pulse">LIVE</span>`;
+        } else if (isReady) {
+          statusPill = `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-[#081d38] text-sky-300 border border-sky-800/80 font-semibold">READY</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-[#102d52]/50 border-b border-[#2c4f75]/40 transition-colors">
+            <td class="py-3 px-4 font-mono text-[#f7b943] font-bold text-xs">
+              ${m.code}
+            </td>
+            <td class="py-3 px-4 text-xs font-mono text-slate-300">
+              ${m.label}
+            </td>
+            <td class="py-3 px-4 text-xs font-mono text-slate-400">
+              BO${m.bestOf}
+            </td>
+            <td class="py-3 px-4">
+              <div class="flex items-center gap-3">
+                <span class="font-semibold text-xs text-slate-100 ${m.winner === 1 ? 'text-[#38bdf8] font-bold' : ''}">
+                  ${p1Name}
+                </span>
+                <span class="px-2 py-0.5 rounded bg-[#06162f] border border-[#2c4f75] font-mono text-xs font-bold ${m.completed ? 'text-[#f7b943]' : 'text-slate-400'}">
+                  ${m.score1} - ${m.score2}
+                </span>
+                <span class="font-semibold text-xs text-slate-100 ${m.winner === 2 ? 'text-[#38bdf8] font-bold' : ''}">
+                  ${p2Name}
+                </span>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-center">
+              ${statusPill}
+            </td>
+            <td class="py-3 px-4 text-right">
+              <button onclick="openMatchModal('${m.id}')" class="px-2.5 py-1 rounded-lg bg-[#0a2344] hover:bg-[#102d52] border border-[#2c4f75] text-xs font-medium text-slate-200 hover:text-white transition-all">
+                Score / Edit
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function setMatchFilter(filter) {
+      state.matchFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.remove('bg-[#102d52]', 'text-[#f7b943]', 'border-[#f7b943]/40', 'font-semibold');
+        b.classList.add('text-slate-400');
+      });
+      const activeBtn = document.getElementById(`filter-${filter}`);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-[#102d52]', 'text-[#f7b943]', 'border', 'border-[#f7b943]/40', 'font-semibold');
+        activeBtn.classList.remove('text-slate-400');
+      }
+      renderMatchList();
+    }
+
+    function setMatchSearch(value) { state.matchSearch = value || ''; renderMatchList(); }
+
+    function renderStandings() {
+      const tbody = document.getElementById('standings-tbody');
+      const summary = document.getElementById('standings-summary');
+      if (summary) {
+        const players = state.players.filter(p => !p.isBye);
+        const eliminated = players.filter(p => getRankForPlayerSafe(p) !== 'Active').length;
+        const live = Object.values(state.matches).filter(m => m.isLive).length;
+        const completed = Object.values(state.matches).filter(m => m.completed).length;
+        summary.innerHTML = [['Active', players.length-eliminated,'text-emerald-300'],['Eliminated',eliminated,'text-red-300'],['Live sets',live,'text-cyan-300'],['Completed',`${completed}/${Object.keys(state.matches).length}`,'text-amber-300']].map(([l,v,c])=>`<div class="bg-[#0a2344] border border-[#2c4f75] rounded-xl px-3 py-2.5 shadow-sm"><div class="text-[9px] font-mono uppercase tracking-[.14em] text-slate-400">${l}</div><div class="mt-1 text-base font-extrabold ${c}">${v}</div></div>`).join('');
+      }
+      const ranks = {};
+
+      const gf1 = state.matches['M26'];
+      const gf2 = state.matches['M27'];
+
+      if (gf2 && gf2.completed && gf2.winner) {
+        ranks[1] = [gf2.winner === 1 ? gf2.p1 : gf2.p2];
+        ranks[2] = [gf2.winner === 1 ? gf2.p2 : gf2.p1];
+      } else if (gf1 && gf1.completed && gf1.winner === 1) {
+        ranks[1] = [gf1.p1];
+        ranks[2] = [gf1.p2];
+      }
+
+      const m25 = state.matches['M25'];
+      if (m25 && m25.completed && m25.winner) {
+        ranks[3] = [m25.winner === 1 ? m25.p2 : m25.p1];
+      }
+
+      const m24 = state.matches['M24'];
+      if (m24 && m24.completed && m24.winner) {
+        ranks[4] = [m24.winner === 1 ? m24.p2 : m24.p1];
+      }
+
+      const m21 = state.matches['M21'];
+      const m22 = state.matches['M22'];
+      const fifthSixth = [];
+      if (m21 && m21.completed && m21.winner) fifthSixth.push(m21.winner === 1 ? m21.p2 : m21.p1);
+      if (m22 && m22.completed && m22.winner) fifthSixth.push(m22.winner === 1 ? m22.p2 : m22.p1);
+      if (fifthSixth.length > 0) ranks['5th-6th'] = fifthSixth;
+
+      const m19 = state.matches['M19'];
+      const m20 = state.matches['M20'];
+      const seventhEighth = [];
+      if (m19 && m19.completed && m19.winner) seventhEighth.push(m19.winner === 1 ? m19.p2 : m19.p1);
+      if (m20 && m20.completed && m20.winner) seventhEighth.push(m20.winner === 1 ? m20.p2 : m20.p1);
+      if (seventhEighth.length > 0) ranks['7th-8th'] = seventhEighth;
+
+      const ninthTwelfth = [];
+      ['M13', 'M14', 'M15', 'M16'].forEach(id => {
+        const m = state.matches[id];
+        if (m && m.completed && m.winner) {
+          ninthTwelfth.push(m.winner === 1 ? m.p2 : m.p1);
+        }
+      });
+      if (ninthTwelfth.length > 0) ranks['9th-12th'] = ninthTwelfth;
+
+      const thirteenthFourteenth = [];
+      ['M11', 'M12'].forEach(id => {
+        const m = state.matches[id];
+        if (m && m.completed && m.winner) {
+          thirteenthFourteenth.push(m.winner === 1 ? m.p2 : m.p1);
+        }
+      });
+      if (thirteenthFourteenth.length > 0) ranks['13th-14th'] = thirteenthFourteenth;
+
+      const getRecord = (player) => {
+        if (!player || player.isBye) return '0 - 0';
+        let wins = 0;
+        let losses = 0;
+        for (const m of Object.values(state.matches)) {
+          if (m.completed && !m.p2?.isBye) {
+            if (m.p1?.id === player.id) {
+              if (m.winner === 1) wins++;
+              else if (m.winner === 2) losses++;
+            } else if (m.p2?.id === player.id) {
+              if (m.winner === 2) wins++;
+              else if (m.winner === 1) losses++;
+            }
+          }
+        }
+        return `${wins} - ${losses}`;
+      };
+
+      const getRankForPlayer = (p) => {
+        for (const [rLabel, pList] of Object.entries(ranks)) {
+          if (pList.some(item => item?.id === p.id)) {
+            return rLabel;
+          }
+        }
+        return 'Active';
+      };
+
+      const displayPlayers = [...state.players].filter(p => !p.isBye).sort((a, b) => {
+        const rankA = getRankForPlayer(a);
+        const rankB = getRankForPlayer(b);
+        const order = { '1': 1, '2': 2, '3': 3, '4': 4, '5th-6th': 5, '7th-8th': 7, '9th-12th': 9, '13th-14th': 13, 'Active': 0 };
+        return (order[rankA] || 99) - (order[rankB] || 99) || a.seed - b.seed;
+      });
+
+      tbody.innerHTML = displayPlayers.map(p => {
+        const rank = getRankForPlayer(p);
+        let rankBadge = `<span class="text-xs font-mono text-slate-400 font-bold">${rank}</span>`;
+        let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-[#081d38] text-slate-300 border border-[#2c4f75]">In Contention</span>`;
+
+        if (rank === '1') {
+          rankBadge = `<span class="px-2.5 py-1 rounded bg-[#f7b943]/20 border border-[#f7b943]/50 text-[#ffd477] font-bold font-mono">1st</span>`;
+          statusBadge = `<span class="px-2.5 py-1 rounded text-[10px] font-mono bg-[#2b1e06] text-[#ffd477] border border-[#f7b943]/60 font-bold">CHAMPION</span>`;
+        } else if (rank === '2') {
+          rankBadge = `<span class="px-2.5 py-1 rounded bg-slate-300/20 border border-slate-300/50 text-slate-100 font-bold font-mono">2nd</span>`;
+          statusBadge = `<span class="px-2.5 py-1 rounded text-[10px] font-mono bg-[#0a2344] text-slate-200 border border-[#2c4f75] font-bold">RUNNER-UP</span>`;
+        } else if (rank === '3') {
+          rankBadge = `<span class="px-2.5 py-1 rounded bg-amber-800/30 border border-amber-700/50 text-amber-400 font-bold font-mono">3rd</span>`;
+          statusBadge = `<span class="px-2.5 py-1 rounded text-[10px] font-mono bg-[#2b1e06]/60 text-amber-400 border border-amber-800">3RD PLACE</span>`;
+        } else if (rank !== 'Active') {
+          statusBadge = `<span class="px-2.5 py-1 rounded text-[10px] font-mono bg-red-950/40 text-red-400 border border-red-900/60">Eliminated</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-[#102d52]/50 border-b border-[#2c4f75]/40 transition-colors">
+            <td class="py-3 px-4 text-center">
+              ${rankBadge}
+            </td>
+            <td class="py-3 px-4 font-mono text-xs text-[#f7b943]">
+              #${p.seed}
+            </td>
+            <td class="py-3 px-4 font-bold text-sm text-slate-100 font-mono">
+              ${p.name}
+            </td>
+            <td class="py-3 px-4 font-mono text-xs text-slate-400">
+              ${p.year}
+            </td>
+            <td class="py-3 px-4 text-xs text-[#38bdf8] font-medium">
+              ${p.character}
+            </td>
+            <td class="py-3 px-4 text-center font-mono text-xs font-bold text-slate-200">
+              ${getRecord(p)}
+            </td>
+            <td class="py-3 px-4 text-right">
+              ${statusBadge}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateMetrics() {
+      const allMatches = Object.values(state.matches);
+      const completedCount = allMatches.filter(m => m.completed).length;
+      const liveCount = allMatches.filter(m => m.isLive).length;
+      const totalCount = allMatches.length;
+
+      document.getElementById('metric-completed').innerText = `${completedCount}/${totalCount}`;
+      document.getElementById('metric-live').innerText = liveCount;
+      document.getElementById('metric-total').innerText = totalCount;
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. SVG CONNECTORS
+    // -------------------------------------------------------------------------
+    function drawConnectors() {
+      const svg = document.getElementById('bracket-svg');
+      if (!svg) return;
+      if (state.bracketLineMode === 'off') {
+        svg.innerHTML = '';
+        return;
+      }
+
+      const canvas = document.getElementById('bracket-canvas');
+      if (!canvas) return;
+
+      const z = Math.max(0.2, Number(state.zoom) || 1.0);
+
+      const w = Math.max(canvas.scrollWidth, canvas.offsetWidth, 2900);
+      const h = Math.max(canvas.scrollHeight, canvas.offsetHeight, 2200);
+      svg.style.width = w + 'px';
+      svg.style.height = h + 'px';
+      svg.setAttribute('width', w);
+      svg.setAttribute('height', h);
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+
+      const canvasRect = canvas.getBoundingClientRect();
+      let skippedDueToLayout = false;
+
+      const links = [
+        // WINNERS R1 -> QUARTERFINALS
+        { from: 'UB1', to: 'M7', slot: 1 },
+        { from: 'M1', to: 'M7', slot: 2 },
+        { from: 'M2', to: 'M8', slot: 1 },
+        { from: 'M3', to: 'M8', slot: 2 },
+        { from: 'UB2', to: 'M9', slot: 1 },
+        { from: 'M4', to: 'M9', slot: 2 },
+        { from: 'M5', to: 'M10', slot: 1 },
+        { from: 'M6', to: 'M10', slot: 2 },
+
+        // WINNERS QUARTERFINALS -> SEMIFINALS
+        { from: 'M7', to: 'M17', slot: 1 },
+        { from: 'M8', to: 'M17', slot: 2 },
+        { from: 'M9', to: 'M18', slot: 1 },
+        { from: 'M10', to: 'M18', slot: 2 },
+
+        // WINNERS SEMIFINALS -> WINNERS FINALS
+        { from: 'M17', to: 'M23', slot: 1 },
+        { from: 'M18', to: 'M23', slot: 2 },
+
+        // WINNERS FINALS -> GRAND FINALS
+        { from: 'M23', to: 'M26', slot: 1, crossSection: true },
+
+        // LOSERS R1 -> LOSERS R2
+        { from: 'M11', to: 'M14', slot: 2 },
+        { from: 'M12', to: 'M16', slot: 2 },
+
+        // LOSERS R2 -> LOSERS R3
+        { from: 'M13', to: 'M19', slot: 1 },
+        { from: 'M14', to: 'M19', slot: 2 },
+        { from: 'M15', to: 'M20', slot: 1 },
+        { from: 'M16', to: 'M20', slot: 2 },
+
+        // LOSERS R3 -> LOSERS QUARTERS
+        { from: 'M19', to: 'M21', slot: 2 },
+        { from: 'M20', to: 'M22', slot: 2 },
+
+        // LOSERS QUARTERS -> LOSERS SEMIS
+        { from: 'M21', to: 'M24', slot: 1 },
+        { from: 'M22', to: 'M24', slot: 2 },
+
+        // LOSERS SEMIS -> LOSERS FINALS
+        { from: 'M24', to: 'M25', slot: 2 },
+
+        // LOSERS FINALS -> GRAND FINALS
+        { from: 'M25', to: 'M26', slot: 2, crossSection: true },
+
+        // GRAND FINALS 1 -> GRAND FINALS RESET (MATCH 27)
+        ...(state.grandFinalsResetNeeded || (state.matches && state.matches['M27'] && state.matches['M27'].p1) ? [{ from: 'M26', to: 'M27', slot: 1 }] : [])
+      ];
+
+      let svgContent = `
+        <defs>
+          <filter id="tekken-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#00f0ff" flood-opacity="0.85"/>
+          </filter>
+          <filter id="tekken-glow-gold" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#f7b943" flood-opacity="0.95"/>
+          </filter>
+          <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#00f0ff" stop-opacity="1"/>
+          </linearGradient>
+          <linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#fbbf24" stop-opacity="1"/>
+          </linearGradient>
+        </defs>
+      `;
+
+      links.forEach(link => {
+        const fromEl = document.getElementById(`card-${link.from}`);
+        const toEl = document.getElementById(`card-${link.to}`);
+
+        if (!fromEl || !toEl) return;
+
+        const fromRect = fromEl.getBoundingClientRect();
+        const toRect = toEl.getBoundingClientRect();
+        if (fromRect.width === 0 || toRect.width === 0 || canvasRect.width === 0) {
+          skippedDueToLayout = true;
+          return;
+        }
+
+        const x1 = (fromRect.right - canvasRect.left) / z;
+        const y1 = (fromRect.top + fromRect.height / 2 - canvasRect.top) / z;
+
+        const x2 = (toRect.left - canvasRect.left) / z;
+        const slotOffset = link.slot === 1 ? toRect.height * 0.35 : toRect.height * 0.70;
+        const y2 = (toRect.top + slotOffset - canvasRect.top) / z;
+
+        if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) return;
+
+        const fromMatch = state.matches[link.from];
+        const isActive = fromMatch && fromMatch.completed;
+        const strokeClass = isActive ? 'connector-active' : 'connector-inactive';
+
+        const strokeColor = isActive ? '#f7b943' : '#00f0ff';
+        const strokeWidth = isActive ? '3.5' : '2.4';
+        const strokeDash = isActive ? '' : 'stroke-dasharray="6 4"';
+        const opacity = isActive ? '1' : '0.95';
+        const filterAttr = isActive ? 'filter="url(#tekken-glow-gold)"' : 'filter="url(#tekken-glow)"';
+
+        let d;
+        if (link.crossSection || x2 < x1) {
+          const midX = x1 + 50;
+          const entryX = Math.max(20, x2 - 50);
+          const midY = (y1 + y2) / 2;
+          d = `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${midY}, ${(x1 + x2) / 2} ${midY} S ${entryX} ${y2}, ${x2} ${y2}`;
+        } else {
+          const dx = Math.max(30, (x2 - x1) * 0.55);
+          d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+        }
+
+        svgContent += `<path d="${d}" class="connector-line ${strokeClass}" fill="none" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-opacity="${opacity}" ${strokeDash} ${filterAttr} stroke-linecap="round" stroke-linejoin="round" />`;
+      });
+
+      svg.innerHTML = svgContent;
+
+      if (skippedDueToLayout) {
+        [50, 150, 300, 600].forEach(delay => {
+          setTimeout(() => {
+            const c = document.getElementById('bracket-canvas');
+            if (c && c.offsetWidth > 0 && appState.activeSport === 'tekken8' && (state.activeView === 'full' || !state.activeView)) {
+              drawConnectors();
+            }
+          }, delay);
+        });
+      }
+
+      // Attach ResizeObserver to keep bracket lines permanently synced
+      if (!window._tekkenResizeObserver && window.ResizeObserver) {
+        const c = document.getElementById('bracket-canvas');
+        if (c) {
+          window._tekkenResizeObserver = new ResizeObserver(() => {
+            if (appState.activeSport === 'tekken8' && (!state.activeView || state.activeView === 'full')) {
+              drawConnectors();
+            }
+          });
+          window._tekkenResizeObserver.observe(c);
+        }
+      }
+    }
+
+    function zoomBracket(delta) {
+      state.zoom = Math.max(0.5, Math.min(1.5, (state.zoom || 1.0) + delta));
+      const pct = `${Math.round(state.zoom * 100)}%`;
+      const tekkenTxt = document.getElementById('zoom-level-text');
+      if (tekkenTxt) tekkenTxt.innerText = pct;
+      const uniTxt = document.getElementById('uni-zoom-level-text');
+      if (uniTxt) uniTxt.innerText = pct;
+
+      const canvas = document.getElementById('bracket-canvas');
+      if (canvas) {
+        canvas.style.transform = `scale(${state.zoom})`;
+      }
+      const uniCanvas = document.getElementById('uni-bracket-canvas');
+      if (uniCanvas) {
+        uniCanvas.style.transform = `scale(${state.zoom})`;
+      }
+      drawConnectors();
+      if (typeof drawUniConnectorsForCurrentSport === 'function') {
+        drawUniConnectorsForCurrentSport();
+      }
+    }
+
+    function resetZoomBracket() {
+      state.zoom = 1.0;
+      const tekkenTxt = document.getElementById('zoom-level-text');
+      if (tekkenTxt) tekkenTxt.innerText = '100%';
+      const uniTxt = document.getElementById('uni-zoom-level-text');
+      if (uniTxt) uniTxt.innerText = '100%';
+
+      const canvas = document.getElementById('bracket-canvas');
+      if (canvas) {
+        canvas.style.transform = `scale(1)`;
+      }
+      const uniCanvas = document.getElementById('uni-bracket-canvas');
+      if (uniCanvas) {
+        uniCanvas.style.transform = `scale(1)`;
+      }
+      drawConnectors();
+      if (typeof drawUniConnectorsForCurrentSport === 'function') {
+        drawUniConnectorsForCurrentSport();
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. TAB NAVIGATION & VIEW SWITCHING
+    // -------------------------------------------------------------------------
+    function switchView(viewName) {
+      state.activeView = viewName;
+      
+      document.querySelectorAll('.view-panel').forEach(panel => {
+        panel.classList.add('hidden');
+      });
+
+      document.querySelectorAll('#view-tekken8 .nav-tab, [id^="tab-"]').forEach(tab => {
+        tab.classList.remove('bg-[#102d52]', 'text-[#f7b943]', 'border-[#f7b943]/40', 'border', 'shadow-sm', 'font-semibold', 'active-tab');
+        tab.classList.add('text-slate-400');
+      });
+
+      const targetView = document.getElementById(`view-${viewName}`);
+      if (targetView) targetView.classList.remove('hidden');
+
+      const targetTab = document.getElementById(`tab-${viewName}`);
+      if (targetTab) {
+        targetTab.classList.add('bg-[#102d52]', 'text-[#f7b943]', 'border', 'border-[#f7b943]/40', 'shadow-sm', 'font-semibold', 'active-tab');
+        targetTab.classList.remove('text-slate-400');
+      }
+
+      const zoomControls = document.getElementById('bracket-zoom-controls');
+      if (zoomControls) {
+        if (viewName === 'full') {
+          zoomControls.classList.remove('hidden');
+          [0, 50, 150, 300].forEach(delay => setTimeout(() => drawConnectors(), delay));
+        } else {
+          zoomControls.classList.add('hidden');
+        }
+      }
+
+      if (viewName === 'winners') renderFocusedWinners();
+      if (viewName === 'losers') renderFocusedLosers();
+      if (viewName === 'finals') renderFinalsSpotlight();
+      if (viewName === 'matches') renderMatchList();
+      if (viewName === 'schedule') renderScheduleView();
+      if (viewName === 'standings') renderStandings();
+      if (viewName === 'control' && typeof renderControlRoom === 'function') renderControlRoom();
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. MATCH MODAL / QUICK EDIT
+    // -------------------------------------------------------------------------
+    function openMatchModal(matchId) {
+      activeModalMatchId = matchId;
+      if (typeof activeControlMatchId !== 'undefined') activeControlMatchId = matchId;
+      const match = state.matches[matchId];
+      if (!match) return;
+
+      document.getElementById('modal-match-code').innerText = match.code;
+      document.getElementById('modal-match-format').innerText = `Best of ${match.bestOf} (First to ${match.targetWins})`;
+      document.getElementById('modal-match-title').innerText = `${match.label} - Score & Settings`;
+
+      const container = document.getElementById('modal-competitors-box');
+      
+      const renderModalPlayer = (player, score, slotNum) => {
+        if (!player) {
+          return `
+            <div class="p-4 rounded-xl border border-dashed border-[#2c4f75]/60 bg-[#06162f]/60 text-center text-slate-400 font-mono text-sm">
+              Competitor Awaiting Progression (TBD)
+            </div>
+          `;
+        }
+
+        if (player.isBye) {
+          return `
+            <div class="p-4 rounded-xl border border-dashed border-[#2c4f75]/60 bg-[#06162f]/60 text-center text-slate-400 font-mono text-sm">
+              ${player.name} (Automatic Bye)
+            </div>
+          `;
+        }
+
+        const isByeMatch = !!(match.p1?.isBye || match.p2?.isBye || match.id === 'UB1' || match.id === 'UB2');
+        const charOptions = TEKKEN_CHARACTERS.map(c => `
+          <option value="${c}" ${player.character === c ? 'selected' : ''}>${c}</option>
+        `).join('');
+
+        return `
+          <div class="p-4 rounded-xl border border-[#2c4f75] bg-[#06162f]/80 space-y-3 shadow-inner">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-xs px-2 py-0.5 rounded bg-[#081d38] text-[#f7b943] border border-[#2c4f75] font-semibold">#${player.seed}</span>
+                <span class="font-bold text-sm text-white">${player.name}</span>
+                <span class="text-xs text-slate-400 font-mono">(${player.year})</span>
+              </div>
+              ${!IS_STUDENT_MODE && !isByeMatch ? `
+              <button onclick="selectMatchWinner('${match.id}', ${slotNum}); closeMatchModal();" class="px-2.5 py-1 rounded-lg bg-cyan-950 hover:bg-cyan-900 border border-cyan-700 text-xs font-mono font-bold text-cyan-300 transition-all">
+                Win Set
+              </button>
+              ` : ''}
+            </div>
+
+            <div class="flex items-center justify-between gap-4 pt-1">
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-slate-400">Tekken 8 Main:</span>
+                ${!IS_STUDENT_MODE ? `
+                <select onchange="updatePlayerCharacter('${player.id}', this.value)" class="bg-[#0a2344] border border-[#2c4f75] rounded px-2 py-1 text-xs text-cyan-300 font-mono focus:outline-none focus:border-[#38bdf8]">
+                  ${charOptions}
+                </select>
+                ` : `
+                <span class="font-mono font-bold text-cyan-300">${player.character || 'Jin'}</span>
+                `}
+              </div>
+
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-400">Score:</span>
+                <div class="flex items-center gap-1">
+                  ${!IS_STUDENT_MODE && !isByeMatch ? `
+                  <button onclick="adjustScore('${match.id}', ${slotNum}, -1); openMatchModal('${match.id}')" class="w-6 h-6 rounded bg-[#0a2344] hover:bg-[#102d52] border border-[#2c4f75] text-sm font-mono font-bold text-slate-200 transition-all">-</button>
+                  ` : ''}
+                  <span class="w-8 text-center font-mono font-bold text-base text-[#f7b943]">${score}</span>
+                  ${!IS_STUDENT_MODE && !isByeMatch ? `
+                  <button onclick="adjustScore('${match.id}', ${slotNum}, 1); openMatchModal('${match.id}')" class="w-6 h-6 rounded bg-[#0a2344] hover:bg-[#102d52] border border-[#2c4f75] text-sm font-mono font-bold text-slate-200 transition-all">+</button>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      };
+
+      container.innerHTML = `
+        ${renderModalPlayer(match.p1, match.score1, 1)}
+        <div class="text-center font-mono text-xs text-[#f7b943] font-bold">VS</div>
+        ${renderModalPlayer(match.p2, match.score2, 2)}
+      `;
+
+      document.getElementById('match-modal').classList.remove('hidden');
+    }
+
+    function closeMatchModal() {
+      document.getElementById('match-modal').classList.add('hidden');
+      activeModalMatchId = null;
+      renderAllViews();
+    }
+
+    function resetCurrentMatchScore() {
+      if (IS_STUDENT_MODE) return;
+      if (!activeModalMatchId) return;
+      const match = state.matches[activeModalMatchId];
+      if (match) {
+        match.score1 = 0;
+        match.score2 = 0;
+        match.completed = false;
+        match.winner = null;
+        propagateBracket();
+        openMatchModal(activeModalMatchId);
+        showToast(`Reset score for ${match.code}`);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. SIMULATION, EXPORT & TOURNAMENT RESET
+    // -------------------------------------------------------------------------
+    function simulateNextMatch() {
+      if (IS_STUDENT_MODE) return;
+      const readyMatch = Object.values(state.matches).find(m => 
+        !m.completed && m.p1 && m.p2 && !m.p1.isBye && !m.p2.isBye
+      );
+
+      if (!readyMatch) {
+        showToast('All playable matches are already completed!');
+        return;
+      }
+
+      const winnerSlot = Math.random() > 0.5 ? 1 : 2;
+      const targetWins = readyMatch.targetWins;
+      const loserScore = Math.floor(Math.random() * targetWins);
+
+      const simStart = getTourneyTimeNow();
+      if (!readyMatch.actualStartTime) {
+        readyMatch.actualStartMins = simStart;
+        readyMatch.actualStartTime = minsToTimeString(simStart);
+      }
+
+      if (winnerSlot === 1) {
+        readyMatch.score1 = targetWins;
+        readyMatch.score2 = loserScore;
+        readyMatch.winner = 1;
+      } else {
+        readyMatch.score1 = loserScore;
+        readyMatch.score2 = targetWins;
+        readyMatch.winner = 2;
+      }
+      readyMatch.completed = true;
+
+      const dur = 8;
+      readyMatch.durationMins = dur;
+
+      if (state.clockMode === 'sim' || (state.clockMode === 'auto' && !isVenueHoursNow())) {
+        state.simClockMins = (state.simClockMins || 0) + dur;
+      }
+      readyMatch.actualEndTime = minsToTimeString(getTourneyTimeNow());
+
+      playElectricSound();
+      propagateBracket();
+      renderAllViews();
+      showToast(`${readyMatch.code}: ${winnerSlot === 1 ? readyMatch.p1.name : readyMatch.p2.name} won!`);
+    }
+
+    function confirmResetTournament() {
+      if (IS_STUDENT_MODE) return;
+      document.getElementById('reset-modal').classList.remove('hidden');
+    }
+
+    function closeResetModal() {
+      document.getElementById('reset-modal').classList.add('hidden');
+    }
+
+    function executeResetTournament() {
+      if (IS_STUDENT_MODE) return;
+      safeRemoveStorage(STORAGE_KEY);
+      initializeTournamentState();
+      renderAllViews();
+      closeResetModal();
+      showToast('Tournament bracket reset to initial seed state');
+    }
+
+    function exportBracketJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `MEODL_Tekken_Bracket_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      toggleExportDropdown();
+      showToast('Exported tournament JSON file');
+    }
+
+    function triggerJSONImport() {
+      document.getElementById('json-file-input').click();
+      toggleExportDropdown();
+    }
+
+    function handleJSONUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.matches && imported.players) {
+            state = imported;
+            propagateBracket();
+            renderAllViews();
+            showToast('Tournament state imported successfully!');
+          } else {
+            showToast('Invalid JSON tournament structure');
+          }
+        } catch (err) {
+          showToast('Failed to parse JSON file');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function toggleExportDropdown() {
+      const dd = document.getElementById('export-dropdown');
+      if (dd) dd.classList.toggle('hidden');
+    }
+
+    function copyStandingsClipboard() {
+      let text = "=== MEODL ESPORTS // TEKKEN 8 TOURNAMENT STANDINGS (MES UPHSD) ===\n\n";
+      const rows = document.querySelectorAll('#standings-tbody tr');
+      rows.forEach(r => {
+        const cols = r.querySelectorAll('td');
+        if (cols.length >= 6) {
+          text += `${cols[0].innerText.trim().padEnd(10)} | ${cols[2].innerText.trim().padEnd(25)} | ${cols[3].innerText.trim().padEnd(10)} | Main: ${cols[4].innerText.trim().padEnd(12)} | ${cols[5].innerText.trim()}\n`;
+        }
+      });
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Standings copied to clipboard!');
+      }).catch(() => {
+        showToast('Standings copied!');
+      });
+    }
+
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = "bg-[#0a2344] border border-[#2c4f75] shadow-card text-[#f7b943] px-4 py-2.5 rounded-xl text-xs font-mono flex items-center gap-2 pointer-events-auto transition-opacity duration-300";
+      toast.innerHTML = `<span>⚡</span> <span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 350);
+      }, 3000);
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. APP BOOTSTRAP
+    // -------------------------------------------------------------------------
+    function initApp() {
+      const saved = safeGetStorage(STORAGE_KEY);
+      let loaded = false;
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.matches && parsed.players && parsed.matches['M1']) {
+            state = Object.assign({
+              players: JSON.parse(JSON.stringify(INITIAL_PLAYERS)),
+              matches: {},
+              grandFinalsResetNeeded: false,
+              activeView: 'full',
+              matchFilter: 'all',
+              matchSearch: '',
+              soundEnabled: true,
+              zoom: 1.0,
+              bracketLineMode: 'front',
+              clockMode: 'auto',
+              simClockMins: 0
+            }, parsed);
+            state.zoom = Math.max(0.2, Number(state.zoom) || 1.0);
+            if (!state.bracketLineMode || state.bracketLineMode === 'off') {
+              state.bracketLineMode = 'front';
+            }
+            propagateBracket();
+            loaded = true;
+          }
+      if (loaded && state.matches) {
+        for (const m of Object.values(state.matches)) {
+          m.bestOf = 3;
+          m.targetWins = 2;
+          const sched = SCHEDULE_TARGETS[m.id];
+          if (sched) {
+            m.scheduledTime = sched.time;
+            m.targetCallMins = sched.targetMins;
+          }
+        }
+        safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+      }
+        } catch(e) {}
+      }
+
+      if (!loaded) {
+        initializeTournamentState();
+      }
+
+      renderAllViews();
+      switchView('full');
+
+      window.addEventListener('resize', () => {
+        drawConnectors();
+        if (typeof drawUniConnectorsForCurrentSport === 'function') {
+          drawUniConnectorsForCurrentSport();
+        }
+      });
+
+      window.addEventListener('click', (e) => {
+        const exportBtn = e.target.closest('#export-dropdown') || e.target.closest('button[onclick="toggleExportDropdown()"]');
+        if (!exportBtn) {
+          const dd = document.getElementById('export-dropdown');
+          if (dd && !dd.classList.contains('hidden')) dd.classList.add('hidden');
+        }
+      });
+    }
+
+
+    // -------------------------------------------------------------------------
+    // 10. ENHANCED OPERATOR LAYER
+    // -------------------------------------------------------------------------
+// Enhanced base wiring
+    const MATCH_PRIORITY = [
+      'UB1', 'M1', 'M2', 'M3', 'UB2', 'M4', 'M5', 'M6',
+      'M11', 'M12',
+      'M7', 'M8', 'M9', 'M10',
+      'M13', 'M14', 'M15', 'M16',
+      'M19', 'M20',
+      'M17', 'M18',
+      'M21', 'M22',
+      'M24',
+      'M23',
+      'M25',
+      'M26',
+      'M27'
+    ];
+    let activeControlMatchId = null;
+
+    function getRankForPlayerSafe(p) {
+      if (!p || p.isBye) return 'Eliminated';
+      const eliminated = Object.values(state.matches).some(m => {
+        if (!m.completed || !m.winner) return false;
+        const loser = m.winner === 1 ? m.p2 : m.p1;
+        return loser?.id === p.id && MATCH_DEFINITIONS[m.id]?.lossDest === null;
+      });
+      return eliminated ? 'Eliminated' : 'Active';
+    }
+    function isPlayableMatch(m){return !!(m&&!m.completed&&m.p1&&m.p2&&!m.p1.isBye&&!m.p2.isBye)}
+    function getReadyMatches(){return MATCH_PRIORITY.map(id=>state.matches[id]).filter(isPlayableMatch)}
+    function getNextReadyMatch(){const live=MATCH_PRIORITY.map(id=>state.matches[id]).find(m=>m?.isLive&&!m.completed);return live||getReadyMatches()[0]||null}
+    function openNextReadyMatch(){const next=getNextReadyMatch();if(!next){switchView('control');showToast('No ready set is currently available.');return}activeControlMatchId=next.id;switchView('control');renderControlRoom();openMatchModal(next.id)}
+    function toggleMatchLive(matchId){const m=state.matches[matchId];if(!m||!isPlayableMatch(m))return;if(!m.isLive){Object.values(state.matches).forEach(x=>{if(x.id!==matchId)x.isLive=false});m.isLive=true;const nowM=getTourneyTimeNow();if(!m.actualStartTime){m.actualStartMins=nowM;m.actualStartTime=minsToTimeString(nowM);}showToast(`${m.code} is now LIVE.`)}else{m.isLive=false;showToast(`${m.code} removed from LIVE.`)}safeSetStorage(STORAGE_KEY,JSON.stringify(state));renderAllViews();if(activeModalMatchId===matchId)openMatchModal(matchId)}
+    function toggleActiveMatchLive(){if(activeControlMatchId)toggleMatchLive(activeControlMatchId);renderControlRoom()}
+    function openActiveControlMatch(){if(activeControlMatchId)openMatchModal(activeControlMatchId)}
+    function resetActiveControlMatch(){if(!activeControlMatchId)return;const m=state.matches[activeControlMatchId];if(!m)return;m.score1=0;m.score2=0;m.winner=null;m.completed=false;m.isLive=false;propagateBracket();renderAllViews();renderControlRoom();showToast(`${m.code} reset.`)}
+    function renderControlConsole(){
+      const c=document.getElementById('control-console'),t=document.getElementById('control-match-title'),b=document.getElementById('control-live-btn'),s=document.getElementById('control-match-status');if(!c||!t||!b||!s)return;
+      let m=activeControlMatchId?state.matches[activeControlMatchId]:null;if(!m||(!m.p1&&!m.p2))m=getNextReadyMatch();if(!m){t.textContent='No playable match available';s.textContent='STANDBY';c.innerHTML='<div class="md:col-span-3 rounded-2xl border border-dashed border-[#2c4f75] p-10 text-center text-sm text-slate-400">Complete the current progression to unlock the next set.</div>';b.textContent='Start Live';return}
+      activeControlMatchId=m.id;t.textContent=`${m.code} • ${m.label}`;s.textContent=m.completed?'COMPLETED':(m.isLive?'LIVE':(isPlayableMatch(m)?'READY':'WAITING'));s.className=`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold border ${m.completed?'bg-cyan-950 text-cyan-300 border-cyan-800':m.isLive?'bg-emerald-950 text-emerald-300 border-emerald-800 live-pulse':isPlayableMatch(m)?'bg-sky-950 text-sky-300 border-sky-800':'bg-[#081d38] text-slate-300 border-[#2c4f75]'}`;b.textContent=m.isLive?'Stop Live':'Start Live';
+      const card=(p,slot)=>{if(!p)return '<div class="player-versus-card p-5 flex items-center justify-center text-slate-400 font-mono text-xs">TBD</div>';const w=m.winner===slot;const score=slot===1?m.score1:m.score2;return `<div class="player-versus-card p-5 flex flex-col justify-between ${w?'border-cyan-500/35 bg-cyan-950/10':''}"><div class="flex items-center justify-between"><span class="text-[9px] font-mono uppercase tracking-[.15em] text-slate-400">Player ${slot}</span><span class="px-2 py-0.5 rounded-full text-[9px] font-mono bg-[#081d38] border border-[#2c4f75] text-[#f7b943]">#${p.seed}</span></div><div class="mt-3 min-w-0"><div class="text-lg sm:text-xl font-extrabold text-white truncate ${w?'text-cyan-300':''}">${p.name}</div><div class="mt-1 flex items-center gap-2 text-[10px] text-slate-400 font-mono"><span>${p.year}</span><span>•</span><span class="text-sky-400">${p.character||'No Pick'}</span></div></div><div class="mt-4 flex items-end justify-between gap-3"><div class="text-5xl font-black num-mono ${w?'text-cyan-300':'text-white'}">${score}</div>${!m.completed?`<div class="flex gap-1.5"><button class="score-button" onclick="adjustScore('${m.id}',${slot},-1)">−</button><button class="score-button" onclick="adjustScore('${m.id}',${slot},1)">+</button></div>`:'<span class="text-[10px] font-mono text-[#f7b943]">SET COMPLETE</span>'}</div></div>`};
+      c.innerHTML=`${card(m.p1,1)}<div class="flex md:flex-col items-center justify-center gap-2 py-2"><div class="text-[9px] font-mono uppercase tracking-[.18em] text-slate-400 font-bold">Best of ${m.bestOf}</div><div class="w-10 h-10 rounded-full border border-[#2c4f75] bg-[#06162f] flex items-center justify-center text-[10px] font-black text-[#f7b943]">VS</div><button class="command-button px-3 py-2 rounded-lg text-[10px] font-bold ${m.completed?'opacity-50 pointer-events-none':''}" onclick="selectMatchWinner('${m.id}',1)">P1 Wins</button><button class="command-button px-3 py-2 rounded-lg text-[10px] font-bold ${m.completed?'opacity-50 pointer-events-none':''}" onclick="selectMatchWinner('${m.id}',2)">P2 Wins</button></div>${card(m.p2,2)}`;
+    }
+    function renderControlQueue(){const c=document.getElementById('control-queue'),count=document.getElementById('queue-count');if(!c)return;const q=getReadyMatches();if(count)count.textContent=`${q.length} ready`;c.innerHTML=q.length?q.slice(0,6).map((m,i)=>`<button class="queue-item w-full text-left rounded-xl border border-[#2c4f75]/80 bg-[#0a2344]/80 hover:bg-[#102d52] p-3 transition-colors" onclick="activeControlMatchId='${m.id}';renderControlRoom()"><div class="flex items-center justify-between gap-2"><span class="text-[10px] font-mono font-bold text-cyan-400">${String(i+1).padStart(2,'0')} • ${m.code}</span><span class="text-[9px] font-mono text-slate-400">BO${m.bestOf}</span></div><div class="mt-1 text-xs font-semibold text-white truncate">${m.p1.name} <span class="text-slate-400 font-mono">vs</span> ${m.p2.name}</div><div class="mt-1 text-[9px] font-mono text-slate-400">${m.label}</div></button>`).join(''):'<div class="rounded-xl border border-dashed border-[#2c4f75] p-8 text-center text-xs text-slate-400 font-mono">No sets are ready.</div>'}
+    function renderControlRoom(){renderControlConsole();renderControlQueue();const g=document.getElementById('control-state-grid');if(g){const a=Object.values(state.matches),r=a.filter(isPlayableMatch).length,l=a.filter(m=>m.isLive).length,d=a.filter(m=>m.completed).length;g.innerHTML=[['READY',r,'text-sky-300'],['LIVE',l,'text-emerald-300'],['DONE',d,'text-cyan-300'],['GF RESET',state.grandFinalsResetNeeded?'YES':'NO',state.grandFinalsResetNeeded?'text-[#f7b943]':'text-slate-400']].map(x=>`<div class="rounded-xl border border-[#2c4f75]/80 bg-[#0a2344]/60 p-3"><div class="text-[9px] font-mono tracking-[.15em] text-slate-400">${x[0]}</div><div class="mt-1 text-base font-extrabold ${x[2]}">${x[1]}</div></div>`).join('')}const route=document.getElementById('control-route');if(route){const m=activeControlMatchId?state.matches[activeControlMatchId]:getNextReadyMatch();route.innerHTML=m?`<div class="flex items-center gap-2 flex-wrap"><span class="px-2 py-1 rounded bg-cyan-950/50 text-cyan-300 border border-cyan-900/60 font-mono">${m.code}</span><span class="text-slate-400">→</span><span class="text-slate-200">Winner advances automatically</span></div><div class="mt-2 text-[11px] text-slate-400 font-mono">${m.p1?.name||'TBD'} vs ${m.p2?.name||'TBD'} • ${m.label} • Best of ${m.bestOf}</div>`:'No active route.'}}
+    // switchView enhanced handled in main function
+    // openMatchModal enhanced handled in main function
+    function togglePresentationMode(){document.body.classList.toggle('presentation-mode');const on=document.body.classList.contains('presentation-mode');showToast(on?'Presentation mode enabled.':'Presentation mode disabled.');if(on)switchView('full')}
+    async function toggleFullscreen(){try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){showToast('Fullscreen is unavailable in this browser context.')}}
+    function updateEnhancedMetrics(){const a=Object.values(state.matches),r=a.filter(isPlayableMatch).length,l=a.filter(m=>m.isLive).length,d=a.filter(m=>m.completed).length,t=a.length,n=getNextReadyMatch(),set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};set('hud-live',l);set('hud-completed',d);set('hud-ready',r);set('hud-total',t);set('hud-next',n?`${n.code} • ${n.p1.name} vs ${n.p2.name}`:'No match currently ready')}
+    // renderAllViews enhanced handled in main function
+    document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const k=e.key.toLowerCase();if(k==='n'){e.preventDefault();openNextReadyMatch()}else if(k==='p'){e.preventDefault();togglePresentationMode()}else if(k==='f'){e.preventDefault();toggleFullscreen()}else if(e.key==='/'){e.preventDefault();switchView('matches');setTimeout(()=>document.getElementById('match-search')?.focus(),40)}else if(e.key==='Escape'){document.getElementById('match-modal')?.classList.add('hidden');document.getElementById('reset-modal')?.classList.add('hidden')}});
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+
+
+// -------------------------------------------------------------------------
+    // 11. SCHEDULE DASHBOARD & REAL-TIME PACING SYSTEM
+    // -------------------------------------------------------------------------
+    function updateScheduleMetrics() {
+      const data = calculateScheduleMetrics();
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      const setHTML = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
+
+      // 1. Sub-header HUD strip
+      set('sched-hud-clock', data.currentTimeStr);
+      setHTML('sched-hud-status', `<span class="px-2 py-0.5 rounded ${data.statusColorClass}">${data.status}</span>`);
+      set('sched-hud-pace', `${data.paceDiff >= 0 ? '+' : ''}${data.paceDiff}m`);
+      set('sched-hud-finish', data.estFinishTimeStr);
+
+      if (data.activeMatch) {
+        set('sched-hud-curr-code', data.activeMatch.code);
+        set('sched-hud-target-time', `(Call: ${data.activeSchedTime}${data.actualStartTime !== '--' ? ' • Start: ' + data.actualStartTime : ''})`);
+        set('sched-hud-curr-names', `${data.activeMatch.p1?.name || 'TBD'} vs ${data.activeMatch.p2?.name || 'TBD'}`);
+      } else {
+        set('sched-hud-curr-code', '--');
+        set('sched-hud-target-time', '');
+        set('sched-hud-curr-names', 'Tournament Concluded');
+      }
+
+      if (data.nextMatch) {
+        const nextSched = SCHEDULE_TARGETS[data.nextMatch.id] || {};
+        set('sched-hud-next-code', data.nextMatch.code);
+        set('sched-hud-next-target', `(${nextSched.time || '--'})`);
+        set('sched-hud-next-names', `${data.nextMatch.p1?.name || 'TBD'} vs ${data.nextMatch.p2?.name || 'TBD'}`);
+      } else {
+        set('sched-hud-next-code', '--');
+        set('sched-hud-next-target', '');
+        set('sched-hud-next-names', 'No matches remaining');
+      }
+
+
+      // 3. Schedule View KPI Cards
+      set('sched-card-clock', data.currentTimeStr);
+      set('sched-card-clock-mode', (state.clockMode === 'live' || (state.clockMode === 'auto' && isVenueHoursNow())) ? '● Live System Time' : '⚡ Tourney Sim Clock');
+      setHTML('sched-card-status-pill', `<span class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold ${data.statusColorClass}">${data.status}</span>`);
+      set('sched-card-pace-delta', `${data.paceDiff >= 0 ? '+' : ''}${data.paceDiff}m ${data.paceDiff >= 0 ? 'ahead of schedule' : 'behind target'}`);
+
+      if (data.activeMatch) {
+        set('sched-card-current', `${data.activeMatch.code} (${data.activeMatch.p1?.name?.split(',')[0] || 'TBD'} vs ${data.activeMatch.p2?.name?.split(',')[0] || 'TBD'})`);
+        set('sched-card-current-time', `Target: ${data.activeSchedTime}${data.actualStartTime !== '--' ? ' • Started: ' + data.actualStartTime : ''}`);
+      } else {
+        set('sched-card-current', 'All Matches Complete');
+        set('sched-card-current-time', 'Champion Crowned');
+      }
+
+      if (data.nextMatch) {
+        const nextSched = SCHEDULE_TARGETS[data.nextMatch.id] || {};
+        set('sched-card-next', `${data.nextMatch.code} (${data.nextMatch.p1?.name?.split(',')[0] || 'TBD'} vs ${data.nextMatch.p2?.name?.split(',')[0] || 'TBD'})`);
+        set('sched-card-next-time', `Target: ${nextSched.time || '--'}`);
+      } else {
+        set('sched-card-next', 'None');
+        set('sched-card-next-time', '--');
+      }
+
+      set('sched-card-est-finish', data.estFinishTimeStr);
+      set('sched-card-buffer', data.minutesBufferToCutoff >= 0 ? `+${data.minutesBufferToCutoff}m buffer to 5:00 PM cutoff` : `${Math.abs(data.minutesBufferToCutoff)}m PAST 5:00 PM CUTOFF!`);
+      const bufferEl = document.getElementById('sched-card-buffer');
+      if (bufferEl) {
+        bufferEl.className = `mt-1 text-[10px] font-mono ${data.minutesBufferToCutoff >= 15 ? 'text-emerald-400' : (data.minutesBufferToCutoff >= 0 ? 'text-amber-400 font-bold' : 'text-red-400 font-black animate-pulse')}`;
+      }
+
+      const clockModeBtn = document.getElementById('clock-mode-btn');
+      if (clockModeBtn) {
+        clockModeBtn.textContent = (state.clockMode === 'live' || (state.clockMode === 'auto' && isVenueHoursNow())) ? '● Real Time' : '⚡ Tourney Sim';
+      }
+
+      // 4. Presentation Mode Overlay
+      set('pres-sched-clock', data.currentTimeStr);
+      setHTML('pres-sched-status', `<span class="${data.paceDiff >= 0 ? 'text-emerald-300' : 'text-amber-300'} font-bold">${data.status} (${data.paceDiff >= 0 ? '+' : ''}${data.paceDiff}m)</span>`);
+      set('pres-sched-finish', `Est: ${data.estFinishTimeStr}`);
+    }
+
+    function renderScheduleView() {
+      const tbody = document.getElementById('schedule-table-tbody');
+      if (!tbody) return;
+
+      const scheduleKeys = Object.keys(SCHEDULE_TARGETS);
+      const rowsHTML = scheduleKeys.map((key, index) => {
+        const item = SCHEDULE_TARGETS[key];
+        const match = state.matches[key];
+
+        if (item.isSetup) {
+          return `
+            <tr class="bg-amber-950/20 text-amber-300/90 font-mono text-xs border-y border-amber-800/40">
+              <td class="py-3 px-4 text-center font-bold">${item.order}</td>
+              <td class="py-3 px-4 font-bold">${item.time}</td>
+              <td class="py-3 px-4 font-bold">${item.code}</td>
+              <td class="py-3 px-4">4 mins</td>
+              <td class="py-3 px-4 font-bold" colspan="2">GRAND FINALS SETUP & COMPETITOR INTRODUCTIONS</td>
+              <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 rounded bg-amber-900/60 border border-amber-700/80 text-[10px]">TRANSITION</span></td>
+              <td class="py-3 px-4 text-right"><span class="text-slate-400 text-[10px]">STAGE READY</span></td>
+            </tr>
+          `;
+        }
+
+        if (!match) return '';
+
+        const isLive = match.isLive;
+        const isCompleted = match.completed;
+        const isReady = !isCompleted && match.p1 && match.p2 && !match.p1.isBye && !match.p2.isBye;
+
+        let statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-[#081d38] text-slate-300 border border-[#2c4f75]">SCHEDULED</span>';
+        let rowHighlight = '';
+
+        if (isCompleted) {
+          statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold">DONE</span>';
+          rowHighlight = 'bg-cyan-950/10';
+        } else if (isLive) {
+          statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-700 font-bold live-pulse">LIVE NOW</span>';
+          rowHighlight = 'bg-emerald-950/20 border-l-2 border-emerald-500';
+        } else if (isReady) {
+          statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-sky-950 text-sky-300 border border-sky-800 font-bold">READY ON DECK</span>';
+          rowHighlight = 'bg-sky-950/10';
+        }
+
+        const p1Name = match.p1 ? `${match.p1.name} (${match.p1.character || 'No Pick'})` : 'TBD';
+        const p2Name = match.p2 ? `${match.p2.name} (${match.p2.character || 'No Pick'})` : 'TBD';
+        const matchupStr = match.p1?.isBye ? `${match.p1.name} (Auto-Advance BYE)` : `${p1Name} <span class="text-slate-400 font-mono">vs</span> ${p2Name}`;
+
+        const actualStartDisplay = match.actualStartTime 
+          ? `<span class="text-emerald-400 font-mono font-bold">${match.actualStartTime}</span>${match.actualEndTime ? ' - ' + match.actualEndTime : ''}`
+          : `<span class="text-slate-500 font-mono">Not started</span>`;
+
+        return `
+          <tr class="hover:bg-[#102d52]/50 transition-colors ${rowHighlight}">
+            <td class="py-3 px-4 text-center font-mono text-slate-400 text-xs">${item.order}</td>
+            <td class="py-3 px-4 font-mono font-bold text-amber-300 text-xs">${item.time}</td>
+            <td class="py-3 px-4 font-mono font-bold text-cyan-300 text-xs cursor-pointer hover:underline" onclick="openMatchModal('${match.id}')">
+              ${match.code} <span class="text-slate-400 font-normal">(${match.label})</span>
+            </td>
+            <td class="py-3 px-4 font-mono text-xs text-slate-300">BO${match.bestOf} (${item.duration}m)</td>
+            <td class="py-3 px-4 text-xs font-medium text-slate-100">${matchupStr}</td>
+            <td class="py-3 px-4 text-xs">${actualStartDisplay}</td>
+            <td class="py-3 px-4 text-center">${statusBadge}</td>
+            <td class="py-3 px-4 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="activeControlMatchId='${match.id}';switchView('control');renderControlRoom()" class="command-button px-2.5 py-1 rounded text-[10px] font-semibold" title="Load into Control Console">
+                  Console
+                </button>
+                <button onclick="openMatchModal('${match.id}')" class="command-button primary px-2.5 py-1 rounded text-[10px] font-semibold" title="Open Scoreboard">
+                  Score
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      tbody.innerHTML = rowsHTML;
+    }
+
+    // Auto-tick schedule metrics every second
+    setInterval(() => {
+      try {
+        updateScheduleMetrics();
+      } catch(e) {}
+    }, 1000);
+  
+
+
+
+    // Window load handler
+    window.addEventListener('DOMContentLoaded', () => {
+      initApp();
+      switchView('full');
+      [0, 50, 150, 300, 600].forEach(delay => {
+        setTimeout(() => { drawConnectors(); }, delay);
+      });
+    });
+  </script>
+</body>
+</html>

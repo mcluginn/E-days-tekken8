@@ -1,0 +1,22 @@
+{
+  "name": "tekken8-engineering-days",
+  "version": "1.0.0",
+  "description": "Tekken 8 14-Player Double Elimination Championship - Engineering Days 2026",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build_vercel.cjs",
+    "start": "node server.js",
+    "serve": "node server.js"
+  },
+  "keywords": [
+    "tekken8",
+    "tournament-bracket",
+    "double-elimination",
+    "esports",
+    "meodl",
+    "uphsd"
+  ],
+  "author": "MEODL Committee",
+  "license": "MIT"
+}

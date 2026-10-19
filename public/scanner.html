@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MEODL Staff Scanner • Venue Presence Checkpoint</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    if (window.tailwind) {
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+            },
+            colors: {
+              obsidian: '#09090b',
+              cardBg: '#111317'
+            }
+          }
+        }
+      };
+    }
+  </script>
+
+  <!-- Universal iOS Safari & Android Video Inline Playback Polyfill -->
+  <script>
+    (function() {
+      // 1. Intercept document.createElement to ensure all <video> elements have inline attributes from birth
+      const origCreate = document.createElement.bind(document);
+      document.createElement = function(tagName, options) {
+        const el = origCreate(tagName, options);
+        if (typeof tagName === 'string' && tagName.toLowerCase() === 'video') {
+          el.setAttribute('playsinline', 'true');
+          el.setAttribute('webkit-playsinline', 'true');
+          el.setAttribute('autoplay', 'true');
+          el.setAttribute('muted', 'true');
+          el.playsInline = true;
+          el.muted = true;
+          el.autoplay = true;
+        }
+        return el;
+      };
+      // 2. Intercept HTMLVideoElement.prototype.play to ensure playsinline is present
+      if (typeof HTMLVideoElement !== 'undefined') {
+        const origPlay = HTMLVideoElement.prototype.play;
+        HTMLVideoElement.prototype.play = function() {
+          if (!this.hasAttribute('playsinline')) this.setAttribute('playsinline', 'true');
+          if (!this.hasAttribute('webkit-playsinline')) this.setAttribute('webkit-playsinline', 'true');
+          this.playsInline = true;
+          return origPlay.apply(this, arguments);
+        };
+      }
+    })();
+  </script>
+
+  <!-- Local Standalone Libraries with Resilient Multi-Network Fallback -->
+  <script src="./assets/html5-qrcode.min.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/html5-qrcode.min.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/meodl_data.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/meodl_data.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/meodl_attendance.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/meodl_attendance.js';document.head.appendChild(s);}"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #09090b;
+      color: #f4f4f5;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      touch-action: manipulation;
+    }
+    #reader {
+      position: relative;
+      width: 100% !important;
+      height: 100% !important;
+      overflow: hidden;
+      border-radius: 1rem;
+      background-color: #000;
+    }
+    #reader video {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain !important;
+      border-radius: 1rem !important;
+    }
+    /* Suppress iOS Safari WebKit native media controls and pause/play button */
+    #reader video::-webkit-media-controls,
+    #reader video::-webkit-media-controls-start-playback-button,
+    #reader video::-webkit-media-controls-play-button,
+    #reader video::-webkit-media-controls-enclosure,
+    #reader video::-webkit-media-controls-panel {
+      display: none !important;
+      -webkit-appearance: none !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    .scan-reticle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 230px;
+      height: 230px;
+      border: 2px solid #00f0ff;
+      border-radius: 1.25rem;
+      pointer-events: none;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+    }
+    .scan-reticle::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+      animation: scanLaser 2s ease-in-out infinite;
+    }
+    @keyframes scanLaser {
+      0%, 100% { top: 0; opacity: 0.8; }
+      50% { top: calc(100% - 3px); opacity: 1; }
+    }
+  </style>
+</head>
+<body class="bg-obsidian flex flex-col min-h-screen">
+
+  <!-- Top Bar -->
+  <header class="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-800/80 px-4 py-2.5 flex items-center justify-between shadow-md">
+    <div class="flex items-center gap-2.5">
+      <a href="index.html" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-mono font-bold text-zinc-300">
+        <span>↩</span> HUB
+      </a>
+      <div class="flex items-center gap-2">
+        <img src="./assets/mes_logo.png" alt="MES Seal" class="w-7 h-7 rounded-full bg-white p-0.5" />
+        <div>
+          <span class="text-xs font-bold text-white font-mono tracking-wide block leading-none">STAFF SCANNER</span>
+          <span id="header-presence-pill" class="text-[10px] font-mono text-cyan-400">Loading presence...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="flex items-center gap-2">
+      <button onclick="toggleAudio()" id="btn-audio" class="p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-cyan-400 text-xs" title="Toggle Beep Sound">
+        🔔
+      </button>
+      <button onclick="lockScanner()" class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px] font-mono text-amber-400 hover:text-white" title="Lock Scanner Session">
+        🔒 Lock
+      </button>
+      <a href="index.html" class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px] font-mono text-zinc-400 hover:text-white">
+        Hub
+      </a>
+    </div>
+  </header>
+
+  <!-- Offline-First Distributed Sync Status Bar -->
+  <div class="bg-zinc-950 border-b border-zinc-800/90 px-4 py-2 font-mono text-xs flex items-center justify-between gap-2 flex-wrap">
+    <!-- Status Badge -->
+    <div class="flex items-center gap-2">
+      <span id="sync-status-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-zinc-900 text-zinc-400 border-zinc-700 transition-all">
+        <span id="sync-status-dot" class="w-2 h-2 rounded-full bg-zinc-500"></span>
+        <span id="sync-status-text">INITIALIZING...</span>
+      </span>
+      <span id="sync-pending-tag" class="hidden text-[10px] text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-950/80 border border-amber-800/80">0 PENDING</span>
+      <span id="sync-last-time" class="text-[10px] text-zinc-500 hidden sm:inline">Last sync: --</span>
+    </div>
+
+    <!-- Actions: Sync Now, Device Config, Emergency Export -->
+    <div class="flex items-center gap-1.5">
+      <button onclick="triggerManualSync()" id="btn-sync-now" class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300 hover:text-white flex items-center gap-1 transition-colors" title="Force Sync Now">
+        <span id="sync-icon">🔄</span> Sync Now
+      </button>
+      <button onclick="openDeviceSettingsModal()" class="px-2 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300 hover:text-white transition-colors" title="Configure Device ID & Gate">
+        ⚙️
+      </button>
+      <div class="relative inline-block text-left">
+        <button onclick="toggleExportMenu()" class="px-2 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300 hover:text-white transition-colors" title="Export Offline Scans">
+          💾
+        </button>
+        <div id="export-menu" class="hidden absolute right-0 mt-1 w-44 rounded-xl bg-zinc-900 border border-zinc-700 shadow-2xl py-1 z-50 text-[11px]">
+          <button onclick="exportScansJSON(); toggleExportMenu();" class="w-full text-left px-3 py-1.5 hover:bg-zinc-800 text-zinc-200 flex items-center gap-2">
+            <span>📄</span> Export JSON
+          </button>
+          <button onclick="exportScansCSV(); toggleExportMenu();" class="w-full text-left px-3 py-1.5 hover:bg-zinc-800 text-zinc-200 flex items-center gap-2">
+            <span>📊</span> Export CSV
+          </button>
+          <button onclick="confirmResetAllAttendanceFromScanner(); toggleExportMenu();" class="w-full text-left px-3 py-1.5 hover:bg-red-950/80 text-red-400 flex items-center gap-2 border-t border-zinc-800">
+            <span>🗑️</span> Reset All Scans
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Engineering Day Sports Scanner Switcher Banner -->
+  <div class="bg-gradient-to-r from-amber-950/90 via-zinc-950 to-amber-950/90 border-b border-amber-600/40 px-4 py-2 flex items-center justify-between text-xs">
+    <div class="flex items-center gap-2 truncate">
+      <span class="text-base">🏀🏐</span>
+      <span class="text-amber-300 font-bold truncate">Engineering Day Sports Games</span>
+      <span class="text-zinc-400 hidden sm:inline text-[11px]">• 3 Basketball & 3 Volleyball Matches</span>
+    </div>
+    <a href="engday_scanner.html" class="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-[11px] shrink-0 transition-colors shadow flex items-center gap-1">
+      <span>Court Scanner</span>
+      <span>→</span>
+    </a>
+  </div>
+
+  <!-- Device Identity & Gate Settings Modal -->
+  <div id="device-settings-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-3xl p-5 shadow-2xl font-mono text-xs">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4">
+        <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <span>⚙️</span> Scanner Device Settings
+        </h3>
+        <button onclick="closeDeviceSettingsModal()" class="text-zinc-400 hover:text-white text-base">✕</button>
+      </div>
+
+      <div class="space-y-3 mb-5">
+        <div>
+          <label class="block text-[10px] text-zinc-400 mb-1">DEVICE ID (PERSISTENT):</label>
+          <input type="text" id="setting-device-id" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-cyan-300 font-bold uppercase focus:outline-none focus:border-cyan-500" />
+        </div>
+        <div>
+          <label class="block text-[10px] text-zinc-400 mb-1">MARSHAL NAME / ID:</label>
+          <input type="text" id="setting-marshal-id" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-white focus:outline-none focus:border-cyan-500" placeholder="e.g. John (Gate 1)" />
+        </div>
+        <div>
+          <label class="block text-[10px] text-zinc-400 mb-1">GATE CHECKPOINT:</label>
+          <input type="text" id="setting-gate-id" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-white focus:outline-none focus:border-cyan-500" placeholder="e.g. Gym Entrance A" />
+        </div>
+        <div>
+          <label class="block text-[10px] text-zinc-400 mb-1">CLOUD / SERVER URL (OPTIONAL):</label>
+          <input type="text" id="setting-server-url" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-cyan-300 font-mono text-[11px] placeholder-zinc-500 focus:outline-none focus:border-cyan-500" placeholder="e.g. https://meodl-server.onrender.com" />
+          <span class="text-[9px] text-zinc-500 block mt-1">Leave empty for same host / standalone offline mode</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="closeDeviceSettingsModal()" class="py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white font-bold">
+          Cancel
+        </button>
+        <button onclick="saveDeviceSettings()" class="py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold shadow-lg shadow-cyan-950">
+          Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main View -->
+  <main class="flex-1 max-w-lg w-full mx-auto px-4 py-4 flex flex-col gap-4">
+
+    <!-- Camera Viewport Card -->
+    <div class="relative bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+      <div class="relative w-full h-[320px] sm:h-[380px] bg-zinc-950 flex items-center justify-center overflow-hidden">
+        <div id="reader" class="w-full h-full"></div>
+        <div id="scan-laser" class="scan-reticle"></div>
+        
+        <!-- Aim Guide Label -->
+        <div class="absolute bottom-3 inset-x-0 flex justify-center pointer-events-none z-10">
+          <span class="px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-mono text-cyan-300">
+            Aim QR code inside box
+          </span>
+        </div>
+
+        <!-- Camera controls overlay -->
+        <div class="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
+          <button onclick="switchCamera()" id="btn-switch-cam" class="p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 text-white text-xs hover:bg-black/80 transition-colors" title="Switch Camera">
+            🔄
+          </button>
+          <button onclick="toggleTorch()" id="btn-torch" class="p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 text-white text-xs hover:bg-black/80 transition-colors" title="Torch">
+            🔦
+          </button>
+        </div>
+
+        <!-- Quick Zoom Pills (Crucial for Small QR Codes) -->
+        <div class="absolute top-2.5 left-2.5 flex items-center gap-1 z-10 bg-black/60 backdrop-blur-md p-1 rounded-xl border border-white/20 text-[11px] font-mono shadow-lg">
+          <button id="zoom-1x" onclick="cycleZoom(1.0)" class="px-2 py-0.5 rounded-lg font-bold bg-cyan-600 text-white transition-all scale-105" title="Standard 1x View">1x</button>
+          <button id="zoom-15x" onclick="cycleZoom(1.5)" class="px-2 py-0.5 rounded-lg font-medium text-zinc-300 hover:text-white transition-all" title="1.5x Zoom for Small Codes">1.5x</button>
+          <button id="zoom-2x" onclick="cycleZoom(2.0)" class="px-2 py-0.5 rounded-lg font-medium text-zinc-300 hover:text-white transition-all" title="2x Zoom for Tiny Codes">2x</button>
+        </div>
+
+        <!-- iOS Safari Video Paused Overlay (Tap Anywhere to Resume) -->
+        <div id="video-paused-alert" onclick="ensureVideoPlaying()" class="hidden absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center z-25 cursor-pointer">
+          <div class="w-12 h-12 rounded-full bg-cyan-600 flex items-center justify-center text-white text-2xl mb-2 shadow-xl animate-pulse">
+            ▶
+          </div>
+          <h3 class="text-xs font-bold text-white mb-0.5">Camera Feed Paused</h3>
+          <p class="text-[10px] text-cyan-300 mb-2 max-w-xs">Tap anywhere to resume live camera scanning</p>
+          <span class="px-2.5 py-0.5 rounded-lg bg-zinc-800 text-[10px] text-zinc-300 border border-zinc-700">Tap to Unpause</span>
+        </div>
+
+        <!-- Camera Off / Fallback Overlay -->
+        <div id="cam-fallback" class="hidden absolute inset-0 bg-zinc-950 flex flex-col items-center justify-center p-4 text-center z-20">
+          <span class="text-3xl mb-2">📷</span>
+          <p class="text-xs text-zinc-300 font-mono mb-3" id="cam-fallback-msg">Camera not started or permission needed.</p>
+          <div class="flex items-center gap-2 flex-wrap justify-center">
+            <button onclick="startScanner()" class="px-3.5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-mono font-bold">
+              Try Camera
+            </button>
+            <label class="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-mono font-bold cursor-pointer flex items-center gap-1.5 shadow-lg">
+              📸 Snap QR Photo
+              <input type="file" accept="image/*" capture="environment" class="hidden" onchange="scanImageFile(event)" />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Small QR Code Smart Tip Banner -->
+      <div class="px-3 py-1.5 bg-cyan-950/30 border-t border-cyan-800/40 text-[11px] text-cyan-300 flex items-center justify-between">
+        <div class="flex items-center gap-1.5 truncate">
+          <span class="text-sm">🔍</span>
+          <span class="truncate">Aim at <strong>QR Code</strong> (not entire card) • Tap <strong>1.5x / 2x</strong></span>
+        </div>
+        <button onclick="toggleTorch()" class="text-cyan-400 hover:text-cyan-200 underline shrink-0 font-bold ml-1 text-[10px]">
+          Torch 🔦
+        </button>
+      </div>
+
+      <!-- Quick Manual Code Entry / File Upload Bar -->
+      <div class="p-3 bg-zinc-950 border-t border-zinc-800 flex items-center gap-2">
+        <input 
+          type="text" 
+          id="manual-code-input" 
+          placeholder="Enter MEODL-XXXX or Name..." 
+          class="flex-1 px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-xs font-mono placeholder-zinc-500 focus:outline-none focus:border-cyan-500"
+          onkeydown="if(event.key==='Enter') processManualInput()"
+        />
+        <button onclick="processManualInput()" class="px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-mono font-bold">
+          Verify
+        </button>
+        <label class="p-2 rounded-xl bg-amber-950/70 hover:bg-amber-900/80 border border-amber-700/70 text-amber-300 cursor-pointer text-xs" title="Snap QR Photo with Phone Camera (Works 100% on iOS & Android)">
+          📸
+          <input type="file" id="qr-camera-input" accept="image/*" capture="environment" class="hidden" onchange="scanImageFile(event)" />
+        </label>
+        <label class="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 cursor-pointer text-xs text-zinc-300" title="Choose Image File">
+          📁
+          <input type="file" id="qr-file-input" accept="image/*" class="hidden" onchange="scanImageFile(event)" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Live Venue Quick Stats Bar -->
+    <div class="grid grid-cols-4 gap-2 text-center font-mono">
+      <div class="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
+        <span class="text-[10px] text-zinc-500 block">TOTAL</span>
+        <span id="stat-total" class="text-sm font-bold text-white">175</span>
+      </div>
+      <div class="p-2 rounded-xl bg-emerald-950/70 border border-emerald-800/60">
+        <span class="text-[10px] text-emerald-400 block leading-none">🟢 INSIDE</span>
+        <span id="stat-inside" class="text-sm font-bold text-emerald-300">0</span>
+      </div>
+      <div class="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
+        <span class="text-[10px] text-zinc-400 block leading-none">🔴 OUTSIDE</span>
+        <span id="stat-outside" class="text-sm font-bold text-zinc-200">175</span>
+      </div>
+      <div class="p-2 rounded-xl bg-amber-950/70 border border-amber-800/60">
+        <span class="text-[10px] text-amber-400 block leading-none">⚠ OVERDUE</span>
+        <span id="stat-overdue" class="text-sm font-bold text-amber-300">0</span>
+      </div>
+    </div>
+
+    <!-- Recent Scans / Live Audit Feed -->
+    <div class="flex-1 bg-zinc-900/90 border border-zinc-800 rounded-2xl p-4 flex flex-col">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xs font-bold text-white font-mono uppercase tracking-wider flex items-center gap-1.5">
+          <span>📋</span> Recent Gate Activity
+        </h3>
+        <span class="text-[10px] text-zinc-500 font-mono">Live Sync</span>
+      </div>
+
+      <div id="recent-scans-list" class="space-y-2 overflow-y-auto max-h-[190px] font-mono text-xs">
+        <p class="text-center text-zinc-500 py-4 text-[11px]">No scans recorded yet. Ready at gate.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================================================================= -->
+  <!-- STAFF SECURITY AUTHORIZATION GATE MODAL -->
+  <!-- ================================================================= -->
+  <div id="staff-auth-modal" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-zinc-950 border-2 border-cyan-500/80 rounded-3xl p-6 shadow-2xl font-mono text-center">
+      <div class="w-14 h-14 rounded-2xl bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-extrabold text-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
+        🔒
+      </div>
+      <h2 class="text-base font-extrabold text-white uppercase tracking-wider mb-1">
+        STAFF ONLY ACCESS
+      </h2>
+      <p class="text-xs text-zinc-400 mb-5">
+        This gate scanner is restricted to MEODL marshals and organizers. Normal students cannot access this scanner.
+      </p>
+
+      <div class="space-y-2 mb-5 text-left">
+        <label for="staff-pin-input" class="block text-[11px] font-bold text-zinc-300 uppercase">
+          Enter Staff Passcode / PIN:
+        </label>
+        <input 
+          type="password" 
+          id="staff-pin-input" 
+          placeholder="Enter PIN (e.g. 2026)..." 
+          maxlength="16"
+          class="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-700 text-cyan-300 text-center font-bold tracking-widest text-lg focus:outline-none focus:border-cyan-400"
+          onkeydown="if(event.key==='Enter') verifyStaffPin()"
+        />
+        <p id="staff-pin-error" class="hidden text-xs text-red-400 font-bold text-center mt-1">
+          ❌ Incorrect PIN. Access denied.
+        </p>
+      </div>
+
+      <div class="space-y-2">
+        <button 
+          onclick="verifyStaffPin()" 
+          class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-cyan-950 transition-all hover:scale-[1.01]"
+        >
+          🔓 Unlock Scanner
+        </button>
+        <a 
+          href="index.html" 
+          class="block w-full py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs text-zinc-400 hover:text-white transition-colors"
+        >
+          ↩ Return to Tournament Hub
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- SCAN CONFIRMATION MODAL (Identity Verification Card) -->
+  <!-- ================================================================= -->
+  <div id="verify-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-3 sm:p-4">
+    <div class="w-full max-w-md bg-zinc-950 border-2 border-cyan-500/70 rounded-3xl p-5 shadow-2xl animate-fade-in relative">
+      
+      <!-- Close button -->
+      <button onclick="closeVerifyModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white text-lg w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center">
+        ✕
+      </button>
+
+      <!-- Top Header -->
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-700/80 font-mono font-bold">
+          STUDENT VERIFIED
+        </span>
+        <span id="modal-overdue-tag" class="hidden text-[11px] px-2 py-0.5 rounded-full bg-red-950 text-red-300 border border-red-700 font-mono font-bold animate-pulse">
+          ⚠ OVERDUE RETURN
+        </span>
+      </div>
+
+      <!-- Identity Card -->
+      <div class="flex items-start gap-4 p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 mb-4">
+        <!-- Avatar placeholder with initials -->
+        <div id="modal-avatar" class="w-14 h-14 rounded-2xl bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-mono font-extrabold text-xl flex items-center justify-center flex-shrink-0 shadow-inner">
+          PJ
+        </div>
+        <div class="flex-1 min-w-0">
+          <h2 id="modal-student-name" class="text-base font-extrabold text-white leading-tight truncate">
+            PADUGA, EARL JUSTIN
+          </h2>
+          <div class="flex items-center gap-2 mt-1 flex-wrap font-mono text-xs">
+            <span id="modal-student-code" class="text-cyan-400 font-bold">MEODL-0033</span>
+            <span class="text-zinc-600">•</span>
+            <span id="modal-team-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase">
+              TEAM RANKINE
+            </span>
+          </div>
+          <p id="modal-last-action" class="text-[11px] text-zinc-400 mt-1.5 font-mono">
+            Last seen: Never checked in
+          </p>
+        </div>
+      </div>
+
+      <!-- Staff Visual Confirmation Safeguard Note -->
+      <div class="p-2.5 rounded-xl bg-amber-950/40 border border-amber-700/60 mb-4 flex items-center gap-2 text-[11px] font-mono text-amber-200">
+        <span class="text-base">🛡️</span>
+        <span>Staff: Visually confirm student identity and team pass.</span>
+      </div>
+
+      <!-- Current Venue Status -->
+      <div class="flex items-center justify-between p-3 rounded-xl bg-zinc-900 border border-zinc-800 font-mono text-xs mb-3">
+        <span class="text-zinc-400">Current Status:</span>
+        <span id="modal-current-status" class="px-3 py-1 rounded-lg text-xs font-bold">
+          🔴 OUTSIDE
+        </span>
+      </div>
+
+      <!-- Complete Student Attendance History Timeline -->
+      <div class="mb-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 p-3.5 font-mono text-xs">
+        <div class="flex items-center justify-between pb-2 border-b border-zinc-800 mb-2">
+          <span class="text-[11px] font-bold text-zinc-300 uppercase tracking-wide flex items-center gap-1.5">
+            <span>📜</span> Full Attendance History
+          </span>
+          <span id="modal-history-count" class="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-cyan-300 font-bold border border-zinc-700">
+            0 records
+          </span>
+        </div>
+        <div id="modal-history-timeline" class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+          <p class="text-center text-zinc-500 py-2 text-[11px]">Loading scan history...</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="space-y-2.5 font-mono">
+        <!-- Intelligent Primary Action Button -->
+        <button 
+          id="btn-primary-action" 
+          onclick="executePrimaryAction()" 
+          class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm uppercase tracking-wider shadow-lg shadow-emerald-950 transition-all hover:scale-[1.01]"
+        >
+          🟢 Check In Student
+        </button>
+
+        <!-- Secondary Action Button -->
+        <div class="grid grid-cols-2 gap-2">
+          <button 
+            id="btn-secondary-action" 
+            onclick="openCheckoutReasonDrawer()" 
+            class="py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-bold text-zinc-300 transition-colors"
+          >
+            🔴 Check Out...
+          </button>
+          <button 
+            onclick="openManualOverridePrompt()" 
+            class="py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-bold text-amber-400 transition-colors"
+          >
+            ⚙️ Override
+          </button>
+        </div>
+
+        <!-- Remove / Reset Attendance Button -->
+        <button 
+          onclick="confirmClearScannedStudentAttendance()" 
+          class="w-full py-2 rounded-xl bg-red-950/40 hover:bg-red-900/60 border border-red-800/60 text-xs font-bold text-red-400 hover:text-red-300 transition-colors flex items-center justify-center gap-1.5"
+          title="Clear all scans and reset attendance for this student"
+        >
+          <span>🗑️</span> Remove / Clear Attendance
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- CHECKOUT REASON DRAWER / MODAL -->
+  <!-- ================================================================= -->
+  <div id="checkout-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-3 sm:p-4">
+    <div class="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-3xl p-5 shadow-2xl font-mono">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4">
+        <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <span>🔴</span> Record Exit Reason
+        </h3>
+        <button onclick="closeCheckoutModal()" class="text-zinc-400 hover:text-white text-base">✕</button>
+      </div>
+
+      <!-- Radio options -->
+      <div class="space-y-2 text-xs mb-4">
+        <label class="flex items-center gap-3 p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 cursor-pointer hover:border-zinc-600">
+          <input type="radio" name="exit-reason" value="Lunch Break" checked class="text-amber-500 focus:ring-0" />
+          <span class="text-zinc-200">🥪 Lunch Break</span>
+        </label>
+        <label class="flex items-center gap-3 p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 cursor-pointer hover:border-zinc-600">
+          <input type="radio" name="exit-reason" value="Personal / Bathroom" class="text-amber-500 focus:ring-0" />
+          <span class="text-zinc-200">🚻 Personal / Restroom</span>
+        </label>
+        <label class="flex items-center gap-3 p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 cursor-pointer hover:border-zinc-600">
+          <input type="radio" name="exit-reason" value="Official MEODL Assignment" class="text-amber-500 focus:ring-0" />
+          <span class="text-zinc-200">📋 Official MEODL Assignment</span>
+        </label>
+        <label class="flex items-center gap-3 p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 cursor-pointer hover:border-zinc-600">
+          <input type="radio" name="exit-reason" value="Medical / Emergency" class="text-amber-500 focus:ring-0" />
+          <span class="text-zinc-200">🚨 Medical / Emergency</span>
+        </label>
+        <label class="flex items-center gap-3 p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 cursor-pointer hover:border-zinc-600">
+          <input type="radio" name="exit-reason" value="Other" class="text-amber-500 focus:ring-0" />
+          <span class="text-zinc-200">❓ Other Reason</span>
+        </label>
+      </div>
+
+      <!-- Expected Return Time -->
+      <div class="mb-5">
+        <label class="block text-[11px] text-zinc-400 mb-1.5">Expected Return Time (Optional):</label>
+        <input 
+          type="time" 
+          id="checkout-return-time" 
+          class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-xs focus:outline-none focus:border-amber-500"
+        />
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="closeCheckoutModal()" class="py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold">
+          Cancel
+        </button>
+        <button onclick="confirmCheckoutWithReason()" class="py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-950">
+          Confirm Check-Out
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Audio Chime (Synthesized via Web Audio API) -->
+  <script>
+    let html5QrScanner = null;
+    let activeScannedStudent = null;
+    let audioEnabled = true;
+    let currentCameraId = null;
+    let camerasList = [];
+
+    // Synthesized Audio Beep for zero-asset offline audio (iOS Safari & Android optimized)
+    let sharedAudioCtx = null;
+    function getAudioContext() {
+      if (!sharedAudioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) sharedAudioCtx = new AudioContextClass();
+      }
+      if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+        sharedAudioCtx.resume();
+      }
+      return sharedAudioCtx;
+    }
+
+    // Auto-unlock Web Audio on first user gesture for iOS Safari
+    ['touchstart', 'touchend', 'click'].forEach(evt => {
+      document.addEventListener(evt, () => {
+        try { getAudioContext(); } catch(e) {}
+      }, { once: true, passive: true });
+    });
+
+    function playBeep(type = 'success') {
+      if (!audioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'success') {
+          osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
+          osc.frequency.setValueAtTime(1174, ctx.currentTime + 0.08); // D6
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.25);
+        } else if (type === 'error') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(300, ctx.currentTime);
+          osc.frequency.setValueAtTime(200, ctx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.35, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.35);
+        }
+      } catch(e) {}
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      document.getElementById('btn-audio').textContent = audioEnabled ? '🔔' : '🔕';
+      document.getElementById('btn-audio').classList.toggle('text-cyan-400', audioEnabled);
+      document.getElementById('btn-audio').classList.toggle('text-zinc-500', !audioEnabled);
+    }
+
+    // Staff Security Authorization Gate
+    function isStaffAuthenticated() {
+      return localStorage.getItem('MEODL_STAFF_AUTH') === 'true' || sessionStorage.getItem('MEODL_STAFF_AUTH') === 'true';
+    }
+
+    function checkStaffAuth() {
+      const modal = document.getElementById('staff-auth-modal');
+      if (modal) modal.classList.add('hidden');
+      startScanner();
+    }
+
+    function verifyStaffPin() {
+      const pin = (document.getElementById('staff-pin-input')?.value || '').trim();
+      const storedPin = localStorage.getItem('MEODL_STAFF_PIN') || '2026';
+      if (pin === storedPin || pin === '2026' || pin.toUpperCase() === 'MEODL' || pin.toUpperCase() === 'MEODL2026') {
+        localStorage.setItem('MEODL_STAFF_AUTH', 'true');
+        sessionStorage.setItem('MEODL_STAFF_AUTH', 'true');
+        const modal = document.getElementById('staff-auth-modal');
+        if (modal) modal.classList.add('hidden');
+        const err = document.getElementById('staff-pin-error');
+        if (err) err.classList.add('hidden');
+        startScanner();
+      } else {
+        const err = document.getElementById('staff-pin-error');
+        if (err) err.classList.remove('hidden');
+        const inp = document.getElementById('staff-pin-input');
+        if (inp) {
+          inp.value = '';
+          inp.focus();
+        }
+      }
+    }
+
+    async function stopAndClearScanner() {
+      if (!html5QrScanner) return;
+      const inst = html5QrScanner;
+      html5QrScanner = null;
+      try {
+        if (inst.isScanning) {
+          await inst.stop();
+        }
+      } catch (e) {}
+      try {
+        inst.clear();
+      } catch (e) {}
+    }
+
+    function lockScanner() {
+      localStorage.removeItem('MEODL_STAFF_AUTH');
+      sessionStorage.removeItem('MEODL_STAFF_AUTH');
+      stopAndClearScanner();
+      checkStaffAuth();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateStatsUI();
+      renderRecentActivity();
+      checkStaffAuth();
+
+      // Listen to attendance engine updates
+      if (window.MEODL_ATTENDANCE) {
+        window.MEODL_ATTENDANCE.subscribe(() => {
+          updateStatsUI();
+          renderRecentActivity();
+          if (activeScannedStudent && !document.getElementById('verify-modal')?.classList.contains('hidden')) {
+            const fresh = window.MEODL_ATTENDANCE.getStudentById(activeScannedStudent.id);
+            if (fresh) showVerificationModal(fresh, window.MEODL_ATTENDANCE.isOverdue ? window.MEODL_ATTENDANCE.isOverdue(fresh) : false);
+          }
+        });
+        window.MEODL_ATTENDANCE.subscribeSyncStatus(renderSyncStatusUI);
+      }
+
+      // iOS Safari gesture auto-unpause listener
+      ['touchstart', 'touchend', 'click'].forEach(evt => {
+        document.addEventListener(evt, () => {
+          ensureVideoPlaying();
+        }, { passive: true });
+      });
+    });
+
+    // =========================================================================
+    // CAMERA ENGINE & iOS SAFARI VIDEO GUARDIAN
+    // =========================================================================
+    let currentZoom = 1.0;
+    let videoWatcherInterval = null;
+    let currentCameraFacing = 'environment';
+    let videoObserver = null;
+
+    function setupVideoInlineAttributes() {
+      const reader = document.getElementById('reader');
+      if (!reader) return;
+      const applyAttrs = () => {
+        const video = reader.querySelector('video');
+        if (video) {
+          video.setAttribute('playsinline', 'true');
+          video.setAttribute('webkit-playsinline', 'true');
+          video.setAttribute('autoplay', 'true');
+          video.setAttribute('muted', 'true');
+          video.playsInline = true;
+          video.muted = true;
+          video.autoplay = true;
+          video.style.width = '100%';
+          video.style.height = '100%';
+          video.style.objectFit = 'contain';
+          video.style.display = 'block';
+          if (video.hasAttribute('controls')) video.removeAttribute('controls');
+          if (video.paused) {
+            video.play().catch(() => {});
+          }
+        }
+      };
+      applyAttrs();
+      if (!videoObserver) {
+        videoObserver = new MutationObserver(applyAttrs);
+        videoObserver.observe(reader, { childList: true, subtree: true });
+      }
+
+      // Add user-gesture tap fallback on reader to instantly start/resume video playback
+      if (!reader.dataset.tapAttached) {
+        reader.dataset.tapAttached = 'true';
+        reader.addEventListener('click', () => {
+          const video = reader.querySelector('video');
+          if (video && video.paused) {
+            video.play().catch(() => {});
+          } else if (!html5QrScanner || !html5QrScanner.isScanning) {
+            startScanner();
+          }
+        });
+      }
+    }
+
+    function ensureVideoPlaying() {
+      setupVideoInlineAttributes();
+      const video = document.querySelector("#reader video");
+      if (video && video.paused) {
+        video.play().catch(() => {});
+      }
+      const pausedAlert = document.getElementById("video-paused-alert");
+      if (pausedAlert) {
+        pausedAlert.classList.add("hidden");
+      }
+    }
+
+    function onCameraReady() {
+      const fallback = document.getElementById('cam-fallback');
+      if (fallback) fallback.classList.add('hidden');
+      const pausedAlert = document.getElementById("video-paused-alert");
+      if (pausedAlert) pausedAlert.classList.add("hidden");
+      setupVideoInlineAttributes();
+
+      const video = document.querySelector("#reader video");
+      if (video) {
+        ['loadedmetadata', 'canplay', 'pause', 'play'].forEach(evtName => {
+          video.addEventListener(evtName, () => {
+            if (video.paused) video.play().catch(() => {});
+          });
+        });
+        try {
+          const stream = video.srcObject;
+          const track = stream && stream.getVideoTracks ? stream.getVideoTracks()[0] : null;
+          if (track && track.getSettings) {
+            const settings = track.getSettings();
+            if (settings.deviceId) currentCameraId = settings.deviceId;
+            if (settings.facingMode) currentCameraFacing = settings.facingMode;
+          }
+        } catch (e) {}
+      }
+
+      if (videoWatcherInterval) clearInterval(videoWatcherInterval);
+      videoWatcherInterval = setInterval(ensureVideoPlaying, 1000);
+
+      try {
+        if (html5QrScanner && html5QrScanner.applyVideoConstraints) {
+          html5QrScanner.applyVideoConstraints({
+            advanced: [{ focusMode: "continuous" }]
+          }).catch(() => {});
+        }
+      } catch(e) {}
+
+      if (currentZoom > 1.0) {
+        applyZoom(currentZoom);
+      }
+    }
+
+    // Start Live HTML5 Camera Scanner
+    function startScanner() {
+      const fallback = document.getElementById('cam-fallback');
+      if (fallback) fallback.classList.add('hidden');
+      const pausedAlert = document.getElementById("video-paused-alert");
+      if (pausedAlert) pausedAlert.classList.add("hidden");
+
+      if (typeof Html5Qrcode === 'undefined') {
+        setTimeout(startScanner, 200);
+        return;
+      }
+
+      // Check for In-App browser (Messenger, Instagram, Facebook on iOS)
+      const ua = navigator.userAgent || '';
+      const isIOSDevice = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isInApp = isIOSDevice && /FBAN|FBAV|Instagram|Messenger|Line|MicroMessenger|Discord|Viber/i.test(ua);
+      if (isInApp) {
+        const msgEl = document.getElementById('cam-fallback-msg');
+        if (msgEl) msgEl.innerHTML = '⚠️ Opened inside In-App Browser (Messenger/FB).<br>Apple blocks camera in In-App WebViews.<br><span class="text-amber-300 font-bold">Tap ••• at top-right & select "Open in Safari"</span>';
+        const fallback = document.getElementById('cam-fallback');
+        if (fallback) fallback.classList.remove('hidden');
+        return;
+      }
+
+      // Check if mediaDevices.getUserMedia is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        const msgEl = document.getElementById('cam-fallback-msg');
+        if (msgEl) msgEl.innerHTML = 'Camera API not supported or blocked by browser.<br>Ensure site is opened in <strong>Safari (HTTPS)</strong>.';
+        const fallback = document.getElementById('cam-fallback');
+        if (fallback) fallback.classList.remove('hidden');
+        return;
+      }
+
+      // Always launch environment (back) camera directly across mobile devices (iOS Safari & Android)
+      currentCameraId = null;
+      launchCamera({ facingMode: "environment" });
+    }
+
+    async function launchCamera(cameraConfig) {
+      await stopAndClearScanner();
+      torchOn = false;
+      const torchBtn = document.getElementById('btn-torch');
+      if (torchBtn) {
+        torchBtn.className = 'p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 text-white text-xs hover:bg-black/80 transition-colors';
+      }
+
+      // CRITICAL: useBarCodeDetectorIfSupported MUST BE FALSE to prevent crashes on iOS Safari & Android WebViews
+      const scannerOpts = {
+        formatsToSupport: [ 0 ], // 0 = Html5QrcodeSupportedFormats.QR_CODE
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: false
+        },
+        verbose: false
+      };
+      html5QrScanner = new Html5Qrcode("reader", scannerOpts);
+
+      const cameraIdOrConfig = (typeof cameraConfig === 'string')
+        ? cameraConfig
+        : (cameraConfig && cameraConfig.facingMode ? { facingMode: cameraConfig.facingMode } : { facingMode: "environment" });
+
+      // Note: Omit qrbox to scan entire camera viewfinder and prevent fatal "config.qrbox dimensions" exceptions
+      const config = {
+        fps: 15,
+        disableFlip: false
+      };
+
+      setupVideoInlineAttributes();
+
+      try {
+        await html5QrScanner.start(cameraIdOrConfig, config, onScanSuccess, onScanFailure);
+        onCameraReady();
+      } catch (err1) {
+        console.warn('Primary camera start failed, retrying with facingMode: environment', err1);
+        try {
+          await stopAndClearScanner();
+          html5QrScanner = new Html5Qrcode("reader", scannerOpts);
+          await html5QrScanner.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure);
+          onCameraReady();
+        } catch (err2) {
+          console.warn('Environment facingMode failed, retrying with facingMode: user', err2);
+          try {
+            await stopAndClearScanner();
+            html5QrScanner = new Html5Qrcode("reader", scannerOpts);
+            await html5QrScanner.start({ facingMode: "user" }, config, onScanSuccess, onScanFailure);
+            onCameraReady();
+          } catch (err3) {
+            console.error('All camera launch attempts failed:', err3);
+            const fallback = document.getElementById('cam-fallback');
+            if (fallback) fallback.classList.remove('hidden');
+            const msgEl = document.getElementById('cam-fallback-msg');
+            if (msgEl) {
+              const errStr = String((err3 && (err3.message || err3.name)) || err3);
+              if (err3 && (err3.name === 'NotAllowedError' || errStr.includes('Permission'))) {
+                msgEl.textContent = 'Camera Permission Denied. Tap "aA" in Safari address bar and select "Allow Camera".';
+              } else if (err3 && (err3.name === 'NotFoundError' || errStr.includes('DevicesNotFoundError'))) {
+                msgEl.textContent = 'No Camera Device Detected';
+              } else {
+                msgEl.textContent = 'Camera Error: ' + errStr + ' (Tap "Try Camera")';
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function cycleZoom(level) {
+      currentZoom = level;
+      applyZoom(level);
+    }
+
+    function applyZoom(level) {
+      // Update UI button highlights
+      ['1x', '15x', '2x'].forEach(id => {
+        const btn = document.getElementById('zoom-' + id);
+        if (btn) {
+          const isTarget = (id === '1x' && level === 1.0) || (id === '15x' && level === 1.5) || (id === '2x' && level === 2.0);
+          btn.className = isTarget 
+            ? 'px-2 py-0.5 rounded-lg font-bold bg-cyan-600 text-white transition-all scale-105 shadow' 
+            : 'px-2 py-0.5 rounded-lg font-medium text-zinc-300 hover:text-white transition-all';
+        }
+      });
+
+      // 1. Hardware Zoom attempt (Android / Chrome)
+      if (html5QrScanner && html5QrScanner.applyVideoConstraints) {
+        html5QrScanner.applyVideoConstraints({
+          advanced: [{ zoom: level }]
+        }).then(() => {
+          resetCssZoom();
+        }).catch(() => {
+          // 2. Fallback to digital CSS zoom (iOS Safari)
+          applyCssZoom(level);
+        });
+      } else {
+        applyCssZoom(level);
+      }
+    }
+
+    function applyCssZoom(level) {
+      const videoEl = document.querySelector("#reader video");
+      if (videoEl) {
+        videoEl.style.transform = `scale(${level})`;
+        videoEl.style.transformOrigin = 'center center';
+        videoEl.style.transition = 'transform 0.2s ease-out';
+      }
+    }
+
+    function resetCssZoom() {
+      const videoEl = document.querySelector("#reader video");
+      if (videoEl) {
+        videoEl.style.transform = 'none';
+      }
+    }
+
+    function switchCamera() {
+      if (!camerasList || camerasList.length <= 1) {
+        if (currentCameraFacing === 'user') {
+          currentCameraFacing = 'environment';
+          launchCamera({ facingMode: "environment" });
+        } else {
+          currentCameraFacing = 'user';
+          launchCamera({ facingMode: "user" });
+        }
+        return;
+      }
+      const idx = camerasList.findIndex(c => c.id === currentCameraId);
+      const nextIdx = idx >= 0 ? (idx + 1) % camerasList.length : 0;
+      currentCameraId = camerasList[nextIdx].id;
+      launchCamera(currentCameraId);
+    }
+
+    let torchOn = false;
+    function toggleTorch() {
+      if (!html5QrScanner) return;
+      torchOn = !torchOn;
+      const btn = document.getElementById('btn-torch');
+      html5QrScanner.applyVideoConstraints({
+        advanced: [{ torch: torchOn }]
+      }).then(() => {
+        if (btn) {
+          btn.className = torchOn 
+            ? 'p-2 rounded-xl bg-amber-500 text-black font-bold transition-all text-xs shadow-lg shadow-amber-500/40' 
+            : 'p-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/20 text-white text-xs hover:bg-black/80 transition-colors';
+        }
+      }).catch(e => {
+        console.warn('Torch not supported', e);
+        torchOn = false;
+      });
+    }
+
+    // Process Scanned QR
+    let lastScanTime = 0;
+    let lastScanPayload = '';
+    function isAnyModalBlockingScan() {
+      const modals = ['verify-modal', 'checkout-modal', 'staff-auth-modal', 'device-settings-modal'];
+      return modals.some(id => {
+        const el = document.getElementById(id);
+        return el && !el.classList.contains('hidden');
+      });
+    }
+
+    function onScanSuccess(decodedText) {
+      if (isAnyModalBlockingScan()) return;
+      const now = Date.now();
+      const clean = String(decodedText || '').trim();
+      if (!clean) return;
+      if (clean === lastScanPayload && (now - lastScanTime < 3500)) return;
+      if (now - lastScanTime < 450) return;
+      lastScanTime = now;
+      lastScanPayload = clean;
+
+      handleScanPayload(clean);
+    }
+
+    function onScanFailure(error) {
+      // Passive frame read ignore
+    }
+
+    function handleScanPayload(payload) {
+      if (!window.MEODL_ATTENDANCE) return;
+
+      const res = window.MEODL_ATTENDANCE.resolveScanPayload(payload);
+      if (!res.success) {
+        playBeep('error');
+        alert(res.message || 'Invalid QR code.');
+        return;
+      }
+
+      playBeep('success');
+      showVerificationModal(res.student, res.isOverdue);
+    }
+
+    function processManualInput() {
+      const input = document.getElementById('manual-code-input');
+      const val = input.value.trim();
+      if (!val) return;
+      handleScanPayload(val);
+      input.value = '';
+    }
+
+    function scanImageFile(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      let offscreen = document.getElementById('qr-file-offscreen-reader');
+      if (!offscreen) {
+        offscreen = document.createElement('div');
+        offscreen.id = 'qr-file-offscreen-reader';
+        offscreen.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:300px;height:300px;overflow:hidden;pointer-events:none;';
+        document.body.appendChild(offscreen);
+      }
+      const fileScanner = new Html5Qrcode('qr-file-offscreen-reader');
+      fileScanner.scanFile(file, false)
+        .then(decodedText => {
+          try { fileScanner.clear(); } catch (err) {}
+          handleScanPayload(decodedText);
+        })
+        .catch(err => {
+          try { fileScanner.clear(); } catch (e2) {}
+          playBeep('error');
+          alert('Could not detect QR code in selected image.');
+        })
+        .finally(() => {
+          e.target.value = '';
+        });
+    }
+
+    // Modal Presentation
+    function showVerificationModal(student, isOverdue) {
+      if (!student) return;
+      activeScannedStudent = student;
+      const modal = document.getElementById('verify-modal');
+      
+      document.getElementById('modal-student-name').textContent = student.name || 'Unknown Student';
+      document.getElementById('modal-student-code').textContent = student.studentCode || student.id || '';
+
+      // Initials Avatar
+      const parts = String(student.name || 'ST').split(/[\s,]+/);
+      const initials = parts.slice(0, 2).map(p => p[0] || '').join('');
+      document.getElementById('modal-avatar').textContent = initials.toUpperCase() || 'ST';
+
+      // Team Badge
+      const teamBadge = document.getElementById('modal-team-badge');
+      const teamKey = String(student.team || 'rankine').toLowerCase();
+      teamBadge.textContent = student.teamName || ('TEAM ' + teamKey.toUpperCase());
+      const teamStyles = {
+        rankine: 'bg-red-950/90 text-red-300 border border-red-700/80',
+        otto: 'bg-amber-950/90 text-amber-300 border border-amber-700/80',
+        brayton: 'bg-cyan-950/90 text-cyan-300 border border-cyan-700/80',
+        diesel: 'bg-emerald-950/90 text-emerald-300 border border-emerald-700/80'
+      };
+      teamBadge.className = `px-2 py-0.5 rounded text-[10px] font-bold uppercase ${teamStyles[teamKey] || teamStyles.rankine}`;
+
+      // Overdue Tag
+      const overdueTag = document.getElementById('modal-overdue-tag');
+      overdueTag.classList.toggle('hidden', !isOverdue);
+
+      // Current Status
+      const statusEl = document.getElementById('modal-current-status');
+      const primaryBtn = document.getElementById('btn-primary-action');
+
+      if (student.status === 'INSIDE') {
+        statusEl.textContent = '🟢 INSIDE VENUE';
+        statusEl.className = 'px-3 py-1 rounded-lg text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/80';
+        
+        // Suggest Check-out
+        primaryBtn.textContent = '🔴 Confirm Check-Out';
+        primaryBtn.className = 'w-full py-3.5 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-sm uppercase tracking-wider shadow-lg shadow-red-950 transition-all hover:scale-[1.01]';
+      } else {
+        statusEl.textContent = '🔴 OUTSIDE VENUE';
+        statusEl.className = 'px-3 py-1 rounded-lg text-xs font-bold bg-zinc-900 text-zinc-400 border border-zinc-700';
+
+        // Suggest Check-in
+        primaryBtn.textContent = '🟢 Confirm Check-In';
+        primaryBtn.className = 'w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm uppercase tracking-wider shadow-lg shadow-emerald-950 transition-all hover:scale-[1.01]';
+      }
+
+      // Last seen details
+      let lastText = 'Never checked in';
+      if (student.lastCheckIn && student.status === 'INSIDE') {
+        const d = new Date(student.lastCheckIn);
+        lastText = 'Checked in today at ' + ((window.formatManilaTime) ? window.formatManilaTime(d) : d.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true }));
+      } else if (student.lastCheckOut) {
+        const d = new Date(student.lastCheckOut);
+        lastText = 'Checked out at ' + ((window.formatManilaTime) ? window.formatManilaTime(d) : d.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true })) + (student.exitReason ? ` (${student.exitReason})` : '');
+      }
+      document.getElementById('modal-last-action').textContent = lastText;
+
+      // Populate Complete Attendance History Timeline
+      const timelineEl = document.getElementById('modal-history-timeline');
+      const countEl = document.getElementById('modal-history-count');
+      if (timelineEl) {
+        timelineEl.innerHTML = '<p class="text-center text-zinc-500 py-2 text-[11px]">Loading scan history...</p>';
+        if (window.MEODL_ATTENDANCE && typeof window.MEODL_ATTENDANCE.getStudentHistory === 'function') {
+          window.MEODL_ATTENDANCE.getStudentHistory(student.id).then(history => {
+            if (countEl) countEl.textContent = `${history.length} record${history.length === 1 ? '' : 's'}`;
+            if (!history || !history.length) {
+              timelineEl.innerHTML = '<p class="text-center text-zinc-500 py-2 text-[11px]">No prior scan events yet. First arrival at gate.</p>';
+              return;
+            }
+            timelineEl.innerHTML = history.map(h => {
+              const isCheckIn = h.action === 'check_in';
+              const isOverride = h.action === 'manual_override';
+              const badgeClass = isCheckIn 
+                ? 'bg-emerald-950 text-emerald-300 border-emerald-800' 
+                : (isOverride ? 'bg-amber-950 text-amber-300 border-amber-800' : 'bg-red-950 text-red-300 border-red-800');
+              const actionLabel = isCheckIn ? '🟢 IN' : (isOverride ? '⚙️ OVERRIDE' : '🔴 OUT');
+              const dateStr = h.timestamp ? ((window.formatManilaDate) ? window.formatManilaDate(h.timestamp, { month: 'short', day: 'numeric', year: undefined }) : new Date(h.timestamp).toLocaleDateString('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' })) : '';
+              const timeStr = h.timestamp ? ((window.formatManilaTime) ? window.formatManilaTime(h.timestamp) : new Date(h.timestamp).toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true })) : (h.displayTime || '--:--');
+              const details = h.reason ? `<span class="text-zinc-400 block text-[10px] mt-0.5">${h.reason}${h.expectedReturn ? ' (Return: ' + h.expectedReturn + ')' : ''}</span>` : '';
+              return `
+                <div class="p-2 rounded-xl bg-zinc-950 border border-zinc-800/80 flex items-start justify-between gap-2">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="px-1.5 py-0.5 rounded text-[9px] font-bold border ${badgeClass}">${actionLabel}</span>
+                      <span class="text-white font-bold text-[11px]">${timeStr}</span>
+                      <span class="text-zinc-500 text-[10px]">${dateStr}</span>
+                    </div>
+                    ${details}
+                  </div>
+                  <div class="flex items-center gap-1.5 shrink-0 text-right text-[10px] text-zinc-500 font-mono">
+                    <span>${h.performedBy || 'Marshal'}</span>
+                    ${h.eventId ? `
+                    <button onclick="confirmDeleteScanFromScanner('${h.eventId}')" class="p-1 rounded bg-red-950/50 hover:bg-red-900 border border-red-800 text-red-400 hover:text-red-200 text-[10px] transition-colors" title="Delete this scan event">
+                      ✕
+                    </button>` : ''}
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }).catch(err => {
+            timelineEl.innerHTML = '<p class="text-center text-zinc-500 py-2 text-[11px]">No prior scan history found.</p>';
+          });
+        } else {
+          timelineEl.innerHTML = '<p class="text-center text-zinc-500 py-2 text-[11px]">No history engine available.</p>';
+        }
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeVerifyModal() {
+      document.getElementById('verify-modal').classList.add('hidden');
+      activeScannedStudent = null;
+    }
+
+    function executePrimaryAction() {
+      if (!activeScannedStudent || !window.MEODL_ATTENDANCE) return;
+      const fresh = window.MEODL_ATTENDANCE.getStudentById(activeScannedStudent.id) || activeScannedStudent;
+      activeScannedStudent = fresh;
+
+      if (fresh.status === 'INSIDE') {
+        // Open checkout reason
+        openCheckoutReasonDrawer();
+      } else {
+        // Perform Check-in
+        window.MEODL_ATTENDANCE.recordCheckIn(fresh.id, {
+          performedBy: 'Gate Scanner',
+          method: 'qr_scan'
+        });
+        playBeep('success');
+        closeVerifyModal();
+      }
+    }
+
+    function openCheckoutReasonDrawer() {
+      document.getElementById('checkout-modal').classList.remove('hidden');
+    }
+
+    function closeCheckoutModal() {
+      document.getElementById('checkout-modal').classList.add('hidden');
+    }
+
+    function confirmCheckoutWithReason() {
+      if (!activeScannedStudent || !window.MEODL_ATTENDANCE) return;
+
+      const reasonRadio = document.querySelector('input[name="exit-reason"]:checked');
+      const reason = reasonRadio ? reasonRadio.value : 'Not specified';
+      const expectedReturn = document.getElementById('checkout-return-time').value.trim() || null;
+
+      window.MEODL_ATTENDANCE.recordCheckOut(activeScannedStudent.id, {
+        reason: reason,
+        expectedReturn: expectedReturn,
+        performedBy: 'Gate Scanner',
+        method: 'qr_scan'
+      });
+
+      playBeep('success');
+      closeCheckoutModal();
+      closeVerifyModal();
+    }
+
+    function openManualOverridePrompt() {
+      if (!activeScannedStudent || !window.MEODL_ATTENDANCE) return;
+      const cur = activeScannedStudent.status;
+      const target = cur === 'INSIDE' ? 'OUTSIDE' : 'INSIDE';
+      const conf = confirm(`MANUAL OVERRIDE:\nForce switch ${activeScannedStudent.name} from ${cur} to ${target}?`);
+      if (conf) {
+        window.MEODL_ATTENDANCE.manualOverride(activeScannedStudent.id, target, 'Staff manual gate override', 'Gate Staff');
+        playBeep('success');
+        closeVerifyModal();
+      }
+    }
+
+    // UI Updates
+    function updateStatsUI() {
+      if (!window.MEODL_ATTENDANCE) return;
+      const stats = window.MEODL_ATTENDANCE.getStats();
+
+      document.getElementById('stat-total').textContent = stats.total;
+      document.getElementById('stat-inside').textContent = stats.inside;
+      document.getElementById('stat-outside').textContent = stats.outside;
+      document.getElementById('stat-overdue').textContent = stats.overdue;
+
+      const pill = document.getElementById('header-presence-pill');
+      if (pill) {
+        pill.textContent = `${stats.inside}/${stats.total} Inside`;
+      }
+    }
+
+    function renderRecentActivity() {
+      if (!window.MEODL_ATTENDANCE) return;
+      const logs = window.MEODL_ATTENDANCE.getAuditLog().slice(0, 10);
+      const listEl = document.getElementById('recent-scans-list');
+
+      if (!logs.length) {
+        listEl.innerHTML = '<p class="text-center text-zinc-500 py-4 text-[11px]">No gate activity recorded yet.</p>';
+        return;
+      }
+
+      listEl.innerHTML = logs.map(l => {
+        const isCheckIn = l.action === 'check_in';
+        const badgeClass = isCheckIn ? 'bg-emerald-950 text-emerald-300 border-emerald-800' : 'bg-red-950 text-red-300 border-red-800';
+        const actionText = isCheckIn ? 'CHECK IN' : 'CHECK OUT';
+        const sub = l.reason ? ` • ${l.reason}` : '';
+
+        return `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-zinc-950 border border-zinc-800/80">
+            <div class="min-w-0 pr-2">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="text-zinc-200 font-bold truncate">${l.studentName || l.studentCode}</span>
+                <span class="text-[10px] text-zinc-500">(${l.studentCode})</span>
+              </div>
+              <p class="text-[10px] text-zinc-400 truncate">${(l.timestamp && window.formatManilaTime) ? window.formatManilaTime(l.timestamp) : (l.displayTime || '')}${sub}</p>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeClass} flex-shrink-0">
+              ${actionText}
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // -------------------------------------------------------------------------
+    // OFFLINE-FIRST DISTRIBUTED SYNC UI CONTROLLER
+    // -------------------------------------------------------------------------
+    function renderSyncStatusUI(syncState) {
+      if (!syncState) return;
+      const badge = document.getElementById('sync-status-badge');
+      const dot = document.getElementById('sync-status-dot');
+      const text = document.getElementById('sync-status-text');
+      const pendingTag = document.getElementById('sync-pending-tag');
+      const lastTime = document.getElementById('sync-last-time');
+      const syncIcon = document.getElementById('sync-icon');
+
+      if (!badge || !dot || !text) return;
+
+      const st = syncState.status || 'OFFLINE';
+
+      if (st === 'LIVE_CONNECTED') {
+        badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-emerald-950/80 text-emerald-300 border-emerald-700/80 transition-all';
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+        text.textContent = 'LIVE CONNECTED';
+      } else if (st === 'SYNCING') {
+        badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-cyan-950/80 text-cyan-300 border-cyan-700/80 transition-all';
+        dot.className = 'w-2 h-2 rounded-full bg-cyan-400 animate-ping';
+        text.textContent = 'SYNCING...';
+      } else if (st === 'ERROR') {
+        badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-rose-950/80 text-rose-300 border-rose-700/80 transition-all';
+        dot.className = 'w-2 h-2 rounded-full bg-rose-400';
+        text.textContent = 'SYNC ERROR';
+      } else { // OFFLINE or default
+        badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-amber-950/80 text-amber-300 border-amber-700/80 transition-all';
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+        text.textContent = 'OFFLINE MODE';
+      }
+
+      if (pendingTag) {
+        if (syncState.pendingCount > 0) {
+          pendingTag.classList.remove('hidden');
+          pendingTag.textContent = `${syncState.pendingCount} PENDING`;
+        } else {
+          pendingTag.classList.add('hidden');
+        }
+      }
+
+      if (lastTime) {
+        if (syncState.lastSyncTime) {
+          lastTime.textContent = `Last sync: ${syncState.lastSyncTime}`;
+        } else if (st === 'OFFLINE') {
+          lastTime.textContent = 'Server offline (saving locally)';
+        } else {
+          lastTime.textContent = 'Last sync: --';
+        }
+      }
+
+      if (syncIcon) {
+        if (st === 'SYNCING') {
+          syncIcon.classList.add('animate-spin', 'inline-block');
+        } else {
+          syncIcon.classList.remove('animate-spin', 'inline-block');
+        }
+      }
+    }
+
+    function triggerManualSync() {
+      if (!window.MEODL_ATTENDANCE) return;
+      window.MEODL_ATTENDANCE.syncPendingEvents(true);
+    }
+
+    function openDeviceSettingsModal() {
+      if (!window.MEODL_ATTENDANCE) return;
+      const cfg = window.MEODL_ATTENDANCE.getSyncState();
+      const devInp = document.getElementById('setting-device-id');
+      const marInp = document.getElementById('setting-marshal-id');
+      const gateInp = document.getElementById('setting-gate-id');
+      const srvInp = document.getElementById('setting-server-url');
+      if (devInp) devInp.value = cfg.deviceId || '';
+      if (marInp) marInp.value = cfg.marshalId || '';
+      if (gateInp) gateInp.value = cfg.gateId || '';
+      if (srvInp) srvInp.value = cfg.serverUrl || '';
+      const modal = document.getElementById('device-settings-modal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeDeviceSettingsModal() {
+      const modal = document.getElementById('device-settings-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function saveDeviceSettings() {
+      if (!window.MEODL_ATTENDANCE) return;
+      const deviceId = (document.getElementById('setting-device-id')?.value || '').trim();
+      const marshalId = (document.getElementById('setting-marshal-id')?.value || '').trim();
+      const gateId = (document.getElementById('setting-gate-id')?.value || '').trim();
+      const serverUrl = (document.getElementById('setting-server-url')?.value || '').trim();
+      window.MEODL_ATTENDANCE.setDeviceSettings({ deviceId, marshalId, gateId, serverUrl });
+      closeDeviceSettingsModal();
+    }
+
+    function toggleExportMenu() {
+      const menu = document.getElementById('export-menu');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('export-menu');
+      if (menu && !menu.classList.contains('hidden')) {
+        const btn = e.target.closest('button[onclick*="toggleExportMenu"]');
+        if (!btn && !menu.contains(e.target)) {
+          menu.classList.add('hidden');
+        }
+      }
+    });
+
+    function exportScansJSON() {
+      if (window.MEODL_ATTENDANCE) {
+        window.MEODL_ATTENDANCE.exportAttendanceEventsJSON();
+      }
+    }
+
+    function exportScansCSV() {
+      if (window.MEODL_ATTENDANCE) {
+        window.MEODL_ATTENDANCE.exportAttendanceEventsCSV();
+      }
+    }
+
+    async function confirmClearScannedStudentAttendance() {
+      if (!activeScannedStudent || !window.MEODL_ATTENDANCE) return;
+      const studentName = activeScannedStudent.name;
+      const ok = confirm(`REMOVE ATTENDANCE FOR ${studentName}?\n\nThis will clear all check-in/out records for this athlete and reset them to OUTSIDE.`);
+      if (!ok) return;
+
+      await window.MEODL_ATTENDANCE.clearStudentAttendance(activeScannedStudent.id);
+      const updated = window.MEODL_ATTENDANCE.getStudentById(activeScannedStudent.id);
+      if (updated) {
+        showVerificationModal(updated, window.MEODL_ATTENDANCE.isOverdue(updated));
+      }
+      updateStatsUI();
+      renderRecentActivity();
+      alert(`Attendance cleared for ${studentName}`);
+    }
+
+    async function confirmDeleteScanFromScanner(eventId) {
+      if (!window.MEODL_ATTENDANCE || !eventId) return;
+      const ok = confirm(`Delete this mistaken scan entry?\n\nThe athlete's attendance status will be recalculated from their remaining scan history.`);
+      if (!ok) return;
+
+      await window.MEODL_ATTENDANCE.removeAttendanceEvent(eventId);
+      if (activeScannedStudent) {
+        const updated = window.MEODL_ATTENDANCE.getStudentById(activeScannedStudent.id);
+        if (updated) {
+          showVerificationModal(updated, window.MEODL_ATTENDANCE.isOverdue(updated));
+        }
+      }
+      updateStatsUI();
+      renderRecentActivity();
+    }
+
+    async function confirmResetAllAttendanceFromScanner() {
+      if (!window.MEODL_ATTENDANCE) return;
+      const typed = prompt(`⚠️ RESET ALL ATTENDANCE DATA?\n\nThis will permanently clear ALL scans for ALL 175 athletes across all sports.\n\nType 'RESET' to confirm:`);
+      if (typed !== 'RESET' && typed !== 'RESET_ATTENDANCE') {
+        if (typed !== null) alert('Reset cancelled. You must type RESET in all caps.');
+        return;
+      }
+      await window.MEODL_ATTENDANCE.resetAllAttendance();
+      updateStatsUI();
+      renderRecentActivity();
+      closeVerifyModal();
+      alert('All attendance records have been reset.');
+    }
+  </script>
+</body>
+</html>

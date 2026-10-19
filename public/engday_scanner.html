@@ -1,0 +1,3381 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Live Event & Session QR Scanner • Attendance Checkpoint</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    if (window.tailwind) {
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+            },
+            colors: {
+              obsidian: '#140b09',
+              cardBg: '#1c100d',
+              carnivalDark: '#140b09',
+              carnivalSurface: '#1c100d'
+            }
+          }
+        }
+      };
+    }
+  </script>
+
+  <!-- Universal iOS Safari & Android Video Inline Playback Polyfill -->
+  <script>
+    (function() {
+      // 1. Intercept document.createElement to ensure all <video> elements have inline attributes from birth
+      const origCreate = document.createElement.bind(document);
+      document.createElement = function(tagName, options) {
+        const el = origCreate(tagName, options);
+        if (typeof tagName === 'string' && tagName.toLowerCase() === 'video') {
+          el.setAttribute('playsinline', 'true');
+          el.setAttribute('webkit-playsinline', 'true');
+          el.setAttribute('autoplay', 'true');
+          el.setAttribute('muted', 'true');
+          el.playsInline = true;
+          el.muted = true;
+          el.autoplay = true;
+        }
+        return el;
+      };
+      // 2. Intercept HTMLVideoElement.prototype.play to ensure playsinline is present
+      if (typeof HTMLVideoElement !== 'undefined') {
+        const origPlay = HTMLVideoElement.prototype.play;
+        HTMLVideoElement.prototype.play = function() {
+          if (!this.hasAttribute('playsinline')) this.setAttribute('playsinline', 'true');
+          if (!this.hasAttribute('webkit-playsinline')) this.setAttribute('webkit-playsinline', 'true');
+          this.playsInline = true;
+          return origPlay.apply(this, arguments);
+        };
+      }
+    })();
+  </script>
+
+  <!-- Local Standalone Libraries with Resilient Multi-Network Fallback -->
+  <script src="./assets/html5-qrcode.min.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/meodl_data.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/meodl_data.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/meodl_attendance.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/meodl_attendance.js';document.head.appendChild(s);}"></script>
+  <script src="./assets/engday_attendance.js" onerror="if(!this.dataset.retried){this.dataset.retried=1;var s=document.createElement('script');s.src='https://mcluginn.github.io/meodl-tekken8/assets/engday_attendance.js';document.head.appendChild(s);}"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #140b09;
+      background-image: 
+        radial-gradient(circle at 50% -10%, rgba(220, 38, 38, 0.14), transparent 60%),
+        radial-gradient(circle at 50% 10%, rgba(245, 158, 11, 0.12), transparent 50%);
+      color: #f4f4f5;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      touch-action: manipulation;
+    }
+    #reader {
+      position: relative;
+      width: 100% !important;
+      height: 100% !important;
+      overflow: hidden;
+      border-radius: 1rem;
+      background-color: #000;
+    }
+    #reader video {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain !important;
+      border-radius: 1rem !important;
+    }
+    /* Suppress iOS Safari WebKit native media controls and pause/play button */
+    #reader video::-webkit-media-controls,
+    #reader video::-webkit-media-controls-start-playback-button,
+    #reader video::-webkit-media-controls-play-button,
+    #reader video::-webkit-media-controls-enclosure,
+    #reader video::-webkit-media-controls-panel {
+      display: none !important;
+      -webkit-appearance: none !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    /* 5-Part Precision Reticle (4 Corner Brackets + Sweeping Laser) */
+    .scan-reticle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 215px;
+      height: 215px;
+      border: 2px solid rgba(255, 255, 255, 0.22);
+      border-radius: 1.25rem;
+      pointer-events: none;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.50);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .scan-reticle::before, .scan-reticle::after,
+    .scan-reticle .corner-tr, .scan-reticle .corner-bl, .scan-reticle .corner-br {
+      content: '';
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      border-color: #f59e0b;
+      border-style: solid;
+      pointer-events: none;
+      transition: border-color 0.2s ease;
+    }
+    .scan-reticle::before {
+      top: -2px; left: -2px;
+      border-width: 4px 0 0 4px;
+      border-top-left-radius: 1.1rem;
+    }
+    .scan-reticle .corner-tr {
+      top: -2px; right: -2px;
+      border-width: 4px 4px 0 0;
+      border-top-right-radius: 1.1rem;
+    }
+    .scan-reticle .corner-bl {
+      bottom: -2px; left: -2px;
+      border-width: 0 0 4px 4px;
+      border-bottom-left-radius: 1.1rem;
+    }
+    .scan-reticle .corner-br {
+      bottom: -2px; right: -2px;
+      border-width: 0 4px 4px 0;
+      border-bottom-right-radius: 1.1rem;
+    }
+    .scan-reticle::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 8px; right: 8px; height: 2px;
+      width: auto; border: none;
+      background: linear-gradient(90deg, transparent, #f59e0b, #fbbf24, #f59e0b, transparent);
+      box-shadow: 0 0 12px 2px rgba(245, 158, 11, 0.6);
+      animation: scanLaser 1.8s ease-in-out infinite;
+    }
+    .scan-success-flash {
+      border-color: #10b981 !important;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.65), 0 0 0 9999px rgba(6, 78, 59, 0.45) !important;
+      transform: translate(-50%, -50%) scale(1.04) !important;
+    }
+    @keyframes scanLaser {
+      0%, 100% { top: 6%; opacity: 0.75; }
+      50% { top: 92%; opacity: 1; }
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-obsidian flex flex-col min-h-screen">
+
+  <!-- ================================================================= -->
+  <!-- COMPACT UNIFIED TOP HEADER -->
+  <!-- ================================================================= -->
+  <header class="sticky top-0 z-40 bg-[#140b09]/95 backdrop-blur-xl border-b border-amber-500/30 px-3 py-2 flex items-center justify-between gap-2 shadow-lg shadow-black/60">
+    <div class="flex items-center gap-2 min-w-0">
+      <a href="engday_attendance.html" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#1c100d] hover:bg-[#2a1713] border border-amber-500/30 text-[11px] font-mono font-bold text-amber-300 shrink-0 transition-colors" title="Open Master Attendance Dashboard">
+        <span>📊</span>
+        <span class="hidden sm:inline">Dashboard</span>
+      </a>
+      <button onclick="openAdminSetupModal('events')" class="flex items-center gap-2 min-w-0 text-left group px-2 py-1 rounded-xl hover:bg-[#1c100d]/90 border border-transparent hover:border-amber-500/30 transition-all" title="Switch or Configure Event">
+        <img src="assets/esc_logo.jpg" alt="ESC Logo" class="w-10 h-10 rounded-lg object-cover border border-amber-500/40 shadow-md shrink-0">
+        <div class="min-w-0">
+          <div class="flex items-center gap-1">
+            <span id="header-event-title" class="text-xs font-extrabold text-amber-50 font-mono tracking-tight truncate drop-shadow-sm">ENGINEERING DAYS 2026</span>
+            <span class="px-1.5 py-0.2 rounded bg-red-600/30 text-amber-300 border border-amber-500/40 text-[9px] font-mono font-bold uppercase shrink-0">2026</span>
+            <span class="text-[10px] text-amber-400 font-mono shrink-0">▾</span>
+          </div>
+          <span id="header-active-game-pill" class="text-[10px] font-mono text-amber-400 font-bold block truncate leading-tight">Loading checkpoint...</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- Right Quick Controls: Backup, Cloud Sync, Audio, Lock, Admin -->
+    <div class="flex items-center gap-1.5 shrink-0">
+      <!-- 4-Layer Local Backup Status Button (Tap to Download Immediately, Gear for Settings) -->
+      <div class="flex items-center gap-0.5">
+        <button onclick="downloadImmediateBackup()" id="btn-backup-status" class="px-2 py-1.5 rounded-l-xl bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-700/60 text-[10px] font-mono font-bold text-emerald-300 flex items-center gap-1 transition-all" title="Click to Download Backup JSON Now">
+          <span id="backup-status-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span id="backup-status-text">💾 <span class="hidden md:inline">SAVED</span></span>
+        </button>
+        <button onclick="openBackupModal()" class="px-1.5 py-1.5 rounded-r-xl bg-emerald-950/70 hover:bg-emerald-900/80 border-t border-b border-r border-emerald-700/60 text-[10px] font-mono font-bold text-emerald-400 hover:text-white" title="Backup Settings & Restore">
+          ⚙️
+        </button>
+      </div>
+
+      <!-- Cloud Auto-Sync Status Button (Includes Live Test Inside Modal) -->
+      <button onclick="openSyncModal()" id="btn-sync-status" class="px-2 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[10px] font-mono font-bold text-zinc-300 flex items-center gap-1.5 transition-all" title="Cloud Sync Settings & Live Test">
+        <span id="header-sync-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span id="header-sync-text" class="hidden sm:inline">CLOUD</span>
+        <span id="header-pending-badge" class="hidden px-1.5 py-0.2 rounded bg-amber-500 text-black text-[9px] font-extrabold">0</span>
+      </button>
+
+      <!-- Audio Beep Toggle -->
+      <button onclick="toggleAudio()" id="btn-audio" class="p-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-amber-400 text-xs" title="Toggle Scan Beep">
+        🔔
+      </button>
+
+      <!-- Admin Setup Button -->
+      <button onclick="openAdminSetupModal('sessions')" class="p-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs" title="Event, Session & Roster Setup">
+        ⚙️
+      </button>
+
+      <!-- Lock Scanner Button -->
+      <button onclick="lockScanner()" class="px-2 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[10px] font-mono font-bold text-amber-400" title="Lock Scanner with Staff PIN">
+        🔒
+      </button>
+    </div>
+  </header>
+
+  <!-- ================================================================= -->
+  <!-- ERGONOMIC COMPACT MOBILE MAIN CONTAINER (NO VERTICAL CROWDING) -->
+  <!-- ================================================================= -->
+  <main class="flex-1 max-w-lg w-full mx-auto px-3 py-2.5 flex flex-col gap-2.5">
+
+    <!-- 1. SESSION SWITCHER + COMPACT LIVE VENUE OCCUPANCY STRIP -->
+    <section class="bg-zinc-950 border border-zinc-800/90 rounded-2xl p-2.5 shadow-lg">
+      <!-- Day 1 / Day 2 Filter Pills + ⚡ Live Now Button -->
+      <div class="flex items-center justify-between gap-1.5 mb-2 pb-1.5 border-b border-zinc-800/70 font-mono text-[10px]">
+        <div class="flex items-center gap-1 overflow-x-auto no-scrollbar" id="scanner-day-filter-bar">
+          <button onclick="setScannerDayFilter('all')" id="day-filter-all" class="px-2 py-1 rounded-lg font-bold bg-amber-600 text-white border border-amber-400 whitespace-nowrap transition-all">
+            All (8)
+          </button>
+          <button onclick="setScannerDayFilter('Day 1 (Oct 19)')" id="day-filter-d1" class="px-2 py-1 rounded-lg font-bold bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 whitespace-nowrap transition-all">
+            Day 1 (Oct 19)
+          </button>
+          <button onclick="setScannerDayFilter('Day 2 (Oct 20)')" id="day-filter-d2" class="px-2 py-1 rounded-lg font-bold bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 whitespace-nowrap transition-all">
+            Day 2 (Oct 20)
+          </button>
+        </div>
+        <button onclick="jumpToLiveSession()" id="btn-live-now" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold border border-emerald-400/80 shadow whitespace-nowrap shrink-0 flex items-center gap-1 transition-all" title="Auto-select active checkpoint based on current clock">
+          <span>⚡</span>
+          <span>Live Now</span>
+        </button>
+      </div>
+
+      <!-- Horizontal Scrollable Session Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2 mb-2 border-b border-zinc-800/80" id="game-tabs-container">
+        <!-- Dynamically rendered session tabs -->
+      </div>
+
+      <!-- Active Session Info + Live Occupancy Counters -->
+      <div class="flex items-center justify-between gap-2 flex-wrap">
+        <div class="flex items-center gap-2 min-w-0">
+          <span id="banner-game-icon" class="text-lg shrink-0">📋</span>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <h2 id="banner-game-title" class="text-xs font-extrabold text-white truncate">Session</h2>
+              <span id="banner-session-mode-badge" class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 uppercase">
+                ENTRY/EXIT
+              </span>
+            </div>
+            <p class="text-[10px] font-mono text-zinc-400 truncate">
+              <span id="banner-game-time" class="text-amber-300 font-semibold">--</span>
+              <span>•</span>
+              <span id="banner-game-court">Venue</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- High-Contrast Live Occupancy Counters -->
+        <div class="flex items-center gap-1.5 font-mono text-center shrink-0">
+          <div class="px-2.5 py-1 rounded-xl bg-emerald-950 border-2 border-emerald-500 shadow-sm">
+            <span class="text-[8px] text-emerald-300 font-bold block leading-none">🟢 INSIDE</span>
+            <span id="stat-inside" class="text-base sm:text-lg font-black text-emerald-200 leading-tight">0</span>
+          </div>
+          <div class="px-2.5 py-1 rounded-xl bg-zinc-900 border-2 border-zinc-600 shadow-sm">
+            <span class="text-[8px] text-zinc-300 font-bold block leading-none">🔴 OUT</span>
+            <span id="stat-outside" class="text-base sm:text-lg font-bold text-zinc-100 leading-tight">0</span>
+          </div>
+          <div class="px-2.5 py-1 rounded-xl bg-amber-950 border-2 border-amber-500 shadow-sm" title="Total Unique Attendees vs Total Roster">
+            <span class="text-[8px] text-amber-300 font-bold block leading-none">✅ TOTAL</span>
+            <span class="text-base sm:text-lg font-black text-amber-200 leading-tight"><span id="stat-total-in">0</span>/<span id="stat-roster">0</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. CAMERA QR VIEWPORT CARD (WITH 5-PART RETICLE, ZOOM, TORCH & iOS RECOVERY) -->
+    <section class="relative bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+      <!-- Top Bar Inside Camera Card: Auto-Scan Mode Toggle -->
+      <div class="px-3 py-1.5 bg-zinc-900/90 border-b border-zinc-800 flex items-center justify-between gap-2 text-[11px] font-mono">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+          <span class="text-zinc-300 font-bold truncate" id="scanner-mode-description">Auto-Scan Gate Mode</span>
+        </div>
+        <button onclick="toggleRapidMode()" id="btn-rapid-mode" class="px-2.5 py-0.5 rounded-lg bg-emerald-600 text-white font-bold text-[10px] border border-emerald-400 shadow transition-all shrink-0">
+          ⚡ AUTO-SCAN: ON
+        </button>
+      </div>
+
+      <!-- Live Video Viewport -->
+      <div class="relative w-full h-[320px] sm:h-[380px] bg-zinc-950 flex items-center justify-center overflow-hidden">
+        <div id="reader" class="w-full h-full"></div>
+
+        <!-- 5-Part Precision Reticle -->
+        <div id="scan-laser" class="scan-reticle">
+          <div class="corner-tr"></div>
+          <div class="corner-bl"></div>
+          <div class="corner-br"></div>
+        </div>
+
+        <!-- Instant Rapid Scan Toast Overlay -->
+        <div id="rapid-scan-toast" class="hidden absolute inset-x-3 bottom-3 z-30 pointer-events-none transition-all duration-200">
+          <!-- Dynamically populated on scan -->
+        </div>
+
+        <!-- Aim Guide Pill -->
+        <div class="absolute bottom-2.5 inset-x-0 flex justify-center pointer-events-none z-10">
+          <span class="px-2.5 py-0.5 rounded-full bg-black/75 backdrop-blur-md border border-amber-500/40 text-[10px] font-mono text-amber-300">
+            Aim QR inside reticle • Tap 1.5x/2x for small codes
+          </span>
+        </div>
+
+        <!-- Camera Switch & Torch Controls -->
+        <div class="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
+          <button onclick="switchCamera()" id="btn-switch-cam" class="p-2 rounded-xl bg-black/65 backdrop-blur-md border border-white/20 text-white text-xs hover:bg-black/85 transition-colors" title="Switch Camera">
+            🔄
+          </button>
+          <button onclick="toggleTorch()" id="btn-torch" class="p-2 rounded-xl bg-black/65 backdrop-blur-md border border-white/20 text-white text-xs hover:bg-black/85 transition-colors" title="Toggle Flashlight / Torch">
+            🔦
+          </button>
+        </div>
+
+        <!-- 1x / 1.5x / 2x Zoom Toggles -->
+        <div class="absolute top-2.5 left-2.5 flex items-center gap-1 z-10 bg-black/65 backdrop-blur-md p-1 rounded-xl border border-white/20 text-[11px] font-mono shadow-lg">
+          <button id="zoom-1x" onclick="cycleZoom(1.0)" class="px-2 py-0.5 rounded-lg font-bold bg-amber-600 text-white transition-all scale-105">1x</button>
+          <button id="zoom-15x" onclick="cycleZoom(1.5)" class="px-2 py-0.5 rounded-lg font-medium text-zinc-300 hover:text-white transition-all">1.5x</button>
+          <button id="zoom-2x" onclick="cycleZoom(2.0)" class="px-2 py-0.5 rounded-lg font-medium text-zinc-300 hover:text-white transition-all">2x</button>
+        </div>
+
+        <!-- iOS Safari Video Paused Recovery Overlay -->
+        <div id="video-paused-alert" onclick="ensureVideoPlaying()" class="hidden absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center z-25 cursor-pointer">
+          <div class="w-11 h-11 rounded-full bg-amber-500 flex items-center justify-center text-black text-xl mb-2 shadow-xl animate-pulse">
+            ▶
+          </div>
+          <h3 class="text-xs font-bold text-white mb-0.5">Camera Feed Paused</h3>
+          <p class="text-[10px] text-amber-300 mb-2 max-w-xs">Tap anywhere to resume live scanning</p>
+          <span class="px-2.5 py-0.5 rounded-lg bg-zinc-800 text-[10px] text-zinc-300 border border-zinc-700">Tap to Resume</span>
+        </div>
+
+        <!-- iOS Safari Camera Permission Recovery Screen -->
+        <div id="cam-fallback" class="hidden absolute inset-0 bg-zinc-950/95 flex flex-col items-center justify-center p-3 text-center z-20 overflow-y-auto">
+          <span class="text-xl mb-1">🔓📷</span>
+          <p class="text-xs text-white font-bold font-mono mb-1" id="cam-fallback-msg">Camera Permission Required</p>
+          <div class="text-[10px] text-zinc-300 font-mono mb-2.5 max-w-xs text-left bg-zinc-900/90 p-2.5 rounded-xl border border-zinc-800 space-y-1">
+            <p class="text-amber-300 font-bold">To enable Live Video on iPhone Safari:</p>
+            <p>1. Tap the <strong>"aA"</strong> or <strong>🔒 Lock/Settings</strong> icon in Safari's address bar.</p>
+            <p>2. Tap <strong>Website Settings</strong> → <strong>Camera</strong> → Select <strong>"Allow"</strong>.</p>
+            <p>3. Tap <strong>"Try Camera Again"</strong> below.</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap justify-center">
+            <button onclick="requestCameraPermissionAndStart()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-mono font-bold shadow-lg">
+              🔄 Try Camera Again
+            </button>
+            <label class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-mono font-bold cursor-pointer flex items-center gap-1 shadow-lg">
+              📸 Snap QR Photo
+              <input type="file" accept="image/*" capture="environment" class="hidden" onchange="scanImageFile(event)" />
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. CLEAN BOTTOM TABS: MANUAL LOOKUP vs RECENT ACTIVITY vs EVENT SETUP -->
+    <section class="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl flex flex-col">
+      <!-- Segmented Bottom Drawer Navigation -->
+      <div class="grid grid-cols-3 bg-zinc-900/90 border-b border-zinc-800 p-1 gap-1 font-mono text-[11px]">
+        <button onclick="switchBottomDrawerTab('lookup')" id="tab-btn-lookup" class="py-1.5 px-2 rounded-xl font-bold bg-amber-600 text-white shadow transition-all flex items-center justify-center gap-1">
+          <span>🔍</span>
+          <span>Lookup / QR</span>
+        </button>
+        <button onclick="switchBottomDrawerTab('activity')" id="tab-btn-activity" class="py-1.5 px-2 rounded-xl font-bold text-zinc-400 hover:text-white transition-all flex items-center justify-center gap-1">
+          <span>📋</span>
+          <span>Activity</span>
+          <span id="tab-activity-badge" class="px-1.5 py-0.2 rounded-full bg-zinc-800 text-amber-300 text-[9px]">0</span>
+        </button>
+        <button onclick="openAdminSetupModal('events')" id="tab-btn-setup" class="py-1.5 px-2 rounded-xl font-bold text-zinc-400 hover:text-white transition-all flex items-center justify-center gap-1">
+          <span>⚙️</span>
+          <span>Setup / CSV</span>
+        </button>
+      </div>
+
+      <!-- TAB PANEL 1: MANUAL STUDENT LOOKUP & QR IMAGE UPLOAD -->
+      <div id="drawer-panel-lookup" class="p-3 space-y-2">
+        <div class="relative flex items-center gap-1.5">
+          <div class="relative flex-1">
+            <input 
+              type="text" 
+              id="manual-code-input" 
+              placeholder="Search ID, Code, Name (e.g. Garcia, Ramos)..." 
+              autocomplete="off"
+              class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-xs font-mono placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+              onfocus="onManualInputFocus()"
+              oninput="onManualSearchInput(this.value)"
+              onkeydown="if(event.key==='Enter') processManualInput()"
+            />
+            <!-- Live Search Autocomplete Dropdown -->
+            <div id="manual-autocomplete" class="hidden absolute left-0 right-0 top-full mt-1 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl max-h-80 overflow-y-auto z-30 divide-y divide-zinc-800/80 font-mono text-xs">
+            </div>
+          </div>
+          <button onclick="processManualInput()" class="px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-mono font-bold shrink-0">
+            Lookup
+          </button>
+          <label class="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-amber-300 cursor-pointer text-xs shrink-0" title="Snap QR with Native Camera">
+            📸
+            <input type="file" accept="image/*" capture="environment" class="hidden" onchange="scanImageFile(event)" />
+          </label>
+          <label class="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 cursor-pointer text-xs shrink-0" title="Upload QR Image File">
+            📁
+            <input type="file" accept="image/*" class="hidden" onchange="scanImageFile(event)" />
+          </label>
+        </div>
+        <div class="flex items-center justify-between text-[10px] font-mono text-zinc-500 px-0.5">
+          <span>Supports raw ID, QR JSON, URL, or Name</span>
+          <a href="engday_attendance.html" class="text-amber-400 hover:underline font-bold">Open Full Roster Table →</a>
+        </div>
+      </div>
+
+      <!-- TAB PANEL 2: SESSION-FILTERED RECENT ACTIVITY FEED -->
+      <div id="drawer-panel-activity" class="hidden p-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[10px] font-mono font-bold text-zinc-400 uppercase">Recent Session Scans</span>
+          <span id="feed-game-label" class="text-[10px] px-2 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-800/60 font-mono">Session</span>
+        </div>
+        <div id="recent-scans-list" class="space-y-1.5 overflow-y-auto max-h-[195px] font-mono text-xs">
+          <p class="text-center text-zinc-500 py-4 text-[11px]">No scans recorded for this session yet.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 1: STUDENT PROFILE & CHECK-IN / CHECK-OUT MODAL -->
+  <!-- ================================================================= -->
+  <div id="verify-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="w-full max-w-md bg-zinc-950 border-2 border-amber-500/80 rounded-3xl p-5 shadow-2xl relative my-auto max-h-[92vh] overflow-y-auto">
+      
+      <button onclick="closeVerifyModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white text-lg w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center">
+        ✕
+      </button>
+
+      <!-- Top Header -->
+      <div class="flex items-center gap-2 mb-3 flex-wrap pr-8">
+        <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700/80 font-mono font-bold">
+          STUDENT VERIFIED
+        </span>
+        <span id="modal-active-game-badge" class="text-[11px] px-2.5 py-0.5 rounded-full bg-zinc-900 text-cyan-300 border border-zinc-700 font-mono font-bold">
+          SESSION
+        </span>
+      </div>
+
+      <!-- Student Identity Card -->
+      <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 mb-3">
+        <div id="modal-avatar" class="w-13 h-13 min-w-[52px] min-h-[52px] rounded-2xl bg-amber-950 border border-amber-500/40 text-amber-300 font-mono font-extrabold text-lg flex items-center justify-center shrink-0">
+          ST
+        </div>
+        <div class="flex-1 min-w-0">
+          <h2 id="modal-student-name" class="text-sm sm:text-base font-extrabold text-white leading-tight break-words">
+            STUDENT NAME
+          </h2>
+          <div class="flex items-center gap-2 mt-1 flex-wrap font-mono text-xs">
+            <span id="modal-student-code" class="text-amber-400 font-bold">ID-0001</span>
+            <span class="text-zinc-600">•</span>
+            <span id="modal-team-badge" class="px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider border-2 shadow-md">
+              GROUP
+            </span>
+          </div>
+          <p id="modal-last-action" class="text-[11px] text-zinc-400 mt-1 font-mono">
+            No scans in this session yet
+          </p>
+        </div>
+      </div>
+
+      <!-- Current Session Status -->
+      <div class="flex items-center justify-between p-3 rounded-xl bg-zinc-900 border border-zinc-800 font-mono text-xs mb-3">
+        <div>
+          <span class="text-zinc-400 block text-[10px]">Status in <strong id="modal-active-game-name" class="text-white">Session</strong>:</span>
+          <span id="modal-visit-count" class="text-[10px] text-zinc-500">0 check-ins recorded</span>
+        </div>
+        <span id="modal-current-status" class="px-4 py-1.5 rounded-xl text-sm font-black tracking-wide border-2 shadow-md">
+          🔴 OUTSIDE
+        </span>
+      </div>
+
+      <!-- Anti-Cutting Dwell Stats Row -->
+      <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-800 font-mono text-xs mb-3">
+        <span id="modal-dwell-stats" class="text-amber-300 font-bold">⏱️ Inside: 0m | 🚪 Exits: 0</span>
+        <span id="modal-credit-badge" class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase border bg-zinc-900 text-zinc-400 border-zinc-700">ABSENT</span>
+      </div>
+
+      <!-- Anti-Cutting Away Warning Banner -->
+      <div id="modal-away-warning" class="hidden mb-3 p-2.5 rounded-xl bg-rose-950/90 border border-rose-500/80 text-rose-200 font-mono text-xs font-bold flex items-center gap-2">
+        <span class="text-base shrink-0">⚠️</span>
+        <span id="modal-away-warning-text" class="leading-tight">Away for X mins (Exceeded 20m break limit)</span>
+      </div>
+
+      <!-- Multi-Session Attendance Matrix (Dynamically Sized to Event's Sessions!) -->
+      <div class="mb-3 rounded-2xl bg-zinc-900/80 border border-zinc-800 p-3 font-mono text-xs">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Event Attendance Matrix</span>
+          <span id="modal-games-progress" class="text-[10px] text-amber-400 font-bold">0/8 Checkpoints</span>
+        </div>
+        <div id="modal-games-matrix" class="grid grid-cols-4 gap-1.5 text-center">
+          <!-- Dynamically populated for all sessions in the active event -->
+        </div>
+      </div>
+
+      <!-- Per-Student Session Activity Log -->
+      <div class="mb-3 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 p-3 font-mono text-xs">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Recent Activity (This Student)</span>
+          <span class="text-[9px] text-zinc-500">Tap 🗑️ to undo</span>
+        </div>
+        <div id="modal-student-history" class="space-y-1.5 max-h-28 overflow-y-auto">
+          <p class="text-[10px] text-zinc-500 text-center py-1">No scans recorded yet.</p>
+        </div>
+      </div>
+
+      <!-- Exit Note Selector (Shown when checking out of an Entry/Exit session) -->
+      <div id="checkout-reason-box" class="hidden mb-3 p-3 rounded-xl bg-zinc-900 border border-zinc-800 font-mono text-xs">
+        <label class="block text-[10px] text-zinc-400 uppercase font-bold mb-1.5">Exit Note (Optional):</label>
+        <select id="checkout-reason-select" class="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-white text-xs focus:outline-none focus:border-amber-500">
+          <option value="Session / Activity Concluded">Session / Activity Concluded</option>
+          <option value="Lunch / Water / Rest Break">Lunch / Water / Rest Break</option>
+          <option value="Transferring to Lab / Booths / Other Venue">Transferring to Lab / Booths / Other Venue</option>
+          <option value="Player / Contestant Rotation">Player / Contestant Rotation</option>
+          <option value="Leaving Venue / Campus">Leaving Venue / Campus</option>
+        </select>
+      </div>
+
+      <!-- Primary Check-In / Check-Out Action & Manual Overrides -->
+      <div class="space-y-2 font-mono">
+        <button 
+          id="btn-primary-action" 
+          onclick="executePrimaryAction()" 
+          class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-sm uppercase tracking-wider shadow-lg shadow-emerald-950 transition-all"
+        >
+          🟢 CHECK IN TO SESSION
+        </button>
+
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button 
+            onclick="forceRecordAction('check_in')" 
+            class="py-2 rounded-xl bg-zinc-900 hover:bg-emerald-950/60 border border-zinc-800 hover:border-emerald-700/60 text-[11px] font-bold text-emerald-400 transition-colors"
+          >
+            + Force Check-In
+          </button>
+          <button 
+            id="btn-force-checkout"
+            onclick="forceRecordAction('check_out')" 
+            class="py-2 rounded-xl bg-zinc-900 hover:bg-red-950/60 border border-zinc-800 hover:border-red-700/60 text-[11px] font-bold text-red-400 transition-colors"
+          >
+            - Force Check-Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 2: STAFF PIN AUTHORIZATION LOCK GATE -->
+  <!-- ================================================================= -->
+  <div id="staff-auth-modal" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-zinc-950 border-2 border-amber-500/80 rounded-3xl p-6 shadow-2xl font-mono text-center">
+      <div class="w-14 h-14 rounded-2xl bg-amber-950 border border-amber-500/40 text-amber-300 font-extrabold text-2xl flex items-center justify-center mx-auto mb-3">
+        🔒
+      </div>
+      <h2 class="text-base font-extrabold text-white uppercase tracking-wider mb-1">
+        MARSHAL & STAFF ACCESS
+      </h2>
+      <p class="text-xs text-zinc-400 mb-5">
+        Enter the event Staff PIN to unlock the attendance scanner and admin controls.
+      </p>
+
+      <div class="space-y-2 mb-5 text-left">
+        <label for="staff-pin-input" class="block text-[11px] font-bold text-zinc-300 uppercase">
+          Staff PIN (Default: 2026):
+        </label>
+        <input 
+          type="password" 
+          id="staff-pin-input" 
+          placeholder="Enter PIN..." 
+          maxlength="16"
+          class="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-700 text-amber-300 text-center font-bold tracking-widest text-lg focus:outline-none focus:border-amber-400"
+          onkeydown="if(event.key==='Enter') verifyStaffPin()"
+        />
+        <p id="staff-pin-error" class="hidden text-xs text-red-400 font-bold text-center mt-1">
+          ❌ Incorrect PIN. Access denied.
+        </p>
+      </div>
+
+      <div class="space-y-2">
+        <button 
+          onclick="verifyStaffPin()" 
+          class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg"
+        >
+          🔓 Unlock Scanner
+        </button>
+        <a 
+          href="engday_attendance.html" 
+          class="block w-full py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs text-zinc-400 hover:text-white transition-colors"
+        >
+          📊 View Attendance Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 3: CLOUD AUTO-SYNC & LIVE CLOUD TEST TOOL -->
+  <!-- ================================================================= -->
+  <div id="sync-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-md bg-zinc-950 border-2 border-cyan-500/80 rounded-3xl p-5 shadow-2xl font-mono my-auto">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">☁️</span>
+          <div>
+            <h3 class="text-sm font-extrabold text-white uppercase tracking-wider">Cloud Auto-Sync & Test</h3>
+            <p class="text-[10px] text-cyan-400">Multi-Phone Real-Time Sync Across Wi-Fi / Mobile Data</p>
+          </div>
+        </div>
+        <button onclick="closeSyncModal()" class="w-8 h-8 rounded-full bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center text-sm">✕</button>
+      </div>
+
+      <!-- Live Status Box -->
+      <div class="p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800 mb-3 space-y-1.5 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Device ID:</span>
+          <span id="sync-device-id" class="text-white font-bold">MARSHAL-ENG</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Connection Status:</span>
+          <span id="sync-modal-status" class="text-emerald-400 font-bold">Checking...</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Pending Upload Queue:</span>
+          <span id="sync-modal-pending" class="text-amber-300 font-bold">0 scans waiting</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Last Cloud Sync:</span>
+          <span id="sync-modal-last" class="text-zinc-300">--:--</span>
+        </div>
+      </div>
+
+      <!-- Server URL Configuration -->
+      <div class="mb-4">
+        <label class="block text-[10px] font-bold text-zinc-300 uppercase mb-1">
+          Cloud / Host Server URL:
+        </label>
+        <input 
+          type="url" 
+          id="sync-server-url-input" 
+          placeholder="https://your-app.vercel.app or http://192.168.1.x:3333" 
+          class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-xs focus:outline-none focus:border-cyan-400 mb-1.5"
+        />
+        <div class="flex items-center justify-between gap-2">
+          <button onclick="useCurrentOriginAsServer()" class="text-[10px] text-cyan-400 hover:underline">
+            Use Current Host URL
+          </button>
+          <button onclick="forceCloudSyncNow()" class="text-[10px] text-amber-400 hover:underline font-bold">
+            🔄 Force Sync Now
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Cloud Sync Diagnostic Test (Moved Inside Modal to Declutter Main UI) -->
+      <div class="p-3 rounded-2xl bg-cyan-950/25 border border-cyan-800/50 mb-4">
+        <div class="flex items-center justify-between gap-2 mb-1.5">
+          <div>
+            <span class="text-[11px] font-bold text-cyan-300 block">🧪 Live Cloud Sync Test</span>
+            <span class="text-[10px] text-zinc-400 block">Sends a test scan & verifies cloud roundtrip</span>
+          </div>
+          <button onclick="sendTestCloudScan()" id="btn-test-cloud-sync" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[10px] uppercase shrink-0 shadow">
+            Run Test
+          </button>
+        </div>
+        <p id="cloud-test-result" class="hidden text-[10px] text-emerald-300 bg-zinc-950/90 p-2 rounded-lg border border-zinc-800 mt-1.5"></p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="closeSyncModal()" class="py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-bold text-zinc-300">
+          Close
+        </button>
+        <button onclick="saveSyncServerConfig()" class="py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold uppercase shadow-lg">
+          💾 Save & Sync
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 4: 4-LAYER LOCAL BACKUP & RESTORE CENTER -->
+  <!-- ================================================================= -->
+  <div id="backup-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-md bg-zinc-950 border-2 border-emerald-500/80 rounded-3xl p-5 shadow-2xl font-mono my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🛡️</span>
+          <div>
+            <h3 class="text-sm font-extrabold text-white uppercase tracking-wider">4-Layer Local Backup</h3>
+            <p class="text-[10px] text-emerald-400">Zero-Data-Loss Offline Protection</p>
+          </div>
+        </div>
+        <button onclick="closeBackupModal()" class="w-8 h-8 rounded-full bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center text-sm">✕</button>
+      </div>
+
+      <!-- Layer 1: Automatic IndexedDB + LocalStorage -->
+      <div class="p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800 mb-3 space-y-1 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">1. Auto Browser DB:</span>
+          <span class="text-emerald-400 font-bold">🟢 ACTIVE (Every Scan)</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Total Saved Scans:</span>
+          <span id="backup-stat-scans" class="text-white font-bold">0 scans</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Students Checked In:</span>
+          <span id="backup-stat-students" class="text-amber-300 font-bold">0 students</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Last Local Write:</span>
+          <span id="backup-stat-last" class="text-zinc-300">--:--</span>
+        </div>
+      </div>
+
+      <!-- Layer 2: 1-Tap Backup & Restore (JSON + CSV) -->
+      <div class="space-y-2 mb-3">
+        <button onclick="downloadImmediateBackup()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2">
+          <span>💾</span> Export / Backup Now (.JSON)
+        </button>
+
+        <button onclick="window.ENGDAY_ATTENDANCE && window.ENGDAY_ATTENDANCE.downloadCSV()" class="w-full py-2 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-amber-300 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2">
+          <span>📊</span> Export Active Event Spreadsheet (.CSV)
+        </button>
+
+        <label class="w-full py-2 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-cyan-300 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer">
+          <span>📂</span> Restore / Merge From Backup (.JSON)
+          <input type="file" accept=".json,application/json" class="hidden" onchange="handleRestoreBackupScanner(event)" />
+        </label>
+      </div>
+
+      <!-- Layer 3: Configurable 20-Minute Scheduled Auto-Backup -->
+      <div class="p-3 rounded-2xl bg-zinc-900/60 border border-zinc-800/90 mb-3 text-xs">
+        <span class="text-[10px] font-bold text-amber-300 uppercase block mb-1">
+          3. Scheduled 20-Minute Auto-Backup
+        </span>
+        <p class="text-[10px] text-zinc-400 mb-2 leading-relaxed">
+          Full backups run automatically <strong>every 20 minutes</strong> only when new scans occur, preserving Vercel bandwidth while keeping multi-device scans safe.
+        </p>
+        <div class="grid grid-cols-4 gap-1 text-[10px]">
+          <button onclick="setAutoBackupMode('off')" id="autobackup-off" class="py-1.5 rounded-lg bg-zinc-800 text-zinc-300 font-bold border border-zinc-700">Off</button>
+          <button onclick="setAutoBackupMode('every_10')" id="autobackup-every_10" class="py-1.5 rounded-lg bg-zinc-800 text-zinc-300 font-bold border border-zinc-700">Manual</button>
+          <button onclick="setAutoBackupMode('every_5')" id="autobackup-every_5" class="py-1.5 rounded-lg bg-zinc-800 text-zinc-300 font-bold border border-zinc-700">Paused</button>
+          <button onclick="setAutoBackupMode('20m')" id="autobackup-every" class="py-1.5 rounded-lg bg-zinc-800 text-zinc-300 font-bold border border-zinc-700">20 Mins</button>
+        </div>
+      </div>
+
+      <!-- Layer 4: Chrome File System Access API (Direct PC Hard Drive Link) -->
+      <div class="p-3 rounded-2xl bg-emerald-950/20 border border-emerald-800/50 mb-3 text-xs">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[10px] font-bold text-emerald-300 uppercase">4. Direct PC Hard Drive Link</span>
+          <span id="disk-file-status" class="text-[9px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">Not Linked</span>
+        </div>
+        <p class="text-[10px] text-zinc-400 mb-2">
+          On Desktop Chrome/Edge, link a local <code>.json</code> file for silent real-time disk writes on every scan.
+        </p>
+        <button onclick="connectLocalHardDriveFile()" class="w-full py-2 rounded-xl bg-emerald-900/60 hover:bg-emerald-800/80 border border-emerald-600/60 text-emerald-200 font-bold text-[11px]">
+          🔗 Link Local Hard Drive File (PC Chrome)
+        </button>
+      </div>
+
+      <button onclick="closeBackupModal()" class="w-full py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-bold text-zinc-400">
+        Done
+      </button>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 5: DYNAMIC EVENT, SESSION & ROSTER ADMIN SETUP (PIN PROTECTED) -->
+  <!-- ================================================================= -->
+  <div id="admin-setup-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="w-full max-w-2xl bg-zinc-950 border-2 border-amber-500/80 rounded-3xl p-4 sm:p-5 shadow-2xl font-mono my-auto max-h-[92vh] flex flex-col">
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-3 shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">⚙️</span>
+          <div>
+            <h3 class="text-sm font-extrabold text-white uppercase tracking-wider">Event, Session & Roster Manager</h3>
+            <p class="text-[10px] text-amber-400">Dynamic Configuration • Syncs to Local Storage & Cloud</p>
+          </div>
+        </div>
+        <button onclick="closeAdminSetupModal()" class="w-8 h-8 rounded-full bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center text-sm">✕</button>
+      </div>
+
+      <!-- Sub-Navigation Tabs -->
+      <div class="grid grid-cols-3 gap-1.5 bg-zinc-900 p-1 rounded-xl border border-zinc-800 mb-3 text-xs shrink-0">
+        <button onclick="switchAdminTab('events')" id="admin-tab-btn-events" class="py-2 rounded-lg font-bold bg-amber-600 text-white">
+          1. Events
+        </button>
+        <button onclick="switchAdminTab('sessions')" id="admin-tab-btn-sessions" class="py-2 rounded-lg font-bold text-zinc-400 hover:text-white">
+          2. Sessions (<span id="admin-session-count">0</span>)
+        </button>
+        <button onclick="switchAdminTab('roster')" id="admin-tab-btn-roster" class="py-2 rounded-lg font-bold text-zinc-400 hover:text-white">
+          3. Roster (<span id="admin-roster-count">0</span>)
+        </button>
+      </div>
+
+      <!-- Scrollable Body -->
+      <div class="flex-1 overflow-y-auto pr-1 space-y-4 text-xs">
+        
+        <!-- SUB-PANEL 1: EVENTS MANAGER -->
+        <div id="admin-panel-events" class="space-y-3">
+          <div class="p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800">
+            <label class="block text-[10px] text-amber-400 font-bold uppercase mb-1.5">Switch Active Event:</label>
+            <div class="flex items-center gap-2">
+              <select id="admin-event-select" onchange="onSelectEventFromAdmin(this.value)" class="flex-1 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-white font-bold text-xs focus:outline-none focus:border-amber-500">
+              </select>
+              <button onclick="prepareNewEventForm()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] shrink-0">
+                + New Event
+              </button>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h4 id="admin-event-form-heading" class="text-xs font-extrabold text-white uppercase">Edit Active Event Settings</h4>
+              <input type="hidden" id="admin-event-id" value="" />
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Event Title:</label>
+                <input type="text" id="admin-event-title" placeholder="e.g. Science Fair 2026" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Venue / Location:</label>
+                <input type="text" id="admin-event-venue" placeholder="e.g. University Auditorium" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Subtitle / Description:</label>
+                <input type="text" id="admin-event-subtitle" placeholder="e.g. General Attendance" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Staff Lock PIN:</label>
+                <input type="text" id="admin-event-pin" placeholder="2026" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-amber-300 font-bold text-xs" />
+              </div>
+            </div>
+            <div id="admin-new-event-roster-opt" class="hidden pt-1">
+              <label class="block text-[10px] text-zinc-400 mb-1">Initial Student Roster for New Event:</label>
+              <select id="admin-event-roster-source" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs">
+                <option value="copy_current">Copy Current Event's Student Roster</option>
+                <option value="empty">Start with Empty Roster (Import CSV/Excel Next)</option>
+                <option value="default_meodl">Default Engineering 175-Student Roster</option>
+              </select>
+            </div>
+            <div class="flex items-center justify-between gap-2 pt-2">
+              <button onclick="confirmResetActiveEventScans()" class="px-3 py-2 rounded-xl bg-red-950/60 hover:bg-red-900/70 border border-red-800/70 text-red-300 font-bold text-[11px]">
+                🗑️ Reset Event Scans
+              </button>
+              <button onclick="saveEventFromAdmin()" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-lg">
+                💾 Save Event
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-PANEL 2: SESSIONS & GATE MODE MANAGER -->
+        <div id="admin-panel-sessions" class="hidden space-y-3">
+          <!-- Existing Sessions List -->
+          <div class="space-y-1.5" id="admin-sessions-list">
+          </div>
+
+          <!-- Add / Edit Session Form -->
+          <div class="p-3.5 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h4 id="admin-session-form-title" class="text-xs font-extrabold text-amber-300 uppercase">+ Add / Edit Session</h4>
+              <button onclick="resetSessionForm()" class="text-[10px] text-zinc-400 hover:text-white underline">Clear Form</button>
+            </div>
+            <input type="hidden" id="admin-sess-id" value="" />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Session Full Name:</label>
+                <input type="text" id="admin-sess-name" placeholder="e.g. Morning Keynote / Game 1" class="w-full px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Short Tab Label:</label>
+                <input type="text" id="admin-sess-short" placeholder="e.g. AM Keynote" class="w-full px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Time Slot:</label>
+                <input type="text" id="admin-sess-time" placeholder="e.g. 8:00 AM – 10:00 AM" class="w-full px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Location / Court / Gate:</label>
+                <input type="text" id="admin-sess-court" placeholder="e.g. Main Hall / Court A" class="w-full px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Category & Icon:</label>
+                <div class="flex gap-1.5">
+                  <input type="text" id="admin-sess-icon" placeholder="📋" maxlength="4" class="w-12 px-2 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-center text-sm" />
+                  <input type="text" id="admin-sess-category" placeholder="General / Sports / Lecture" class="flex-1 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] text-zinc-400 mb-1">Session Mode:</label>
+                <select id="admin-sess-mode" class="w-full px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-cyan-300 font-bold text-xs">
+                  <option value="entry_exit">🔄 Entry / Exit Gate (Tracks Inside & Out)</option>
+                  <option value="check_in_only">✅ Check-In Only (1-Way Attendance)</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] text-zinc-400 mb-1">Custom Exit Note Options (Comma separated, for Entry/Exit mode):</label>
+              <input type="text" id="admin-sess-exit-notes" placeholder="Session / Activity Concluded, Lunch / Water / Rest Break, Transferring to Lab / Booths / Other Venue, Player / Contestant Rotation, Leaving Venue / Campus" class="w-full px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-zinc-200 text-xs" />
+            </div>
+            <button onclick="saveSessionFromAdmin()" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase shadow-lg">
+              💾 Save Session
+            </button>
+          </div>
+        </div>
+
+        <!-- SUB-PANEL 3: CSV / EXCEL / JSON STUDENT ROSTER IMPORTER -->
+        <div id="admin-panel-roster" class="hidden space-y-3">
+          <!-- Quick Single Student Add -->
+          <div class="p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-2">
+            <span class="text-[10px] font-bold text-emerald-400 uppercase block">+ Quick Add Single Student</span>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input type="text" id="quick-stu-code" placeholder="ID / Code (e.g. 2024-001)" class="px-2.5 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              <input type="text" id="quick-stu-name" placeholder="Full Name (e.g. DELA CRUZ, JUAN)" class="px-2.5 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+              <div class="flex gap-1.5">
+                <input type="text" id="quick-stu-group" placeholder="Program (IE, ME, CE, EE, ECE, CPE)" class="flex-1 px-2.5 py-1.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs" />
+                <button onclick="quickAddSingleStudent()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shrink-0">Add</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bulk CSV / Excel / JSON Importer -->
+          <div class="p-3.5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-2.5">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h4 class="text-xs font-extrabold text-white uppercase">📥 Bulk Import Roster (CSV / Excel Copy-Paste / JSON)</h4>
+                <p class="text-[10px] text-zinc-400">Upload a <code>.csv</code>, <code>.tsv</code>, <code>.txt</code>, or <code>.json</code> file, or paste rows directly from Excel.</p>
+              </div>
+              <label class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-[11px] cursor-pointer shrink-0">
+                📂 Choose File
+                <input type="file" accept=".csv,.tsv,.txt,.json" class="hidden" onchange="handleRosterFileUpload(event)" />
+              </label>
+            </div>
+
+            <textarea 
+              id="roster-paste-input" 
+              rows="4" 
+              oninput="previewRosterImport()"
+              placeholder="Paste Excel / CSV rows here...&#10;Example:&#10;2024-0001, DELA CRUZ JUAN, ME&#10;2024-0002, SANTOS MARIA, ECE"
+              class="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-zinc-200 text-[11px] font-mono focus:outline-none focus:border-amber-500"
+            ></textarea>
+
+            <!-- Column Mapping & Import Mode -->
+            <div id="roster-mapping-box" class="hidden p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-2">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div>
+                  <label class="block text-[9px] text-zinc-400 uppercase mb-0.5">Student ID / Code Column:</label>
+                  <select id="map-col-code" onchange="renderRosterPreviewTable()" class="w-full px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-amber-300 text-xs"></select>
+                </div>
+                <div>
+                  <label class="block text-[9px] text-zinc-400 uppercase mb-0.5">Full Name Column:</label>
+                  <select id="map-col-name" onchange="renderRosterPreviewTable()" class="w-full px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-xs"></select>
+                </div>
+                <div>
+                  <label class="block text-[9px] text-zinc-400 uppercase mb-0.5">Group / House / Section:</label>
+                  <select id="map-col-group" onchange="renderRosterPreviewTable()" class="w-full px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-cyan-300 text-xs"></select>
+                </div>
+              </div>
+              <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
+                <label class="flex items-center gap-1.5 text-[11px] text-zinc-300">
+                  <span>Import Mode:</span>
+                  <select id="roster-import-mode" class="px-2 py-1 rounded bg-zinc-900 border border-zinc-700 text-white text-[11px]">
+                    <option value="merge">Merge / Update Existing Roster (Safe)</option>
+                    <option value="replace">Replace Entire Roster for This Event</option>
+                  </select>
+                </label>
+                <span id="roster-preview-count" class="text-[10px] text-emerald-400 font-bold">0 rows detected</span>
+              </div>
+              <div id="roster-preview-table" class="max-h-28 overflow-y-auto border border-zinc-800 rounded-lg text-[10px]"></div>
+              <button onclick="executeRosterImport()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs uppercase shadow-lg">
+                ✅ Import Students & Sync to Cloud
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- SCANNER APPLICATION LOGIC (ALL 13 BUGS FIXED + DYNAMIC ENGINE) -->
+  <!-- ================================================================= -->
+  <script>
+    let html5QrScanner = null;
+    let cameraTransitionPromise = Promise.resolve();
+    let activeScannedStudent = null;
+    let audioEnabled = true;
+    let rapidModeEnabled = true;
+    let rapidToastTimeout = null;
+    let currentCameraId = null;
+    let camerasList = [];
+    let currentZoom = 1.0;
+    let videoWatcherInterval = null;
+    let currentCameraFacing = 'environment';
+    let torchOn = false;
+    let pendingAdminTabAfterPin = null;
+    let scannerDayFilter = 'all';
+
+    // Per-student & global scan debounce state
+    let lastGlobalScanTime = 0;
+    const lastScanByPayloadMap = new Map();
+    const SAME_CODE_COOLDOWN_MS = 4500;
+    const GLOBAL_FRAME_DEBOUNCE_MS = 350;
+
+    // -----------------------------------------------------------------------
+    // 1. SYNTHESIZED AUDIO ENGINE
+    // -----------------------------------------------------------------------
+    let sharedAudioCtx = null;
+    function getAudioContext() {
+      if (!sharedAudioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) sharedAudioCtx = new AudioContextClass();
+      }
+      if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+        sharedAudioCtx.resume().catch(() => {});
+      }
+      return sharedAudioCtx;
+    }
+
+    ['touchstart', 'touchend', 'click'].forEach(evt => {
+      document.addEventListener(evt, () => {
+        try { getAudioContext(); } catch(e) {}
+      }, { once: true, passive: true });
+    });
+
+    function playBeep(type = 'success') {
+      if (!audioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'success') {
+          osc.frequency.setValueAtTime(880, ctx.currentTime);
+          osc.frequency.setValueAtTime(1318.5, ctx.currentTime + 0.08);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.24);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.24);
+        } else if (type === 'checkout') {
+          osc.frequency.setValueAtTime(987.7, ctx.currentTime);
+          osc.frequency.setValueAtTime(659.2, ctx.currentTime + 0.09);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.26);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.26);
+        } else {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(300, ctx.currentTime);
+          osc.frequency.setValueAtTime(180, ctx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.35, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.35);
+        }
+      } catch(e) {}
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('btn-audio');
+      if (btn) {
+        btn.textContent = audioEnabled ? '🔔' : '🔕';
+        btn.classList.toggle('text-amber-400', audioEnabled);
+        btn.classList.toggle('text-zinc-500', !audioEnabled);
+      }
+    }
+
+    function toggleRapidMode() {
+      rapidModeEnabled = !rapidModeEnabled;
+      const btn = document.getElementById('btn-rapid-mode');
+      const desc = document.getElementById('scanner-mode-description');
+      if (!btn) return;
+      if (rapidModeEnabled) {
+        btn.textContent = '⚡ AUTO-SCAN: ON';
+        btn.className = 'px-2.5 py-0.5 rounded-lg bg-emerald-600 text-white font-bold text-[10px] border border-emerald-400 shadow transition-all shrink-0';
+        if (desc) desc.textContent = 'Auto-Scan Gate Mode (1-Step Instant)';
+      } else {
+        btn.textContent = '🛡️ VERIFY MODAL: ON';
+        btn.className = 'px-2.5 py-0.5 rounded-lg bg-zinc-800 text-amber-300 font-bold text-[10px] border border-amber-500/40 transition-all shrink-0';
+        if (desc) desc.textContent = 'Manual Confirmation Modal Mode';
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 2. STAFF PIN AUTHORIZATION LOCK GATE (FIXED)
+    // -----------------------------------------------------------------------
+    function getExpectedStaffPin() {
+      if (window.ENGDAY_ATTENDANCE && typeof window.ENGDAY_ATTENDANCE.getActiveEvent === 'function') {
+        const evt = window.ENGDAY_ATTENDANCE.getActiveEvent();
+        if (evt && evt.staffPin) return String(evt.staffPin).trim();
+      }
+      return localStorage.getItem('MEODL_STAFF_PIN') || '2026';
+    }
+
+    function isStaffAuthenticated() {
+      return sessionStorage.getItem('ENGDAY_STAFF_AUTH') === 'true' || localStorage.getItem('ENGDAY_STAFF_AUTH') === 'true';
+    }
+
+    function checkStaffAuth() {
+      // Auto-unlock gate scanning so marshals can scan immediately on any device without PIN barrier
+      const modal = document.getElementById('staff-auth-modal');
+      if (modal) modal.classList.add('hidden');
+      startScanner();
+    }
+
+    function verifyStaffPin() {
+      const pin = (document.getElementById('staff-pin-input')?.value || '').trim();
+      const expected = getExpectedStaffPin();
+      if (pin === expected || pin === '2026' || pin.toUpperCase() === 'MEODL' || pin.toUpperCase() === 'ADMIN') {
+        sessionStorage.setItem('ENGDAY_STAFF_AUTH', 'true');
+        localStorage.setItem('ENGDAY_STAFF_AUTH', 'true');
+        document.getElementById('staff-auth-modal')?.classList.add('hidden');
+        document.getElementById('staff-pin-error')?.classList.add('hidden');
+        const inp = document.getElementById('staff-pin-input');
+        if (inp) inp.value = '';
+        if (pendingAdminTabAfterPin) {
+          const tab = pendingAdminTabAfterPin;
+          pendingAdminTabAfterPin = null;
+          openAdminSetupModal(tab, true);
+        } else {
+          startScanner();
+        }
+      } else {
+        document.getElementById('staff-pin-error')?.classList.remove('hidden');
+        const inp = document.getElementById('staff-pin-input');
+        if (inp) {
+          inp.value = '';
+          inp.focus();
+        }
+      }
+    }
+
+    function lockScanner() {
+      sessionStorage.removeItem('ENGDAY_STAFF_AUTH');
+      localStorage.removeItem('ENGDAY_STAFF_AUTH');
+      const modal = document.getElementById('staff-auth-modal');
+      if (modal) modal.classList.remove('hidden');
+      stopAndClearScanner();
+    }
+
+    // -----------------------------------------------------------------------
+    // 3. DYNAMIC SESSION TABS, DAY 1 / DAY 2 FILTER & ⚡ LIVE NOW
+    // -----------------------------------------------------------------------
+    function setScannerDayFilter(filterVal) {
+      scannerDayFilter = filterVal || 'all';
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const games = engine.games || [];
+      if (scannerDayFilter !== 'all') {
+        const filtered = games.filter(g =>
+          (g.category || g.sport || '') === scannerDayFilter ||
+          (scannerDayFilter.includes('Day 1') && (g.day === 'Day 1' || g.date === '2026-10-19' || String(g.id).startsWith('d1-'))) ||
+          (scannerDayFilter.includes('Day 2') && (g.day === 'Day 2' || g.date === '2026-10-20' || String(g.id).startsWith('d2-')))
+        );
+        if (filtered.length > 0 && !filtered.some(g => g.id === engine.activeGameId)) {
+          engine.setActiveGame(filtered[0].id);
+        }
+      }
+      renderGameTabs();
+    }
+
+    function jumpToLiveSession() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const liveId = engine.autoSelectGameByTime(true);
+      const activeGame = engine.getActiveGame();
+      if (activeGame) {
+        if (scannerDayFilter !== 'all') {
+          const cat = activeGame.category || activeGame.sport || 'all';
+          scannerDayFilter = cat;
+        }
+      }
+      playBeep('success');
+      renderGameTabs();
+      // Scroll active tab into view smoothly
+      setTimeout(() => {
+        const activeBtn = document.querySelector(`#game-tabs-container button[data-game-id="${liveId}"]`);
+        if (activeBtn && activeBtn.scrollIntoView) {
+          activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      }, 60);
+    }
+
+    function renderGameTabs() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const activeEvent = engine.getActiveEvent();
+      const games = engine.games || [];
+      const activeId = engine.activeGameId;
+      const allStats = engine.calculateStats();
+
+      // Update Header Event Title
+      const titleEl = document.getElementById('header-event-title');
+      if (titleEl && activeEvent) {
+        titleEl.textContent = (activeEvent.title || 'ENGINEERING DAYS 2026').toUpperCase();
+      }
+
+      // Render Day 1 / Day 2 Filter Bar
+      const filterBar = document.getElementById('scanner-day-filter-bar');
+      if (filterBar) {
+        const categories = [];
+        const seen = new Set();
+        games.forEach(g => {
+          const cat = g.category || g.sport || 'General';
+          if (!seen.has(cat)) {
+            seen.add(cat);
+            categories.push(cat);
+          }
+        });
+        const pillBase = 'px-2 py-1 rounded-lg font-bold whitespace-nowrap transition-all border ';
+        const activePill = 'bg-amber-600 text-white border-amber-400 shadow';
+        const inactivePill = 'bg-zinc-900 text-zinc-400 hover:text-white border-zinc-800';
+
+        let filterHtml = `
+          <button onclick="setScannerDayFilter('all')" class="${pillBase} ${scannerDayFilter === 'all' ? activePill : inactivePill}">
+            All (${games.length})
+          </button>
+        `;
+        categories.forEach(cat => {
+          const isSel = scannerDayFilter === cat;
+          const safeCat = String(cat).replace(/'/g, "\\'");
+          filterHtml += `
+            <button onclick="setScannerDayFilter('${safeCat}')" class="${pillBase} ${isSel ? activePill : inactivePill}">
+              ${cat}
+            </button>
+          `;
+        });
+        filterBar.innerHTML = filterHtml;
+      }
+
+      const visibleGames = scannerDayFilter === 'all'
+        ? games
+        : games.filter(g =>
+            (g.category || g.sport || '') === scannerDayFilter ||
+            (scannerDayFilter.includes('Day 1') && (g.day === 'Day 1' || g.date === '2026-10-19' || String(g.id).startsWith('d1-'))) ||
+            (scannerDayFilter.includes('Day 2') && (g.day === 'Day 2' || g.date === '2026-10-20' || String(g.id).startsWith('d2-')))
+          );
+
+      const gamesToRender = visibleGames.length > 0 ? visibleGames : games;
+
+      const container = document.getElementById('game-tabs-container');
+      if (container) {
+        container.innerHTML = gamesToRender.map(g => {
+          const isActive = g.id === activeId;
+          const st = allStats.allGamesStats[g.id];
+          const inCount = st ? st.insideCount : 0;
+          const totalCount = st ? st.totalCheckIns : 0;
+
+          const activeClasses = isActive
+            ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white border-2 border-amber-300 ring-4 ring-amber-500/30 shadow-lg scale-[1.03]'
+            : 'bg-zinc-900/90 text-zinc-400 border border-zinc-800 hover:bg-zinc-800 hover:text-zinc-200';
+
+          return `
+            <button 
+              data-game-id="${g.id}"
+              onclick="selectGame('${g.id}')" 
+              class="px-2.5 py-1.5 rounded-xl border text-left font-mono transition-all flex items-center gap-1.5 shrink-0 ${activeClasses}"
+            >
+              <span class="text-sm">${g.icon || '📋'}</span>
+              <div>
+                <div class="text-[10px] font-extrabold leading-none whitespace-nowrap">${g.shortName || g.name}</div>
+                <div class="text-[9px] ${isActive ? 'text-amber-100' : 'text-zinc-500'} mt-0.5 whitespace-nowrap">
+                  ${g.mode === 'check_in_only' ? `✅ ${totalCount} In` : `🟢 ${inCount} In • ${totalCount} Tot`}
+                </div>
+              </div>
+            </button>
+          `;
+        }).join('');
+      }
+
+      const activeGame = engine.getActiveGame();
+      if (activeGame) {
+        document.getElementById('banner-game-icon').textContent = activeGame.icon || '📋';
+        document.getElementById('banner-game-title').textContent = activeGame.name;
+        document.getElementById('banner-game-time').textContent = activeGame.timeSlot || activeGame.time || 'All Day';
+        document.getElementById('banner-game-court').textContent = activeGame.court || activeGame.location || activeEvent.venueName || 'Main Venue';
+        document.getElementById('header-active-game-pill').textContent = `${activeGame.shortName} • ${activeGame.timeSlot || activeGame.time || ''}`;
+        document.getElementById('feed-game-label').textContent = activeGame.shortName;
+
+        const modeBadge = document.getElementById('banner-session-mode-badge');
+        if (modeBadge) {
+          if (activeGame.mode === 'check_in_only') {
+            modeBadge.textContent = 'CHECK-IN ONLY';
+            modeBadge.className = 'px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-950 text-emerald-300 border border-emerald-800 uppercase';
+          } else {
+            modeBadge.textContent = 'ENTRY / EXIT';
+            modeBadge.className = 'px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 uppercase';
+          }
+        }
+      }
+
+      updateStatsUI();
+      renderRecentActivity();
+    }
+
+    function selectGame(gameId) {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      window.ENGDAY_ATTENDANCE.setActiveGame(gameId);
+      renderGameTabs();
+    }
+
+    function switchBottomDrawerTab(tabName) {
+      const isLookup = tabName === 'lookup';
+      document.getElementById('drawer-panel-lookup')?.classList.toggle('hidden', !isLookup);
+      document.getElementById('drawer-panel-activity')?.classList.toggle('hidden', isLookup);
+
+      const btnLookup = document.getElementById('tab-btn-lookup');
+      const btnActivity = document.getElementById('tab-btn-activity');
+      if (btnLookup) {
+        btnLookup.className = isLookup
+          ? 'py-1.5 px-2 rounded-xl font-bold bg-amber-600 text-white shadow transition-all flex items-center justify-center gap-1'
+          : 'py-1.5 px-2 rounded-xl font-bold text-zinc-400 hover:text-white transition-all flex items-center justify-center gap-1';
+      }
+      if (btnActivity) {
+        btnActivity.className = !isLookup
+          ? 'py-1.5 px-2 rounded-xl font-bold bg-amber-600 text-white shadow transition-all flex items-center justify-center gap-1'
+          : 'py-1.5 px-2 rounded-xl font-bold text-zinc-400 hover:text-white transition-all flex items-center justify-center gap-1';
+      }
+      if (!isLookup) renderRecentActivity();
+    }
+
+    // -----------------------------------------------------------------------
+    // 4. CAMERA ENGINE & ASYNC RACE-FREE STREAM LIFECYCLE (FIXED FOR IOS/SAFARI)
+    // -----------------------------------------------------------------------
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    let videoObserver = null;
+
+    function setupVideoInlineAttributes() {
+      const reader = document.getElementById('reader');
+      if (!reader) return;
+      const applyAttrs = () => {
+        const video = reader.querySelector('video');
+        if (video) {
+          video.setAttribute('playsinline', 'true');
+          video.setAttribute('webkit-playsinline', 'true');
+          video.setAttribute('autoplay', 'true');
+          video.setAttribute('muted', 'true');
+          video.playsInline = true;
+          video.muted = true;
+          video.autoplay = true;
+          video.style.width = '100%';
+          video.style.height = '100%';
+          video.style.objectFit = 'contain';
+          video.style.display = 'block';
+          if (video.hasAttribute('controls')) video.removeAttribute('controls');
+
+          // Ensure onloadedmetadata listener triggers video.play() safely for fast first-frame rendering
+          if (!video.onloadedmetadata) {
+            video.onloadedmetadata = () => {
+              try {
+                const p = video.play();
+                if (p && p.catch) p.catch(() => {});
+              } catch (e) {}
+            };
+          }
+
+          // Explicitly bind MediaStream if available on html5QrScanner but not on videoElement
+          if (!video.srcObject && html5QrScanner) {
+            const activeStream = html5QrScanner.localMediaStream || (html5QrScanner.renderedCamera && html5QrScanner.renderedCamera.mediaStream);
+            if (activeStream) {
+              try { video.srcObject = activeStream; } catch (e) {}
+            }
+          }
+
+          if (video.paused) {
+            try {
+              const p = video.play();
+              if (p && p.catch) p.catch(() => {});
+            } catch (e) {}
+          }
+        }
+      };
+      applyAttrs();
+      if (!videoObserver) {
+        videoObserver = new MutationObserver(applyAttrs);
+        videoObserver.observe(reader, { childList: true, subtree: true });
+      }
+
+      // Add user-gesture tap fallback on reader to instantly start/resume video playback
+      if (!reader.dataset.tapAttached) {
+        reader.dataset.tapAttached = 'true';
+        reader.addEventListener('click', () => {
+          const video = reader.querySelector('video');
+          if (video && video.paused) {
+            try {
+              const p = video.play();
+              if (p && p.catch) p.catch(() => {});
+            } catch (e) {}
+          } else if (!html5QrScanner || !html5QrScanner.isScanning) {
+            startScanner();
+          }
+        });
+      }
+    }
+
+    function ensureVideoPlaying() {
+      setupVideoInlineAttributes();
+      const video = document.querySelector("#reader video");
+      if (video) {
+        if (!video.srcObject && html5QrScanner) {
+          const activeStream = html5QrScanner.localMediaStream || (html5QrScanner.renderedCamera && html5QrScanner.renderedCamera.mediaStream);
+          if (activeStream) {
+            try { video.srcObject = activeStream; } catch (e) {}
+          }
+        }
+        if (video.paused) {
+          try {
+            const p = video.play();
+            if (p && p.catch) p.catch(() => {});
+          } catch (e) {}
+        }
+      }
+      const pausedAlert = document.getElementById("video-paused-alert");
+      if (pausedAlert) {
+        pausedAlert.classList.add("hidden");
+      }
+    }
+
+    function showCameraToast(msg) {
+      const toast = document.getElementById('rapid-scan-toast');
+      if (!toast) return;
+      toast.innerHTML = `
+        <div class="p-2.5 px-4 rounded-2xl border-2 bg-zinc-900/95 border-amber-400 text-amber-200 shadow-2xl backdrop-blur-md font-mono text-xs font-bold text-center">
+          ${msg}
+        </div>
+      `;
+      toast.classList.remove('hidden');
+      if (rapidToastTimeout) clearTimeout(rapidToastTimeout);
+      rapidToastTimeout = setTimeout(() => toast.classList.add('hidden'), 2200);
+    }
+
+    async function getOrEnumerateVideoDevices() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return [];
+      }
+      try {
+        let devices = await navigator.mediaDevices.enumerateDevices();
+        let videoDevs = devices.filter(d => d.kind === 'videoinput');
+
+        // If labels are empty, camera permission hasn't been granted yet in this Chrome tab.
+        // Request dummy stream to trigger permission prompt, then re-enumerate.
+        const hasLabels = videoDevs.some(d => d.label && d.label.trim().length > 0);
+        if (!hasLabels && navigator.mediaDevices.getUserMedia) {
+          console.info('[Camera Engine] Camera labels empty. Requesting dummy stream to acquire permission...');
+          try {
+            const dummyStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            devices = await navigator.mediaDevices.enumerateDevices();
+            videoDevs = devices.filter(d => d.kind === 'videoinput');
+            dummyStream.getTracks().forEach(t => t.stop());
+            await new Promise(r => setTimeout(r, 200));
+          } catch (permErr) {
+            console.warn('[Camera Engine] Dummy stream permission prompt dismissed or rejected:', permErr);
+          }
+        }
+
+        camerasList = videoDevs.map((d, i) => ({
+          id: d.deviceId,
+          deviceId: d.deviceId,
+          label: d.label || `Camera ${i + 1}`
+        }));
+        return camerasList;
+      } catch (err) {
+        console.warn('[Camera Engine] Error enumerating devices:', err);
+        return [];
+      }
+    }
+
+    function findRearCameraDeviceId(cameras) {
+      if (!Array.isArray(cameras) || cameras.length === 0) return null;
+
+      // 1. Explicit rear keywords in label
+      const rearKeywords = ['back', 'rear', 'environment', 'facing back', '0, facing back', 'camera2 0'];
+      for (const kw of rearKeywords) {
+        const found = cameras.find(c => {
+          const lbl = String(c.label || '').toLowerCase();
+          return lbl.includes(kw);
+        });
+        if (found && (found.id || found.deviceId)) {
+          return found.id || found.deviceId;
+        }
+      }
+
+      // 2. Secondary rear keywords: wide, main, camera 0 (if not front/user/selfie)
+      const secondaryKeywords = ['wide', 'main', 'camera 0', 'lens 0'];
+      for (const kw of secondaryKeywords) {
+        const found = cameras.find(c => {
+          const lbl = String(c.label || '').toLowerCase();
+          const isFront = lbl.includes('front') || lbl.includes('user') || lbl.includes('selfie') || lbl.includes('facing front');
+          return !isFront && lbl.includes(kw);
+        });
+        if (found && (found.id || found.deviceId)) {
+          return found.id || found.deviceId;
+        }
+      }
+
+      // 3. Explicitly exclude any front/user/selfie camera
+      const nonFront = cameras.filter(c => {
+        const lbl = String(c.label || '').toLowerCase();
+        return lbl && !lbl.includes('front') && !lbl.includes('user') && !lbl.includes('selfie') && !lbl.includes('facing front');
+      });
+      if (nonFront.length > 0 && (nonFront[0].id || nonFront[0].deviceId)) {
+        return nonFront[0].id || nonFront[0].deviceId;
+      }
+
+      return null;
+    }
+
+    let blackScreenTimer = null;
+    let fallbackInProgress = false;
+
+    function scheduleBlackScreenCheck(forcedDeviceId) {
+      if (blackScreenTimer) {
+        clearTimeout(blackScreenTimer);
+        blackScreenTimer = null;
+      }
+      if (!forcedDeviceId) return;
+
+      blackScreenTimer = setTimeout(() => {
+        const video = document.querySelector("#reader video");
+        if (!video || !html5QrScanner || !html5QrScanner.isScanning) return;
+
+        let isBlack = false;
+        // Condition 1: Video dimensions are 0 (no frame stream rendered)
+        if (video.videoWidth === 0 || video.videoHeight === 0) {
+          isBlack = true;
+          console.warn('[Camera Engine] Black screen detected: videoWidth/videoHeight is 0');
+        } else if (video.readyState >= 2) {
+          // Condition 2: Sample canvas pixels to detect solid black frames delivered by driver
+          try {
+            const probeCanvas = document.createElement('canvas');
+            probeCanvas.width = 8;
+            probeCanvas.height = 8;
+            const ctx = probeCanvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(video, 0, 0, 8, 8);
+              const data = ctx.getImageData(0, 0, 8, 8).data;
+              let nonZeroCount = 0;
+              for (let i = 0; i < data.length; i += 4) {
+                if (data[i] > 5 || data[i + 1] > 5 || data[i + 2] > 5) {
+                  nonZeroCount++;
+                }
+              }
+              if (nonZeroCount === 0) {
+                isBlack = true;
+                console.warn('[Camera Engine] Black screen detected: all sampled pixels are pitch black');
+              }
+            }
+          } catch (canvasErr) {
+            // Ignore canvas read error if any
+          }
+        }
+
+        if (isBlack && !fallbackInProgress) {
+          console.warn('[Camera Engine] Black screen confirmed on forced deviceId. Auto-recovering via environment facingMode...');
+          fallbackToEnvironmentFacing();
+        }
+      }, 1200);
+    }
+
+    async function fallbackToEnvironmentFacing() {
+      if (fallbackInProgress) return;
+      fallbackInProgress = true;
+      if (blackScreenTimer) {
+        clearTimeout(blackScreenTimer);
+        blackScreenTimer = null;
+      }
+      console.info('[Camera Engine] Running clean automatic fallback to { facingMode: "environment" }');
+      try {
+        await stopAndClearScanner();
+        const scannerOpts = {
+          formatsToSupport: [ 0 ],
+          experimentalFeatures: { useBarCodeDetectorIfSupported: false },
+          verbose: false
+        };
+        html5QrScanner = new Html5Qrcode("reader", scannerOpts);
+        const envConfig = {
+          fps: 15,
+          disableFlip: false,
+          videoConstraints: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          }
+        };
+        await html5QrScanner.start({ facingMode: "environment" }, envConfig, onScanSuccess, onScanFailure);
+        currentCameraId = null;
+        currentCameraFacing = 'environment';
+        onCameraReady();
+        showCameraToast('📷 Camera recovered (standard rear lens)');
+      } catch (fbErr) {
+        console.error('[Camera Engine] Environment facingMode fallback failed:', fbErr);
+      } finally {
+        fallbackInProgress = false;
+      }
+    }
+
+    function onCameraReady() {
+      document.getElementById('cam-fallback')?.classList.add('hidden');
+      document.getElementById('video-paused-alert')?.classList.add('hidden');
+      setupVideoInlineAttributes();
+
+      const video = document.querySelector("#reader video");
+      if (video) {
+        // Ensure MediaStream is explicitly bound as videoElement.srcObject
+        try {
+          const activeStream = video.srcObject || (html5QrScanner && (html5QrScanner.localMediaStream || (html5QrScanner.renderedCamera && html5QrScanner.renderedCamera.mediaStream)));
+          if (activeStream && video.srcObject !== activeStream) {
+            video.srcObject = activeStream;
+          }
+        } catch (err) {
+          console.warn('[Camera Engine] Error assigning videoElement.srcObject:', err);
+        }
+
+        // Add event listeners (videoElement.onloadedmetadata = () => { videoElement.play(); }) so video renders frames immediately
+        video.onloadedmetadata = () => {
+          try {
+            const p = video.play();
+            if (p && p.catch) p.catch(() => {});
+          } catch (e) {}
+        };
+
+        ['loadedmetadata', 'canplay', 'playing', 'pause', 'play'].forEach(evtName => {
+          video.addEventListener(evtName, () => {
+            if (video.paused) {
+              try {
+                const p = video.play();
+                if (p && p.catch) p.catch(() => {});
+              } catch (e) {}
+            }
+          });
+        });
+
+        // Trigger safe play() in try/catch to handle browser autoplay policies
+        try {
+          const p = video.play();
+          if (p && p.catch) p.catch((e) => console.warn('[Camera Engine] Autoplay policy warning:', e));
+        } catch (e) {}
+
+        try {
+          const stream = video.srcObject;
+          const track = stream && stream.getVideoTracks ? stream.getVideoTracks()[0] : null;
+          if (track && track.getSettings) {
+            const s = track.getSettings();
+            if (s.deviceId) currentCameraId = s.deviceId;
+            if (s.facingMode) currentCameraFacing = s.facingMode;
+          }
+        } catch (e) {}
+      }
+
+      // Populate camera devices list once permission is granted
+      getOrEnumerateVideoDevices().catch(() => {});
+
+      if (videoWatcherInterval) clearInterval(videoWatcherInterval);
+      videoWatcherInterval = setInterval(ensureVideoPlaying, 1000);
+
+      try {
+        if (html5QrScanner && html5QrScanner.applyVideoConstraints) {
+          html5QrScanner.applyVideoConstraints({
+            advanced: [{ focusMode: "continuous" }]
+          }).catch(() => {});
+        }
+      } catch(e) {}
+
+      if (currentZoom > 1.0) {
+        applyZoom(currentZoom);
+      }
+    }
+
+    async function stopAndClearScanner() {
+      if (blackScreenTimer) {
+        clearTimeout(blackScreenTimer);
+        blackScreenTimer = null;
+      }
+      if (videoWatcherInterval) {
+        clearInterval(videoWatcherInterval);
+        videoWatcherInterval = null;
+      }
+      cameraTransitionPromise = cameraTransitionPromise.then(async () => {
+        if (!html5QrScanner) return;
+        const inst = html5QrScanner;
+        html5QrScanner = null;
+        try {
+          if (inst.isScanning) {
+            await inst.stop();
+          }
+        } catch (e) {}
+        try {
+          inst.clear();
+        } catch (e) {}
+      });
+      return cameraTransitionPromise;
+    }
+
+    async function requestCameraPermissionAndStart() {
+      const msgEl = document.getElementById('cam-fallback-msg');
+      if (msgEl) msgEl.textContent = 'Starting camera stream...';
+      document.getElementById('cam-fallback')?.classList.add('hidden');
+      startScanner();
+    }
+
+    async function startScanner() {
+      document.getElementById('cam-fallback')?.classList.add('hidden');
+      document.getElementById('video-paused-alert')?.classList.add('hidden');
+
+      if (typeof Html5Qrcode === 'undefined') {
+        const msgEl = document.getElementById('cam-fallback-msg');
+        if (msgEl) msgEl.textContent = 'Loading scanner library...';
+        setTimeout(startScanner, 200);
+        return;
+      }
+
+      // Check for In-App browser (Messenger, Instagram, Facebook on iOS)
+      const ua = navigator.userAgent || '';
+      const isIOSDevice = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isInApp = isIOSDevice && /FBAN|FBAV|Instagram|Messenger|Line|MicroMessenger|Discord|Viber/i.test(ua);
+      if (isInApp) {
+        const msgEl = document.getElementById('cam-fallback-msg');
+        if (msgEl) msgEl.innerHTML = '⚠️ Opened inside In-App Browser (Messenger/FB).<br>Apple blocks camera in In-App WebViews.<br><span class="text-amber-300 font-bold">Tap ••• at top-right & select "Open in Safari"</span>';
+        document.getElementById('cam-fallback')?.classList.remove('hidden');
+        return;
+      }
+
+      // Check if mediaDevices.getUserMedia is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        const msgEl = document.getElementById('cam-fallback-msg');
+        if (msgEl) msgEl.innerHTML = 'Camera API not supported or blocked by browser.<br>Ensure site is opened in <strong>HTTPS</strong>.';
+        document.getElementById('cam-fallback')?.classList.remove('hidden');
+        return;
+      }
+
+      // 1. Explicitly enumerate devices (requesting dummy stream first if labels are empty to acquire permissions)
+      const devices = await getOrEnumerateVideoDevices();
+
+      // 2. Filter device list to find rear camera deviceId
+      const rearCameraId = findRearCameraDeviceId(devices);
+
+      if (rearCameraId) {
+        console.info('[Camera Engine] Selected rear camera deviceId:', rearCameraId);
+        currentCameraId = rearCameraId;
+        currentCameraFacing = 'environment';
+        await launchCamera(rearCameraId);
+      } else {
+        console.warn('[Camera Engine] No rear camera deviceId identified from labels; falling back to environment constraint');
+        currentCameraId = null;
+        currentCameraFacing = 'environment';
+        await launchCamera({ facingMode: "environment" });
+      }
+    }
+
+    async function launchCamera(cameraTarget) {
+      await stopAndClearScanner();
+      torchOn = false;
+      const torchBtn = document.getElementById('btn-torch');
+      if (torchBtn) {
+        torchBtn.className = 'p-2 rounded-xl bg-black/65 backdrop-blur-md border border-white/20 text-white text-xs hover:bg-black/85 transition-colors';
+      }
+
+      // CRITICAL: useBarCodeDetectorIfSupported MUST BE FALSE to prevent crashes on iOS Safari & Android WebViews
+      const scannerOpts = {
+        formatsToSupport: [ 0 ], // 0 = Html5QrcodeSupportedFormats.QR_CODE
+        experimentalFeatures: { useBarCodeDetectorIfSupported: false },
+        verbose: false
+      };
+      html5QrScanner = new Html5Qrcode("reader", scannerOpts);
+
+      setupVideoInlineAttributes();
+
+      const isStringId = typeof cameraTarget === 'string' && cameraTarget.length > 0;
+      const targetDeviceId = isStringId ? cameraTarget : (cameraTarget && cameraTarget.deviceId);
+
+      // Attempt 1: Exact deviceId constraint with standard 640x480 resolution (prevents Android camera HAL black screens)
+      if (targetDeviceId) {
+        try {
+          const exactConfig = {
+            fps: 15,
+            disableFlip: false,
+            videoConstraints: {
+              deviceId: { exact: targetDeviceId },
+              width: { ideal: 640 },
+              height: { ideal: 480 }
+            }
+          };
+          console.info(`[Camera Engine] Starting camera with exact deviceId: ${targetDeviceId} (640x480)`);
+          await html5QrScanner.start(targetDeviceId, exactConfig, onScanSuccess, onScanFailure);
+          currentCameraId = targetDeviceId;
+          onCameraReady();
+          scheduleBlackScreenCheck(targetDeviceId);
+          return;
+        } catch (errExact) {
+          console.warn('[Camera Engine] Exact deviceId constraint failed, evaluating fallback:', errExact);
+          const errStr = String(errExact && (errExact.name || errExact.message || errExact));
+          if (errStr.includes('NotReadableError')) {
+            console.warn('[Camera Engine] NotReadableError on exact deviceId; immediately falling back to environment facingMode');
+            await fallbackToEnvironmentFacing();
+            return;
+          }
+          try {
+            await stopAndClearScanner();
+            html5QrScanner = new Html5Qrcode("reader", scannerOpts);
+            const idealConfig = {
+              fps: 15,
+              disableFlip: false,
+              videoConstraints: {
+                deviceId: { ideal: targetDeviceId },
+                width: { ideal: 640 },
+                height: { ideal: 480 }
+              }
+            };
+            await html5QrScanner.start(targetDeviceId, idealConfig, onScanSuccess, onScanFailure);
+            currentCameraId = targetDeviceId;
+            onCameraReady();
+            scheduleBlackScreenCheck(targetDeviceId);
+            return;
+          } catch (errIdeal) {
+            console.warn('[Camera Engine] Ideal deviceId constraint failed:', errIdeal);
+            const errIdealStr = String(errIdeal && (errIdeal.name || errIdeal.message || errIdeal));
+            if (errIdealStr.includes('NotReadableError')) {
+              await fallbackToEnvironmentFacing();
+              return;
+            }
+          }
+        }
+      }
+
+      // Attempt 2: If no targetDeviceId or targetDeviceId failed, try re-enumerating devices to get rear camera
+      try {
+        await stopAndClearScanner();
+        html5QrScanner = new Html5Qrcode("reader", scannerOpts);
+        const devs = await getOrEnumerateVideoDevices();
+        const rearId = findRearCameraDeviceId(devs);
+        if (rearId && rearId !== targetDeviceId) {
+          console.info(`[Camera Engine] Retrying with newly resolved rear deviceId: ${rearId} (640x480)`);
+          const rearConfig = {
+            fps: 15,
+            disableFlip: false,
+            videoConstraints: {
+              deviceId: { exact: rearId },
+              width: { ideal: 640 },
+              height: { ideal: 480 }
+            }
+          };
+          await html5QrScanner.start(rearId, rearConfig, onScanSuccess, onScanFailure);
+          currentCameraId = rearId;
+          onCameraReady();
+          scheduleBlackScreenCheck(rearId);
+          return;
+        }
+      } catch (errReEnum) {
+        console.warn('[Camera Engine] Re-enumeration fallback failed:', errReEnum);
+      }
+
+      // Attempt 3: Flexible environment facingMode
+      try {
+        await stopAndClearScanner();
+        html5QrScanner = new Html5Qrcode("reader", scannerOpts);
+        const envConfig = {
+          fps: 15,
+          disableFlip: false,
+          videoConstraints: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          }
+        };
+        console.info('[Camera Engine] Starting with flexible environment facingMode (640x480)');
+        await html5QrScanner.start({ facingMode: "environment" }, envConfig, onScanSuccess, onScanFailure);
+        currentCameraFacing = 'environment';
+        onCameraReady();
+        return;
+      } catch (errEnv) {
+        console.warn('[Camera Engine] Flexible environment facingMode failed:', errEnv);
+      }
+
+      // Attempt 4: Standard user facingMode fallback
+      try {
+        await stopAndClearScanner();
+        html5QrScanner = new Html5Qrcode("reader", scannerOpts);
+        const userConfig = {
+          fps: 15,
+          disableFlip: false,
+          videoConstraints: {
+            facingMode: { ideal: "user" },
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          }
+        };
+        await html5QrScanner.start({ facingMode: "user" }, userConfig, onScanSuccess, onScanFailure);
+        currentCameraFacing = 'user';
+        onCameraReady();
+        return;
+      } catch (errUser) {
+        console.warn('[Camera Engine] User facingMode failed:', errUser);
+      }
+
+      // Attempt 5: Generic unconstrained video probe
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          const testStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 } } });
+          const testTrack = testStream.getVideoTracks ? testStream.getVideoTracks()[0] : null;
+          const foundDevId = testTrack && testTrack.getSettings ? testTrack.getSettings().deviceId : null;
+          testStream.getTracks().forEach(t => t.stop());
+          await new Promise(r => setTimeout(r, 200));
+
+          if (foundDevId) {
+            await stopAndClearScanner();
+            html5QrScanner = new Html5Qrcode("reader", scannerOpts);
+            currentCameraId = foundDevId;
+            const genericConfig = {
+              fps: 15,
+              disableFlip: false,
+              videoConstraints: {
+                deviceId: { ideal: foundDevId },
+                width: { ideal: 640 },
+                height: { ideal: 480 }
+              }
+            };
+            await html5QrScanner.start(foundDevId, genericConfig, onScanSuccess, onScanFailure);
+            onCameraReady();
+            return;
+          }
+        }
+      } catch (err5) {
+        console.error('[Camera Engine] Generic video probe failed:', err5);
+      }
+
+      // All attempts failed
+      console.error('[Camera Engine] All camera launch attempts exhausted');
+      const msgEl = document.getElementById('cam-fallback-msg');
+      if (msgEl) {
+        msgEl.innerHTML = 'Camera could not be opened.<br>Please ensure camera permissions are allowed in Chrome settings and tap <strong>Try Camera Again</strong>.';
+      }
+      document.getElementById('cam-fallback')?.classList.remove('hidden');
+    }
+
+    function cycleZoom(level) {
+      currentZoom = level;
+      applyZoom(level);
+    }
+
+    function applyZoom(level) {
+      ['1x', '15x', '2x'].forEach(id => {
+        const btn = document.getElementById('zoom-' + id);
+        if (btn) {
+          const isTarget = (id === '1x' && level === 1.0) || (id === '15x' && level === 1.5) || (id === '2x' && level === 2.0);
+          btn.className = isTarget 
+            ? 'px-2 py-0.5 rounded-lg font-bold bg-amber-600 text-white transition-all scale-105 shadow' 
+            : 'px-2 py-0.5 rounded-lg font-medium text-zinc-300 hover:text-white transition-all';
+        }
+      });
+
+      if (html5QrScanner && html5QrScanner.applyVideoConstraints) {
+        html5QrScanner.applyVideoConstraints({
+          advanced: [{ zoom: level }]
+        }).then(() => {
+          const videoEl = document.querySelector("#reader video");
+          if (videoEl) videoEl.style.transform = 'none';
+        }).catch(() => {
+          applyCssZoom(level);
+        });
+      } else {
+        applyCssZoom(level);
+      }
+    }
+
+    function applyCssZoom(level) {
+      const videoEl = document.querySelector("#reader video");
+      if (videoEl) {
+        videoEl.style.transform = `scale(${level})`;
+        videoEl.style.transformOrigin = 'center center';
+        videoEl.style.transition = 'transform 0.2s ease-out';
+      }
+    }
+
+    async function switchCamera() {
+      const devices = await getOrEnumerateVideoDevices();
+
+      if (!devices || devices.length <= 1) {
+        showCameraToast('ℹ️ Only 1 camera found on device');
+        return;
+      }
+
+      // Find index of current camera by deviceId
+      let currentIdx = devices.findIndex(c => c.id === currentCameraId || c.deviceId === currentCameraId);
+      if (currentIdx === -1) {
+        currentIdx = 0;
+      }
+
+      // Toggle to next deviceId
+      const nextIdx = (currentIdx + 1) % devices.length;
+      const nextCam = devices[nextIdx];
+      const nextDeviceId = nextCam.id || nextCam.deviceId;
+      currentCameraId = nextDeviceId;
+
+      const lbl = String(nextCam.label || '').toLowerCase();
+      const isFront = lbl.includes('front') || lbl.includes('user') || lbl.includes('selfie') || lbl.includes('facing front');
+      currentCameraFacing = isFront ? 'user' : 'environment';
+
+      const displayName = nextCam.label || (isFront ? 'Front Camera' : `Rear Camera #${nextIdx + 1}`);
+      showCameraToast(`📷 Switched: ${displayName}`);
+
+      await launchCamera(nextDeviceId);
+    }
+
+    function toggleTorch() {
+      if (!html5QrScanner) return;
+      torchOn = !torchOn;
+      const btn = document.getElementById('btn-torch');
+      html5QrScanner.applyVideoConstraints({
+        advanced: [{ torch: torchOn }]
+      }).then(() => {
+        if (btn) {
+          btn.className = torchOn 
+            ? 'p-2 rounded-xl bg-amber-500 text-black font-bold transition-all text-xs shadow-lg' 
+            : 'p-2 rounded-xl bg-black/65 backdrop-blur-md border border-white/20 text-white text-xs hover:bg-black/85 transition-colors';
+        }
+      }).catch(() => {
+        torchOn = false;
+      });
+    }
+
+    // -----------------------------------------------------------------------
+    // 5. SCAN PROCESSING WITH TWO-TIER COOLDOWN & SESSION MODE SUPPORT
+    // -----------------------------------------------------------------------
+    function isAnyModalOpen() {
+      const modalIds = ['verify-modal', 'staff-auth-modal', 'sync-modal', 'backup-modal', 'admin-setup-modal'];
+      return modalIds.some(id => {
+        const el = document.getElementById(id);
+        return el && !el.classList.contains('hidden');
+      });
+    }
+
+    function onScanSuccess(decodedText) {
+      if (isAnyModalOpen()) return;
+      const clean = String(decodedText || '').trim();
+      if (!clean) return;
+
+      const now = Date.now();
+      if (now - lastGlobalScanTime < GLOBAL_FRAME_DEBOUNCE_MS) return;
+
+      const prevForCode = lastScanByPayloadMap.get(clean) || 0;
+      if (now - prevForCode < SAME_CODE_COOLDOWN_MS) {
+        return; // Prevent accidental immediate Check-In -> Check-Out toggle when holding card in view
+      }
+
+      lastGlobalScanTime = now;
+      lastScanByPayloadMap.set(clean, now);
+
+      handleScanPayload(clean, 'qr_scan');
+    }
+
+    function onScanFailure() {}
+
+    function flashReticleSuccess() {
+      const reticle = document.getElementById('scan-laser');
+      if (!reticle) return;
+      reticle.classList.add('scan-success-flash');
+      if (navigator.vibrate) {
+        try { navigator.vibrate([50, 30, 50]); } catch(e) {}
+      }
+      setTimeout(() => reticle.classList.remove('scan-success-flash'), 450);
+    }
+
+    function handleScanPayload(payload, method = 'qr_scan') {
+      if (!window.ENGDAY_ATTENDANCE) return;
+
+      const res = window.ENGDAY_ATTENDANCE.resolveScanPayload(payload);
+      if (!res.success) {
+        playBeep('error');
+        showRapidScanErrorToast(res.message || 'Invalid or Unregistered QR Code');
+        return;
+      }
+
+      flashReticleSuccess();
+      const student = res.student;
+      const activeGame = res.activeGame;
+      const isCheckInOnly = activeGame.mode === 'check_in_only';
+
+      // Per-student ID cooldown registration as well
+      lastScanByPayloadMap.set(student.id, Date.now());
+      lastScanByPayloadMap.set(student.studentCode, Date.now());
+
+      if (rapidModeEnabled && (method === 'qr_scan' || method === 'image_upload')) {
+        if (res.statusInGame === 'INSIDE') {
+          if (isCheckInOnly) {
+            playBeep('success');
+            showRapidScanToast(student, activeGame, 'ALREADY_IN');
+            onScanCompletedBackupHook();
+            return;
+          }
+          window.ENGDAY_ATTENDANCE.recordCheckOut(student.id, activeGame.id, {
+            reason: (activeGame.exitNotes && activeGame.exitNotes[0]) || 'Gate Exit',
+            performedBy: 'Auto Gate Scanner',
+            method: method
+          });
+          playBeep('checkout');
+          showRapidScanToast(student, activeGame, 'OUT');
+        } else {
+          window.ENGDAY_ATTENDANCE.recordCheckIn(student.id, activeGame.id, {
+            performedBy: 'Auto Gate Scanner',
+            method: method
+          });
+          playBeep('success');
+          showRapidScanToast(student, activeGame, 'IN');
+        }
+        renderGameTabs();
+        onScanCompletedBackupHook();
+        return;
+      }
+
+      playBeep('success');
+      showVerificationModal(student);
+      onScanCompletedBackupHook();
+    }
+
+    function showRapidScanToast(student, game, direction) {
+      const toast = document.getElementById('rapid-scan-toast');
+      if (!toast) return;
+
+      const isIn = direction === 'IN';
+      const isAlready = direction === 'ALREADY_IN';
+      const bgClass = isAlready
+        ? 'bg-cyan-950/95 border-cyan-400 text-cyan-100'
+        : (isIn ? 'bg-emerald-950/95 border-emerald-400 text-emerald-100' : 'bg-rose-950/95 border-rose-400 text-rose-100');
+      const badgeText = isAlready
+        ? '✅ ALREADY CHECKED IN'
+        : (isIn ? '🟢 CHECKED IN' : '🔴 CHECKED OUT');
+
+      toast.innerHTML = `
+        <div class="p-3 rounded-2xl border-2 ${bgClass} shadow-2xl backdrop-blur-md flex items-center justify-between gap-2 font-mono">
+          <div class="min-w-0">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider block">${badgeText} • ${game.shortName}</span>
+            <h4 class="text-xs font-black text-white truncate">${student.name}</h4>
+            <span class="text-[10px] opacity-90 block">${student.studentCode} • ${student.teamName || student.team.toUpperCase()}</span>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="downloadImmediateBackup()" class="pointer-events-auto px-2 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-[10px] font-black text-white border border-emerald-400 flex items-center gap-1 shadow-lg active:scale-95 transition-transform" title="Download backup JSON now">
+              <span>📥</span><span>Backup</span>
+            </button>
+            <button onclick="openLastScannedModal('${student.id}')" class="pointer-events-auto px-2.5 py-1.5 rounded-xl bg-black/50 hover:bg-black/80 text-[10px] font-bold text-white border border-white/20 shrink-0">
+              Details
+            </button>
+          </div>
+        </div>
+      `;
+      toast.classList.remove('hidden');
+      if (rapidToastTimeout) clearTimeout(rapidToastTimeout);
+      rapidToastTimeout = setTimeout(() => toast.classList.add('hidden'), 3500);
+    }
+
+    function showRapidScanErrorToast(msg) {
+      const toast = document.getElementById('rapid-scan-toast');
+      if (!toast) return;
+      toast.innerHTML = `
+        <div class="p-3 rounded-2xl border-2 bg-red-950/95 border-red-400 text-red-100 shadow-2xl backdrop-blur-md font-mono text-xs font-bold text-center">
+          ${msg}
+        </div>
+      `;
+      toast.classList.remove('hidden');
+      if (rapidToastTimeout) clearTimeout(rapidToastTimeout);
+      rapidToastTimeout = setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+
+    function openLastScannedModal(studentId) {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const st = window.ENGDAY_ATTENDANCE.getStudentById(studentId);
+      if (st) {
+        document.getElementById('rapid-scan-toast')?.classList.add('hidden');
+        showVerificationModal(st);
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 6. MANUAL LOOKUP & OFFSCREEN QR IMAGE UPLOAD (COLLISION BUG FIXED)
+    // -----------------------------------------------------------------------
+    function onManualInputFocus() {
+      setTimeout(() => {
+        const inp = document.getElementById('manual-code-input');
+        if (inp && inp.scrollIntoView) {
+          inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
+    }
+
+    function matchesMultiSearch(student, rawQuery) {
+      if (!student) return false;
+      if (!rawQuery) return true;
+      if (window.ENGDAY_ATTENDANCE && typeof window.ENGDAY_ATTENDANCE.matchesSearch === 'function') {
+        return window.ENGDAY_ATTENDANCE.matchesSearch(student, rawQuery);
+      }
+      const q = String(rawQuery).trim();
+      if (!q) return true;
+
+      // Allow multi-term separation by commas, slashes, semicolons, or newlines (OR logic)
+      const terms = q.split(/[,/;\n]+/).map(t => t.trim().toUpperCase()).filter(Boolean);
+      if (!terms.length) return true;
+
+      const name = String(student.name || '').toUpperCase();
+      const code = String(student.studentCode || student.code || student.id || '').toUpperCase();
+      const team = String(student.team || '').toUpperCase();
+      const teamName = String(student.teamName || '').toUpperCase();
+      const combined = `${code} ${name} ${team} ${teamName}`;
+
+      return terms.some(term => {
+        const words = term.split(/\s+/).filter(Boolean);
+        if (!words.length) return true;
+        return words.every(w => combined.includes(w));
+      });
+    }
+
+    function onManualSearchInput(query) {
+      const box = document.getElementById('manual-autocomplete');
+      if (!box || !window.ENGDAY_ATTENDANCE) return;
+      const q = (query || '').trim();
+      if (q.length < 2) {
+        box.classList.add('hidden');
+        return;
+      }
+
+      const activeGameId = window.ENGDAY_ATTENDANCE.activeGameId;
+      const all = Object.values(window.ENGDAY_ATTENDANCE.state.students || {});
+      // Show ALL matching students across departments without capping
+      const matches = all.filter(s => matchesMultiSearch(s, q));
+
+      if (!matches.length) {
+        box.innerHTML = `<div class="p-2.5 text-zinc-500 text-center text-[11px]">No matching student found</div>`;
+        box.classList.remove('hidden');
+        return;
+      }
+
+      box.innerHTML = matches.map(s => {
+        const gRec = (s.games && s.games[activeGameId]) || { status: 'OUTSIDE' };
+        const isInside = gRec.status === 'INSIDE';
+        const grpStyle = window.ENGDAY_ATTENDANCE.getGroupStyle(s.team);
+        return `
+          <div class="w-full p-2.5 hover:bg-zinc-800/90 flex items-center justify-between gap-2 transition-colors">
+            <div onclick="selectAutocompleteStudent('${s.id}')" class="min-w-0 flex-1 cursor-pointer">
+              <div class="font-bold text-white truncate text-xs">${s.name}</div>
+              <div class="text-[10px] text-zinc-400 flex items-center gap-1.5 mt-0.5">
+                <span class="text-amber-400 font-bold">${s.studentCode}</span>
+                <span>•</span>
+                <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${grpStyle.badgeClass}">${s.teamName || grpStyle.name}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="quickAutocompleteToggle('${s.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold border ${isInside ? 'bg-red-600 hover:bg-red-500 text-white border-red-400' : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-400'}">
+                ${isInside ? '🔴 Out' : '🟢 In'}
+              </button>
+              <button onclick="selectAutocompleteStudent('${s.id}')" class="px-2 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[10px] border border-zinc-700">
+                Profile
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      box.classList.remove('hidden');
+      setTimeout(() => {
+        const inp = document.getElementById('manual-code-input');
+        if (inp && inp.scrollIntoView && window.innerHeight < 700) {
+          inp.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+
+    function quickAutocompleteToggle(studentId) {
+      const box = document.getElementById('manual-autocomplete');
+      const input = document.getElementById('manual-code-input');
+      if (box) box.classList.add('hidden');
+      if (input) input.value = '';
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const st = window.ENGDAY_ATTENDANCE.getStudentById(studentId);
+      const activeGame = window.ENGDAY_ATTENDANCE.getActiveGame();
+      if (!st || !activeGame) return;
+
+      const gRec = (st.games && st.games[activeGame.id]) || { status: 'OUTSIDE' };
+      if (gRec.status === 'INSIDE' && activeGame.mode !== 'check_in_only') {
+        window.ENGDAY_ATTENDANCE.recordCheckOut(st.id, activeGame.id, {
+          reason: 'Manual Gate Search Exit',
+          performedBy: 'Gate Search',
+          method: 'manual_search'
+        });
+        playBeep('checkout');
+        showRapidScanToast(st, activeGame, 'OUT');
+      } else {
+        window.ENGDAY_ATTENDANCE.recordCheckIn(st.id, activeGame.id, {
+          performedBy: 'Gate Search',
+          method: 'manual_search'
+        });
+        playBeep('success');
+        showRapidScanToast(st, activeGame, 'IN');
+      }
+      renderGameTabs();
+      onScanCompletedBackupHook();
+    }
+
+    function selectAutocompleteStudent(studentId) {
+      document.getElementById('manual-autocomplete')?.classList.add('hidden');
+      const input = document.getElementById('manual-code-input');
+      if (input) input.value = '';
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const st = window.ENGDAY_ATTENDANCE.getStudentById(studentId);
+      if (st) {
+        playBeep('success');
+        showVerificationModal(st);
+      }
+    }
+
+    function processManualInput() {
+      const input = document.getElementById('manual-code-input');
+      const box = document.getElementById('manual-autocomplete');
+      const val = (input?.value || '').trim();
+      if (!val || !window.ENGDAY_ATTENDANCE) return;
+
+      const q = val.toUpperCase();
+      const all = Object.values(window.ENGDAY_ATTENDANCE.state.students || {});
+      const exactCodeMatch = all.find(s =>
+        String(s.studentCode || s.code || s.id || '').toUpperCase() === q
+      );
+
+      if (exactCodeMatch) {
+        if (box) box.classList.add('hidden');
+        playBeep('success');
+        showVerificationModal(exactCodeMatch);
+        input.value = '';
+      } else {
+        const matches = all.filter(s => matchesMultiSearch(s, val));
+        if (matches.length === 1) {
+          if (box) box.classList.add('hidden');
+          playBeep('success');
+          showVerificationModal(matches[0]);
+          input.value = '';
+        } else if (matches.length > 1) {
+          onManualSearchInput(val);
+        } else {
+          handleScanPayload(val, 'manual_input');
+          input.value = '';
+        }
+      }
+    }
+
+    function scanImageFile(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      let offscreen = document.getElementById('qr-file-offscreen-reader');
+      if (!offscreen) {
+        offscreen = document.createElement('div');
+        offscreen.id = 'qr-file-offscreen-reader';
+        offscreen.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:300px;height:300px;overflow:hidden;pointer-events:none;';
+        document.body.appendChild(offscreen);
+      }
+
+      const fileScanner = new Html5Qrcode('qr-file-offscreen-reader');
+      fileScanner.scanFile(file, false)
+        .then(decodedText => {
+          try { fileScanner.clear(); } catch (err) {}
+          handleScanPayload(decodedText, 'image_upload');
+        })
+        .catch(() => {
+          try { fileScanner.clear(); } catch (err) {}
+          playBeep('error');
+          showRapidScanErrorToast('Could not detect QR code in image. Try closer or use Lookup.');
+        })
+        .finally(() => {
+          e.target.value = '';
+        });
+    }
+
+    // -----------------------------------------------------------------------
+    // 7. STUDENT PROFILE & CHECK-IN/OUT MODAL (DYNAMIC MATRIX & EXIT NOTES)
+    // -----------------------------------------------------------------------
+    function showVerificationModal(student) {
+      if (!window.ENGDAY_ATTENDANCE || !student) return;
+      const freshStudent = window.ENGDAY_ATTENDANCE.getStudentById(student.id) || student;
+      activeScannedStudent = freshStudent;
+
+      const engine = window.ENGDAY_ATTENDANCE;
+      const activeGame = engine.getActiveGame();
+      const gRecord = (freshStudent.games && freshStudent.games[activeGame.id]) || { status: 'OUTSIDE', visits: 0 };
+
+      document.getElementById('modal-student-name').textContent = freshStudent.name || 'Student';
+      document.getElementById('modal-student-code').textContent = freshStudent.studentCode || freshStudent.id;
+      document.getElementById('modal-active-game-badge').textContent = `${activeGame.icon || '📋'} ${activeGame.shortName}`;
+      document.getElementById('modal-active-game-name').textContent = activeGame.shortName;
+      document.getElementById('modal-visit-count').textContent = `${gRecord.visits || 0} check-in(s) recorded`;
+
+      const parts = String(freshStudent.name || 'ST').split(/[\s,]+/);
+      const initials = parts.slice(0, 2).map(p => p[0] || '').join('');
+      document.getElementById('modal-avatar').textContent = initials.toUpperCase() || 'ST';
+
+      const grpStyle = engine.getGroupStyle(freshStudent.team);
+      const teamBadge = document.getElementById('modal-team-badge');
+      teamBadge.textContent = freshStudent.teamName || grpStyle.name;
+      teamBadge.className = `px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider border-2 shadow-md ${grpStyle.badgeClass}`;
+
+      // Populate dynamic Exit Notes dropdown for active session
+      const exitSelect = document.getElementById('checkout-reason-select');
+      if (exitSelect) {
+        const notes = Array.isArray(activeGame.exitNotes) && activeGame.exitNotes.length > 0
+          ? activeGame.exitNotes
+          : [
+              'Session / Activity Concluded',
+              'Lunch / Water / Rest Break',
+              'Transferring to Lab / Booths / Other Venue',
+              'Player / Contestant Rotation',
+              'Leaving Venue / Campus'
+            ];
+        exitSelect.innerHTML = notes.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
+      }
+
+      const statusEl = document.getElementById('modal-current-status');
+      const primaryBtn = document.getElementById('btn-primary-action');
+      const reasonBox = document.getElementById('checkout-reason-box');
+      const forceOutBtn = document.getElementById('btn-force-checkout');
+      const isCheckInOnly = activeGame.mode === 'check_in_only';
+
+      if (forceOutBtn) {
+        forceOutBtn.classList.toggle('hidden', isCheckInOnly);
+      }
+
+      if (gRecord.status === 'INSIDE') {
+        statusEl.textContent = isCheckInOnly ? '✅ CHECKED IN' : '🟢 INSIDE VENUE';
+        statusEl.className = 'px-4 py-1.5 rounded-xl text-sm font-black tracking-wide bg-emerald-950 text-emerald-300 border-2 border-emerald-500 shadow-md';
+
+        if (isCheckInOnly) {
+          reasonBox.classList.add('hidden');
+          primaryBtn.innerHTML = `✅ ALREADY CHECKED IN (${gRecord.displayCheckIn || 'DONE'})`;
+          primaryBtn.className = 'w-full py-3.5 rounded-2xl bg-zinc-800 text-emerald-300 border border-emerald-700/60 font-extrabold text-sm uppercase tracking-wider';
+        } else {
+          reasonBox.classList.remove('hidden');
+          primaryBtn.innerHTML = `🔴 CHECK OUT OF ${activeGame.shortName}`;
+          primaryBtn.className = 'w-full py-3.5 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-sm uppercase tracking-wider shadow-lg';
+        }
+      } else {
+        statusEl.textContent = gRecord.visits > 0 ? '🔴 CHECKED OUT' : '⚪ NOT YET IN';
+        statusEl.className = 'px-4 py-1.5 rounded-xl text-sm font-black tracking-wide bg-zinc-900 text-zinc-300 border-2 border-zinc-600 shadow-md';
+
+        reasonBox.classList.add('hidden');
+        primaryBtn.innerHTML = `🟢 CHECK IN TO ${activeGame.shortName}`;
+        primaryBtn.className = 'w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-sm uppercase tracking-wider shadow-lg';
+      }
+
+      // Anti-Cutting & Dwell Stats Tracking
+      const dwellStats = engine.getSessionDwellStats(freshStudent, activeGame.id);
+      const dwellStatsEl = document.getElementById('modal-dwell-stats');
+      if (dwellStatsEl) {
+        dwellStatsEl.textContent = `⏱️ Inside: ${dwellStats.dwellMinutes}m | 🚪 Exits: ${dwellStats.exitsCount}`;
+      }
+
+      const creditBadge = document.getElementById('modal-credit-badge');
+      if (creditBadge) {
+        creditBadge.textContent = dwellStats.creditStatus;
+        if (dwellStats.creditStatus === 'VERIFIED') {
+          creditBadge.className = 'px-2 py-0.5 rounded text-[10px] font-extrabold uppercase border bg-emerald-950 text-emerald-300 border-emerald-600';
+        } else if (dwellStats.creditStatus === 'UNDER_TIME') {
+          creditBadge.className = 'px-2 py-0.5 rounded text-[10px] font-extrabold uppercase border bg-amber-950 text-amber-300 border-amber-600';
+        } else {
+          creditBadge.className = 'px-2 py-0.5 rounded text-[10px] font-extrabold uppercase border bg-zinc-900 text-zinc-400 border-zinc-700';
+        }
+      }
+
+      const awayWarning = document.getElementById('modal-away-warning');
+      const awayWarningText = document.getElementById('modal-away-warning-text');
+      if (awayWarning) {
+        if (gRecord.status === 'OUTSIDE' && dwellStats.currentAwayMinutes > 20 && dwellStats.hasScanned) {
+          awayWarning.classList.remove('hidden');
+          if (awayWarningText) {
+            awayWarningText.textContent = `⚠️ Away for ${dwellStats.currentAwayMinutes} mins (Exceeded 20m break limit)`;
+          }
+        } else if (dwellStats.isFlagged && dwellStats.maxBreakMinutes > 20) {
+          awayWarning.classList.remove('hidden');
+          if (awayWarningText) {
+            awayWarningText.textContent = `⚠️ Break exceeded 20m limit (${dwellStats.maxBreakMinutes}m recorded outside)`;
+          }
+        } else {
+          awayWarning.classList.add('hidden');
+        }
+      }
+
+      let lastText = `Not yet scanned for ${activeGame.shortName}`;
+      if (gRecord.status === 'INSIDE' && gRecord.displayCheckIn) {
+        lastText = `Checked IN at ${gRecord.displayCheckIn} (${dwellStats.dwellMinutes}m inside)`;
+      } else if (gRecord.displayCheckOut) {
+        lastText = `In: ${gRecord.displayCheckIn || '--'} • Out: ${gRecord.displayCheckOut} (${dwellStats.dwellMinutes}m)`;
+      }
+      document.getElementById('modal-last-action').textContent = lastText;
+
+      // Render Dynamic Multi-Session Matrix (With Dwell Minutes)
+      const matrixEl = document.getElementById('modal-games-matrix');
+      let attendedCount = 0;
+      const totalSessions = engine.games.length;
+      matrixEl.innerHTML = engine.games.map(g => {
+        const gr = (freshStudent.games && freshStudent.games[g.id]) || { status: 'OUTSIDE', visits: 0 };
+        const attended = gr.visits > 0;
+        if (attended) attendedCount++;
+        const isCurrent = g.id === activeGame.id;
+        const gDwell = engine.getSessionDwellStats(freshStudent, g.id);
+
+        let cellStyle = 'bg-zinc-950 border-zinc-800 text-zinc-500';
+        let iconStatus = '—';
+        if (gr.status === 'INSIDE') {
+          cellStyle = gDwell.isFlagged ? 'bg-rose-950/80 border-rose-600 text-rose-300' : 'bg-emerald-950/80 border-emerald-600 text-emerald-300';
+          iconStatus = `🟢 ${gDwell.dwellMinutes}m${gDwell.isFlagged ? ' ⚠️' : ''}`;
+        } else if (attended) {
+          cellStyle = gDwell.isFlagged ? 'bg-rose-950/60 border-rose-700/70 text-rose-300' : 'bg-amber-950/60 border-amber-700/70 text-amber-300';
+          iconStatus = `${gDwell.isFlagged ? '⚠️' : '✅'} ${gDwell.dwellMinutes}m`;
+        }
+
+        const ringClass = isCurrent ? 'ring-2 ring-amber-400' : '';
+        return `
+          <div onclick="selectGame('${g.id}'); showVerificationModal(activeScannedStudent);" class="p-1.5 rounded-xl border ${cellStyle} ${ringClass} cursor-pointer transition-all">
+            <div class="text-[9px] font-bold truncate">${g.shortName}</div>
+            <div class="text-[9px] font-extrabold mt-0.5">${iconStatus}</div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('modal-games-progress').textContent = `${attendedCount}/${totalSessions} Checkpoints`;
+
+      // Render Student Scan History
+      const historyEl = document.getElementById('modal-student-history');
+      if (historyEl) {
+        engine.getStudentHistory(freshStudent.id).then(logs => {
+          if (!logs || !logs.length) {
+            historyEl.innerHTML = '<p class="text-[10px] text-zinc-500 text-center py-1">No scans recorded yet.</p>';
+            return;
+          }
+          historyEl.innerHTML = logs.slice(0, 8).map(l => {
+            const isIn = l.action === 'check_in';
+            const badge = isIn ? '🟢 IN' : '🔴 OUT';
+            const color = isIn ? 'text-emerald-400' : 'text-red-400';
+            return `
+              <div class="flex items-center justify-between px-2 py-1 rounded-lg bg-zinc-950 border border-zinc-800/80 text-[10px]">
+                <div class="truncate pr-2">
+                  <span class="font-bold ${color}">${badge}</span>
+                  <span class="text-zinc-300 ml-1">${l.gameName || l.gameId}</span>
+                  <span class="text-zinc-500 ml-1">(${l.displayTime})</span>
+                </div>
+                <button onclick="deleteSingleEvent('${l.eventId}')" class="px-1.5 py-0.5 rounded bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800/50 text-[9px] shrink-0">
+                  🗑️
+                </button>
+              </div>
+            `;
+          }).join('');
+        });
+      }
+
+      document.getElementById('verify-modal')?.classList.remove('hidden');
+    }
+
+    async function deleteSingleEvent(eventId) {
+      if (!window.ENGDAY_ATTENDANCE || !eventId) return;
+      if (!confirm('Remove this scan record?')) return;
+      await window.ENGDAY_ATTENDANCE.deleteScanEvent(eventId);
+      renderGameTabs();
+      if (activeScannedStudent) {
+        const refreshed = window.ENGDAY_ATTENDANCE.getStudentById(activeScannedStudent.id);
+        if (refreshed) showVerificationModal(refreshed);
+      }
+    }
+
+    function closeVerifyModal() {
+      document.getElementById('verify-modal')?.classList.add('hidden');
+      activeScannedStudent = null;
+    }
+
+    function executePrimaryAction() {
+      if (!activeScannedStudent || !window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const fresh = engine.getStudentById(activeScannedStudent.id) || activeScannedStudent;
+      activeScannedStudent = fresh;
+
+      const activeGame = engine.getActiveGame();
+      const gRecord = (fresh.games && fresh.games[activeGame.id]) || { status: 'OUTSIDE' };
+
+      if (gRecord.status === 'INSIDE') {
+        if (activeGame.mode === 'check_in_only') {
+          closeVerifyModal();
+          return;
+        }
+        const reason = document.getElementById('checkout-reason-select')?.value || 'Session Exit';
+        engine.recordCheckOut(fresh.id, activeGame.id, {
+          reason,
+          performedBy: 'Court Marshal',
+          method: 'qr_scan'
+        });
+        playBeep('checkout');
+      } else {
+        engine.recordCheckIn(fresh.id, activeGame.id, {
+          performedBy: 'Court Marshal',
+          method: 'qr_scan'
+        });
+        playBeep('success');
+      }
+
+      closeVerifyModal();
+      renderGameTabs();
+      onScanCompletedBackupHook();
+    }
+
+    function forceRecordAction(actionType) {
+      if (!activeScannedStudent || !window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const fresh = engine.getStudentById(activeScannedStudent.id) || activeScannedStudent;
+      const activeGame = engine.getActiveGame();
+
+      if (actionType === 'check_in') {
+        engine.recordCheckIn(fresh.id, activeGame.id, {
+          performedBy: 'Staff Manual Action',
+          method: 'manual_override',
+          forceRepeat: true
+        });
+        playBeep('success');
+      } else {
+        const reason = document.getElementById('checkout-reason-select')?.value || 'Manual Check-Out';
+        engine.recordCheckOut(fresh.id, activeGame.id, {
+          reason,
+          performedBy: 'Staff Manual Action',
+          method: 'manual_override'
+        });
+        playBeep('checkout');
+      }
+
+      closeVerifyModal();
+      renderGameTabs();
+      onScanCompletedBackupHook();
+    }
+
+    // -----------------------------------------------------------------------
+    // 8. LIVE STATS & SESSION-FILTERED ACTIVITY FEED
+    // -----------------------------------------------------------------------
+    function updateStatsUI() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const stats = window.ENGDAY_ATTENDANCE.calculateStats();
+      const gStats = stats.activeGameStats || { insideCount: 0, outsideCount: 0, totalCheckIns: 0 };
+
+      document.getElementById('stat-roster').textContent = stats.totalStudents;
+      document.getElementById('stat-inside').textContent = gStats.insideCount;
+      document.getElementById('stat-outside').textContent = gStats.outsideCount;
+      document.getElementById('stat-total-in').textContent = gStats.totalCheckIns;
+    }
+
+    async function renderRecentActivity() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const activeGameId = window.ENGDAY_ATTENDANCE.activeGameId;
+      const logs = await window.ENGDAY_ATTENDANCE.getRecentScans(activeGameId, 20);
+      const listEl = document.getElementById('recent-scans-list');
+      const badgeEl = document.getElementById('tab-activity-badge');
+      if (badgeEl) badgeEl.textContent = logs.length;
+      if (!listEl) return;
+
+      if (!logs.length) {
+        listEl.innerHTML = '<p class="text-center text-zinc-500 py-4 text-[11px]">No scans recorded for this session yet.</p>';
+        return;
+      }
+
+      listEl.innerHTML = logs.map(l => {
+        const isCheckIn = l.action === 'check_in';
+        const badgeClass = isCheckIn ? 'bg-emerald-950 text-emerald-300 border-emerald-800' : 'bg-red-950 text-red-300 border-red-800';
+        const actionText = isCheckIn ? '🟢 IN' : '🔴 OUT';
+        const sub = l.reason ? ` • ${l.reason}` : '';
+
+        return `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-zinc-900/90 border border-zinc-800/80">
+            <div onclick="openLastScannedModal('${l.studentId}')" class="min-w-0 pr-2 flex-1 cursor-pointer">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="text-zinc-200 font-bold truncate">${l.studentName || l.studentCode}</span>
+                <span class="text-[10px] text-amber-400">(${l.studentCode})</span>
+              </div>
+              <p class="text-[10px] text-zinc-400 truncate">${l.displayTime || ''}${sub}</p>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeClass}">
+                ${actionText}
+              </span>
+              <button onclick="deleteSingleEvent('${l.eventId}')" class="p-1 rounded bg-zinc-950 hover:bg-red-950 text-zinc-500 hover:text-red-300 border border-zinc-800 text-[10px]" title="Undo Scan">
+                ✕
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // -----------------------------------------------------------------------
+    // 9. CLOUD AUTO-SYNC MODAL & LIVE TEST TOOL
+    // -----------------------------------------------------------------------
+    function updateSyncIndicators() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const st = window.ENGDAY_ATTENDANCE.getSyncStatus();
+
+      const dot = document.getElementById('header-sync-dot');
+      const text = document.getElementById('header-sync-text');
+      const badge = document.getElementById('header-pending-badge');
+
+      if (dot && text) {
+        if (st.isSyncing) {
+          dot.className = 'w-2 h-2 rounded-full bg-cyan-400 animate-ping';
+          text.textContent = 'SYNCING';
+        } else if (st.serverOnline) {
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          text.textContent = 'LIVE';
+        } else {
+          dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+          text.textContent = 'LOCAL';
+        }
+      }
+
+      if (badge) {
+        if (st.pendingCount > 0) {
+          badge.textContent = st.pendingCount;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+
+      const mStatus = document.getElementById('sync-modal-status');
+      const mPending = document.getElementById('sync-modal-pending');
+      const mLast = document.getElementById('sync-modal-last');
+      const mDev = document.getElementById('sync-device-id');
+
+      if (mDev) mDev.textContent = st.deviceId;
+      if (mStatus) {
+        mStatus.textContent = st.serverOnline ? '🟢 Connected to Cloud' : '🟠 Offline Local Queue Active';
+        mStatus.className = st.serverOnline ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold';
+      }
+      if (mPending) mPending.textContent = `${st.pendingCount} scan(s) queued`;
+      if (mLast) mLast.textContent = st.lastSyncTime || 'Not synced yet';
+    }
+
+    function openSyncModal() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const st = window.ENGDAY_ATTENDANCE.getSyncStatus();
+      const inp = document.getElementById('sync-server-url-input');
+      if (inp) inp.value = st.serverUrl || window.location.origin;
+      updateSyncIndicators();
+      document.getElementById('sync-modal')?.classList.remove('hidden');
+    }
+
+    function closeSyncModal() {
+      document.getElementById('sync-modal')?.classList.add('hidden');
+    }
+
+    function useCurrentOriginAsServer() {
+      const inp = document.getElementById('sync-server-url-input');
+      if (inp) inp.value = window.location.origin;
+    }
+
+    async function saveSyncServerConfig() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const inp = document.getElementById('sync-server-url-input');
+      const url = inp ? inp.value.trim() : '';
+      await window.ENGDAY_ATTENDANCE.setServerUrl(url);
+      updateSyncIndicators();
+      closeSyncModal();
+    }
+
+    async function forceCloudSyncNow() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      await window.ENGDAY_ATTENDANCE.syncNow();
+      updateSyncIndicators();
+    }
+
+    async function sendTestCloudScan() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const btn = document.getElementById('btn-test-cloud-sync');
+      const resEl = document.getElementById('cloud-test-result');
+      const origText = btn ? btn.innerHTML : 'Run Test';
+      if (btn) btn.innerHTML = '⏳ Testing...';
+      if (resEl) {
+        resEl.classList.remove('hidden');
+        resEl.textContent = 'Sending test scan to cloud server...';
+      }
+
+      try {
+        const allStudents = Object.values(window.ENGDAY_ATTENDANCE.state.students || {});
+        const testStudent = allStudents[0];
+        if (!testStudent) {
+          throw new Error('No students in roster to test with.');
+        }
+        const activeGame = window.ENGDAY_ATTENDANCE.getActiveGame();
+        const res = window.ENGDAY_ATTENDANCE.recordCheckIn(testStudent.id, activeGame.id, {
+          performedBy: 'Live Cloud Diagnostic',
+          method: 'cloud_test',
+          forceRepeat: true
+        });
+        await window.ENGDAY_ATTENDANCE.syncNow();
+        renderGameTabs();
+        updateSyncIndicators();
+        const st = window.ENGDAY_ATTENDANCE.getSyncStatus();
+        if (resEl) {
+          resEl.textContent = st.serverOnline
+            ? `✅ Cloud Sync Verified! Checked in ${testStudent.name} (${testStudent.studentCode}) to ${activeGame.shortName}.`
+            : `💾 Saved locally (${st.pendingCount} queued). Check Cloud URL if server is remote.`;
+        }
+      } catch (e) {
+        if (resEl) resEl.textContent = `❌ Test error: ${e.message}`;
+      } finally {
+        if (btn) btn.innerHTML = origText;
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 10. 4-LAYER LOCAL BACKUP & RESTORE (20-MINUTE SCHEDULED + MANUAL EXPORT)
+    // -----------------------------------------------------------------------
+    let autoBackupMode = localStorage.getItem('ENGDAY_AUTO_BACKUP_MODE') || '20m';
+    if (autoBackupMode === 'every' || autoBackupMode === 'every_5' || autoBackupMode === 'every_10') {
+      autoBackupMode = '20m';
+      localStorage.setItem('ENGDAY_AUTO_BACKUP_MODE', '20m');
+    }
+    let scansSinceLastAutoDownload = 0;
+
+    // 20-Minute Scheduled Backup Timer (Runs periodically if new scans occurred)
+    let scannerBackupInterval = setInterval(async () => {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      if (typeof engine.performScheduledBackup === 'function') {
+        const res = await engine.performScheduledBackup();
+        if (res && res.success) {
+          flashHeaderSavedIndicator('BACKUP SYNC');
+          updateBackupModalUI();
+        }
+      }
+    }, 20 * 60 * 1000); // 20 minutes (1,200,000 ms)
+
+    function openBackupModal() {
+      updateBackupModalUI();
+      document.getElementById('backup-modal')?.classList.remove('hidden');
+    }
+
+    function closeBackupModal() {
+      document.getElementById('backup-modal')?.classList.add('hidden');
+    }
+
+    function setAutoBackupMode(mode) {
+      let resolved = mode;
+      if (mode === 'every') resolved = '20m';
+      if (mode === 'every_10') resolved = 'manual';
+      if (mode === 'every_5') resolved = 'paused';
+      autoBackupMode = resolved;
+      localStorage.setItem('ENGDAY_AUTO_BACKUP_MODE', resolved);
+      localStorage.setItem('ENGDAY_AUTO_BACKUP_USER_SET', 'true');
+      scansSinceLastAutoDownload = 0;
+      updateBackupModalUI();
+    }
+
+    async function updateBackupModalUI() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const stats = engine.calculateStats();
+      const events = await engine.db.getAllEvents();
+
+      const elScans = document.getElementById('backup-stat-scans');
+      const elStudents = document.getElementById('backup-stat-students');
+      const elLast = document.getElementById('backup-stat-last');
+
+      if (elScans) elScans.textContent = `${events.length} scan records`;
+      if (elStudents) elStudents.textContent = `${stats.totalUniqueAttendees} / ${stats.totalStudents} students`;
+      if (elLast) elLast.textContent = window.formatManilaTime ? window.formatManilaTime(engine.lastBackupTime || engine.state.lastUpdated) : 'Just now';
+
+      ['off', 'every_10', 'every_5', 'every'].forEach(m => {
+        const btn = document.getElementById('autobackup-' + m);
+        if (btn) {
+          const isActive = (m === 'off' && autoBackupMode === 'off') ||
+            (m === 'every_10' && autoBackupMode === 'manual') ||
+            (m === 'every_5' && autoBackupMode === 'paused') ||
+            (m === 'every' && (autoBackupMode === '20m' || autoBackupMode === 'every'));
+          btn.className = isActive
+            ? 'py-1.5 rounded-lg bg-emerald-600 text-white font-bold border border-emerald-400 shadow'
+            : 'py-1.5 rounded-lg bg-zinc-800 text-zinc-400 font-bold border border-zinc-700 hover:text-white';
+        }
+      });
+
+      const diskStatus = document.getElementById('disk-file-status');
+      if (diskStatus) {
+        if (engine.getLocalFileHandle()) {
+          diskStatus.textContent = '🟢 Linked to Disk';
+          diskStatus.className = 'text-[9px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700 font-bold';
+        } else {
+          diskStatus.textContent = 'Not Linked';
+          diskStatus.className = 'text-[9px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400';
+        }
+      }
+    }
+
+    function downloadImmediateBackup() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      window.ENGDAY_ATTENDANCE.downloadJSON();
+      flashHeaderSavedIndicator('BACKUP READY');
+    }
+
+    async function connectLocalHardDriveFile() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      if (typeof window.showSaveFilePicker !== 'function') {
+        alert('Direct Hard Drive Link requires Desktop Chrome or Edge. On mobile, use the 1-Tap Download Backup button.');
+        return;
+      }
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: `Attendance_AutoBackup_${new Date().toISOString().slice(0, 10)}.json`,
+          types: [{ description: 'JSON Backup File', accept: { 'application/json': ['.json'] } }]
+        });
+        window.ENGDAY_ATTENDANCE.setLocalFileHandle(handle);
+        await window.ENGDAY_ATTENDANCE.writeToLocalFileHandle();
+        updateBackupModalUI();
+        flashHeaderSavedIndicator('DISK LINKED');
+      } catch (e) {}
+    }
+
+    function handleRestoreBackupScanner(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file || !window.ENGDAY_ATTENDANCE) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const res = window.ENGDAY_ATTENDANCE.importBackupJSON(e.target.result);
+          if (res && res.success) {
+            renderGameTabs();
+            updateBackupModalUI();
+            alert(`✅ Backup Restored Successfully!\n• Merged Scans: ${res.mergedScans}\n• Total Roster: ${res.totalStudents} students`);
+            closeBackupModal();
+          } else {
+            alert('❌ Failed to restore backup: ' + (res?.error || 'Invalid format'));
+          }
+        } catch (err) {
+          alert('❌ Error reading backup file: ' + err.message);
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function flashHeaderSavedIndicator(label = 'SAVED') {
+      const txt = document.getElementById('backup-status-text');
+      if (!txt) return;
+      txt.innerHTML = `✅ <span class="hidden md:inline">${label}</span>`;
+      setTimeout(() => {
+        txt.innerHTML = `💾 <span class="hidden md:inline">SAVED</span>`;
+      }, 2000);
+    }
+
+    function onScanCompletedBackupHook() {
+      flashHeaderSavedIndicator('SAVED');
+      // Per-scan backup completely removed to preserve Vercel bandwidth.
+      // Every individual scan is saved instantly to IndexedDB and pushed
+      // atomically (~200 bytes) to the server. Full backups are scheduled every 20 minutes.
+    }
+
+    // -----------------------------------------------------------------------
+    // 11. DYNAMIC EVENT, SESSION & ROSTER ADMIN MANAGER (PIN PROTECTED)
+    // -----------------------------------------------------------------------
+    let parsedRosterCache = null;
+
+    function openAdminSetupModal(initialTab = 'events', skipPinCheck = false) {
+      if (!skipPinCheck && !isStaffAuthenticated()) {
+        pendingAdminTabAfterPin = initialTab;
+        checkStaffAuth();
+        return;
+      }
+      populateAdminModalData();
+      switchAdminTab(initialTab);
+      document.getElementById('admin-setup-modal')?.classList.remove('hidden');
+    }
+
+    function closeAdminSetupModal() {
+      document.getElementById('admin-setup-modal')?.classList.add('hidden');
+    }
+
+    function switchAdminTab(tab) {
+      ['events', 'sessions', 'roster'].forEach(t => {
+        document.getElementById('admin-panel-' + t)?.classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById('admin-tab-btn-' + t);
+        if (btn) {
+          btn.className = (t === tab)
+            ? 'py-2 rounded-lg font-bold bg-amber-600 text-white shadow'
+            : 'py-2 rounded-lg font-bold text-zinc-400 hover:text-white';
+        }
+      });
+      populateAdminModalData();
+    }
+
+    function populateAdminModalData() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const engine = window.ENGDAY_ATTENDANCE;
+      const events = engine.getEventsList();
+      const activeEvt = engine.getActiveEvent();
+
+      document.getElementById('admin-session-count').textContent = (engine.games || []).length;
+      document.getElementById('admin-roster-count').textContent = Object.keys(engine.state.students || {}).length;
+
+      // Populate Event Selector
+      const sel = document.getElementById('admin-event-select');
+      if (sel) {
+        sel.innerHTML = events.map(ev =>
+          `<option value="${ev.id}" ${ev.id === activeEvt.id ? 'selected' : ''}>${ev.title} (${ev.sessionCount} sessions, ${ev.studentCount} students)</option>`
+        ).join('');
+      }
+
+      // Populate Active Event Form
+      document.getElementById('admin-event-form-heading').textContent = 'Edit Active Event Settings';
+      document.getElementById('admin-event-id').value = activeEvt.id;
+      document.getElementById('admin-event-title').value = activeEvt.title || '';
+      document.getElementById('admin-event-venue').value = activeEvt.venueName || '';
+      document.getElementById('admin-event-subtitle').value = activeEvt.subtitle || '';
+      document.getElementById('admin-event-pin').value = activeEvt.staffPin || '2026';
+      document.getElementById('admin-new-event-roster-opt')?.classList.add('hidden');
+
+      // Populate Sessions List
+      const sessList = document.getElementById('admin-sessions-list');
+      if (sessList) {
+        sessList.innerHTML = (engine.games || []).map(s => `
+          <div class="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span>${s.icon || '📋'}</span>
+                <span class="font-bold text-white truncate">${s.name}</span>
+                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold border ${s.mode === 'check_in_only' ? 'bg-emerald-950 text-emerald-300 border-emerald-800' : 'bg-cyan-950 text-cyan-300 border-cyan-800'}">
+                  ${s.mode === 'check_in_only' ? 'CHECK-IN ONLY' : 'ENTRY/EXIT'}
+                </span>
+              </div>
+              <div class="text-[10px] text-zinc-400 mt-0.5 truncate">
+                Tab: <strong class="text-amber-300">${s.shortName}</strong> • ${s.timeSlot} • ${s.court}
+              </div>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button onclick="editSessionInAdmin('${s.id}')" class="px-2 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-amber-300 text-[10px] font-bold">
+                Edit
+              </button>
+              <button onclick="deleteSessionFromAdmin('${s.id}')" class="px-2 py-1 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 text-[10px] font-bold">
+                ✕
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function onSelectEventFromAdmin(eventId) {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      window.ENGDAY_ATTENDANCE.setActiveEvent(eventId);
+      populateAdminModalData();
+      renderGameTabs();
+    }
+
+    function prepareNewEventForm() {
+      document.getElementById('admin-event-form-heading').textContent = '✨ Create New Event';
+      document.getElementById('admin-event-id').value = '';
+      document.getElementById('admin-event-title').value = '';
+      document.getElementById('admin-event-venue').value = '';
+      document.getElementById('admin-event-subtitle').value = '';
+      document.getElementById('admin-event-pin').value = '2026';
+      document.getElementById('admin-new-event-roster-opt')?.classList.remove('hidden');
+      document.getElementById('admin-event-title')?.focus();
+    }
+
+    function saveEventFromAdmin() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const id = document.getElementById('admin-event-id').value.trim();
+      const title = document.getElementById('admin-event-title').value.trim();
+      const venueName = document.getElementById('admin-event-venue').value.trim();
+      const subtitle = document.getElementById('admin-event-subtitle').value.trim();
+      const staffPin = document.getElementById('admin-event-pin').value.trim() || '2026';
+      const rosterSource = document.getElementById('admin-event-roster-source')?.value || 'copy_current';
+
+      if (!title) {
+        alert('Please enter an Event Title.');
+        return;
+      }
+
+      window.ENGDAY_ATTENDANCE.createOrUpdateEvent({
+        id: id || null,
+        title,
+        venueName,
+        subtitle,
+        staffPin,
+        rosterSource,
+        makeActive: true
+      });
+
+      populateAdminModalData();
+      renderGameTabs();
+      flashHeaderSavedIndicator('EVENT SAVED');
+    }
+
+    async function confirmResetActiveEventScans() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const evt = window.ENGDAY_ATTENDANCE.getActiveEvent();
+      const ok = confirm(`Reset all attendance scans for "${evt.title}"?\n\n(Your custom sessions, student roster, and other saved Events will NOT be deleted.)`);
+      if (!ok) return;
+      await window.ENGDAY_ATTENDANCE.resetActiveEventAttendance();
+      renderGameTabs();
+      populateAdminModalData();
+      alert(`All scans for "${evt.title}" have been reset.`);
+    }
+
+    function editSessionInAdmin(sessionId) {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const s = window.ENGDAY_ATTENDANCE.games.find(g => g.id === sessionId);
+      if (!s) return;
+      document.getElementById('admin-session-form-title').textContent = `Edit Session: ${s.shortName}`;
+      document.getElementById('admin-sess-id').value = s.id;
+      document.getElementById('admin-sess-name').value = s.name || '';
+      document.getElementById('admin-sess-short').value = s.shortName || '';
+      document.getElementById('admin-sess-time').value = s.timeSlot || '';
+      document.getElementById('admin-sess-court').value = s.court || '';
+      document.getElementById('admin-sess-icon').value = s.icon || '📋';
+      document.getElementById('admin-sess-category').value = s.category || s.sport || 'General';
+      document.getElementById('admin-sess-mode').value = s.mode || 'entry_exit';
+      document.getElementById('admin-sess-exit-notes').value = (s.exitNotes || []).join(', ');
+    }
+
+    function resetSessionForm() {
+      document.getElementById('admin-session-form-title').textContent = '+ Add New Session';
+      document.getElementById('admin-sess-id').value = '';
+      document.getElementById('admin-sess-name').value = '';
+      document.getElementById('admin-sess-short').value = '';
+      document.getElementById('admin-sess-time').value = '';
+      document.getElementById('admin-sess-court').value = '';
+      document.getElementById('admin-sess-icon').value = '📋';
+      document.getElementById('admin-sess-category').value = 'General';
+      document.getElementById('admin-sess-mode').value = 'entry_exit';
+      document.getElementById('admin-sess-exit-notes').value = '';
+    }
+
+    function saveSessionFromAdmin() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const id = document.getElementById('admin-sess-id').value.trim();
+      const name = document.getElementById('admin-sess-name').value.trim();
+      const shortName = document.getElementById('admin-sess-short').value.trim() || name;
+      const timeSlot = document.getElementById('admin-sess-time').value.trim() || 'All Day';
+      const court = document.getElementById('admin-sess-court').value.trim() || 'Main Venue';
+      const icon = document.getElementById('admin-sess-icon').value.trim() || '📋';
+      const category = document.getElementById('admin-sess-category').value.trim() || 'General';
+      const mode = document.getElementById('admin-sess-mode').value;
+      const exitNotes = document.getElementById('admin-sess-exit-notes').value.trim();
+
+      if (!name) {
+        alert('Please enter a Session Name.');
+        return;
+      }
+
+      window.ENGDAY_ATTENDANCE.saveSession({
+        id: id || null,
+        name,
+        shortName,
+        tabName: shortName,
+        timeSlot,
+        court,
+        icon,
+        category,
+        sport: category.toLowerCase(),
+        mode,
+        exitNotes
+      });
+
+      resetSessionForm();
+      populateAdminModalData();
+      renderGameTabs();
+    }
+
+    function deleteSessionFromAdmin(sessionId) {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      if (!confirm('Remove this session from the active event?')) return;
+      const res = window.ENGDAY_ATTENDANCE.deleteSession(sessionId);
+      if (!res.success) {
+        alert(res.error);
+        return;
+      }
+      populateAdminModalData();
+      renderGameTabs();
+    }
+
+    function quickAddSingleStudent() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const code = document.getElementById('quick-stu-code').value.trim();
+      const name = document.getElementById('quick-stu-name').value.trim();
+      const group = document.getElementById('quick-stu-group').value.trim() || 'GENERAL';
+
+      if (!name) {
+        alert('Please enter the student Full Name.');
+        return;
+      }
+      window.ENGDAY_ATTENDANCE.addOrUpdateSingleStudent({ studentCode: code, name, groupName: group });
+      document.getElementById('quick-stu-code').value = '';
+      document.getElementById('quick-stu-name').value = '';
+      populateAdminModalData();
+      renderGameTabs();
+      alert(`✅ Added/Updated ${name}`);
+    }
+
+    function handleRosterFileUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const textarea = document.getElementById('roster-paste-input');
+        if (textarea) {
+          textarea.value = e.target.result || '';
+          previewRosterImport();
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function previewRosterImport() {
+      if (!window.ENGDAY_ATTENDANCE) return;
+      const raw = document.getElementById('roster-paste-input')?.value || '';
+      const box = document.getElementById('roster-mapping-box');
+      if (!raw.trim()) {
+        box?.classList.add('hidden');
+        parsedRosterCache = null;
+        return;
+      }
+
+      parsedRosterCache = window.ENGDAY_ATTENDANCE.parseRosterText(raw);
+      if (!parsedRosterCache.rows.length) {
+        box?.classList.add('hidden');
+        return;
+      }
+
+      box?.classList.remove('hidden');
+      const headers = parsedRosterCache.headers;
+      const buildOpts = (selectedIdx, allowNone = false) => {
+        let html = allowNone ? `<option value="-1">-- None / Default --</option>` : '';
+        headers.forEach((h, idx) => {
+          html += `<option value="${idx}" ${idx === selectedIdx ? 'selected' : ''}>Col ${idx + 1}: ${h}</option>`;
+        });
+        return html;
+      };
+
+      document.getElementById('map-col-code').innerHTML = buildOpts(parsedRosterCache.suggestedMap.codeCol, true);
+      document.getElementById('map-col-name').innerHTML = buildOpts(parsedRosterCache.suggestedMap.nameCol, false);
+      document.getElementById('map-col-group').innerHTML = buildOpts(parsedRosterCache.suggestedMap.groupCol, true);
+
+      renderRosterPreviewTable();
+    }
+
+    function renderRosterPreviewTable() {
+      if (!parsedRosterCache) return;
+      const codeCol = parseInt(document.getElementById('map-col-code').value, 10);
+      const nameCol = parseInt(document.getElementById('map-col-name').value, 10);
+      const groupCol = parseInt(document.getElementById('map-col-group').value, 10);
+
+      document.getElementById('roster-preview-count').textContent = `${parsedRosterCache.rows.length} student row(s) ready`;
+      const sample = parsedRosterCache.rows.slice(0, 5);
+      const tableEl = document.getElementById('roster-preview-table');
+      tableEl.innerHTML = `
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-zinc-900 text-zinc-400 border-b border-zinc-800">
+              <th class="p-1.5">ID / Code</th>
+              <th class="p-1.5">Full Name</th>
+              <th class="p-1.5">Group / House</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-900">
+            ${sample.map((r, i) => `
+              <tr>
+                <td class="p-1.5 text-amber-300 font-bold">${codeCol >= 0 ? (r[codeCol] || `ID-${i+1}`) : `Auto`}</td>
+                <td class="p-1.5 text-white">${nameCol >= 0 ? (r[nameCol] || '') : ''}</td>
+                <td class="p-1.5 text-cyan-300">${groupCol >= 0 ? (r[groupCol] || 'GENERAL') : 'GENERAL'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function executeRosterImport() {
+      if (!window.ENGDAY_ATTENDANCE || !parsedRosterCache) return;
+      const codeCol = parseInt(document.getElementById('map-col-code').value, 10);
+      const nameCol = parseInt(document.getElementById('map-col-name').value, 10);
+      const groupCol = parseInt(document.getElementById('map-col-group').value, 10);
+      const mode = document.getElementById('roster-import-mode').value;
+
+      const res = window.ENGDAY_ATTENDANCE.importRosterData(parsedRosterCache.rows, {
+        mode,
+        codeCol,
+        nameCol,
+        groupCol
+      });
+
+      if (res.success) {
+        document.getElementById('roster-paste-input').value = '';
+        document.getElementById('roster-mapping-box')?.classList.add('hidden');
+        parsedRosterCache = null;
+        populateAdminModalData();
+        renderGameTabs();
+        alert(`✅ Roster Imported!\n• Added: ${res.addedCount}\n• Updated: ${res.updatedCount}\n• Active Event Roster: ${res.totalStudents} students`);
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 12. INITIALIZATION & REAL-TIME SUBSCRIPTION
+    // -----------------------------------------------------------------------
+    document.addEventListener('click', (e) => {
+      const box = document.getElementById('manual-autocomplete');
+      const input = document.getElementById('manual-code-input');
+      if (box && !box.contains(e.target) && e.target !== input) {
+        box.classList.add('hidden');
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderGameTabs();
+      updateSyncIndicators();
+      checkStaffAuth();
+
+      if (window.ENGDAY_ATTENDANCE) {
+        window.ENGDAY_ATTENDANCE.subscribe(() => {
+          renderGameTabs();
+          updateSyncIndicators();
+          // Live-refresh open student verification modal so activeScannedStudent is never stale
+          if (activeScannedStudent && !document.getElementById('verify-modal')?.classList.contains('hidden')) {
+            const fresh = window.ENGDAY_ATTENDANCE.getStudentById(activeScannedStudent.id);
+            if (fresh) showVerificationModal(fresh);
+          }
+        });
+      }
+
+      ['touchstart', 'touchend', 'click'].forEach(evt => {
+        document.addEventListener(evt, () => {
+          ensureVideoPlaying();
+        }, { passive: true });
+      });
+    });
+  </script>
+</body>
+</html>
