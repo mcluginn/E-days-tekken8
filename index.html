@@ -135,53 +135,47 @@
     }
 
     /* Bracket SVG Connector Lines Layering */
-    #uni-bracket-svg, #bracket-svg {
+    #bracket-svg {
       position: absolute;
       top: 0;
       left: 0;
       pointer-events: none;
       overflow: visible !important;
-      z-index: 40 !important; /* Default: In Front of cards and frames */
+      z-index: 45 !important; /* Default: In Front of cards */
     }
-    body.bracket-lines-under #uni-bracket-svg,
-    body.bracket-lines-under #bracket-svg {
-      z-index: 20 !important; /* Under cards (z-30), but above container boxes (z-5) */
+    body.bracket-lines-under #bracket-svg,
+    body.bracket-lines-behind #bracket-svg {
+      z-index: 10 !important; /* Under cards (cards have z-index: 30) */
     }
-    body.bracket-lines-front #uni-bracket-svg,
     body.bracket-lines-front #bracket-svg {
-      z-index: 40 !important; /* In front of cards */
+      z-index: 45 !important; /* In front of cards */
     }
-    body.bracket-lines-off #uni-bracket-svg,
     body.bracket-lines-off #bracket-svg {
       display: none !important;
     }
 
     .match-node {
       position: relative;
-      z-index: 30 !important;
-    }
-    .bracket-championship-box {
-      position: relative;
-      z-index: 5 !important;
+      z-index: 30;
     }
 
     .connector-line {
-      transition: stroke 0.3s ease, stroke-width 0.3s ease, opacity 0.3s ease;
+      transition: stroke 0.2s ease, stroke-width 0.2s ease, opacity 0.2s ease;
       stroke-linecap: round;
       stroke-linejoin: round;
+      pointer-events: none;
     }
     .connector-active {
       stroke: #fbbf24 !important;
-      stroke-width: 3.5 !important;
+      stroke-width: 3px !important;
       opacity: 1 !important;
-      filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 14px rgba(234, 179, 8, 0.6)) !important;
+      filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 12px rgba(234, 179, 8, 0.6)) !important;
     }
     .connector-inactive {
-      stroke: #b45309 !important;
-      stroke-width: 2.2 !important;
-      stroke-dasharray: 6 4 !important;
+      stroke: #f59e0b !important;
+      stroke-width: 2px !important;
       opacity: 0.85 !important;
-      filter: drop-shadow(0 0 4px rgba(217, 119, 6, 0.65)) !important;
+      filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.5)) !important;
     }
     .live-pulse { animation: livePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     @keyframes livePulse { 0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.6)); } 50% { opacity: .75; filter: drop-shadow(0 0 3px rgba(6, 182, 212, 0.2)); } }
@@ -253,7 +247,6 @@
 
   <!-- Fixed Fullscreen Engineering Days Main Background Layer -->
   <div id="site-ambient-bg" class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-    <div id="site-ambient-bg-image" class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-35 filter contrast-125 brightness-95" style="background-image: url('./assets/official/meodl_banner_league.jpg');"></div>
     <div class="absolute inset-0 bg-gradient-to-b from-[#110d0d]/92 via-[#160f0e]/85 to-[#110d0d]/98"></div>
     <div class="absolute inset-0" style="background: radial-gradient(ellipse at 50% 25%, transparent 20%, rgba(22, 15, 14, 0.75) 65%, rgba(17, 13, 13, 0.98) 100%);"></div>
     <div class="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-red-900/20 via-amber-700/10 to-transparent"></div>
@@ -402,7 +395,7 @@
                 <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-950/80 border border-emerald-700/80 text-[10px] font-mono font-bold text-emerald-300">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 live-pulse"></span> LIVE CONTROL
                 </span>
-                <span class="text-[10px] font-mono uppercase tracking-[.2em] text-slate-400">MEODL ESPORTS • TOURNAMENT OPS</span>
+                <span class="text-[10px] font-mono uppercase tracking-[.2em] text-slate-400">ENGINEERING DAYS • TOURNAMENT OPS</span>
               </div>
               <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-mono">Control Room</h2>
               <p class="mt-1 text-sm text-slate-300 max-w-2xl">Run the tournament from one place. Start a set, update scores, move winners automatically, and keep the next match visible to the stage crew.</p>
@@ -492,8 +485,6 @@
 
         <!-- Scrollable Bracket Viewport -->
         <div id="bracket-viewport" class="bracket-viewport w-full h-full overflow-auto relative">
-          <!-- Subtle Tekken Arena Ambient Background Layer -->
-          <div class="absolute inset-0 bg-cover bg-center pointer-events-none opacity-15" style="background-image: url('./assets/meodl_arena_bg.png'); filter: blur(0.5px);"></div>
           <div id="bracket-canvas" class="relative origin-top-left transition-transform duration-75 p-8" style="transform: scale(1); min-width: 2900px;">
             
             <!-- Dynamic SVG Connection Layer -->
@@ -966,7 +957,7 @@
         <div class="flex items-center gap-2">
           <span class="text-xl">📖</span>
           <div>
-            <h3 class="text-sm font-bold text-white font-mono uppercase">Official MEODL Rules & Guidelines</h3>
+            <h3 class="text-sm font-bold text-white font-mono uppercase">Official Tekken 8 Rules & Guidelines</h3>
             <p class="text-[10px] text-slate-400 font-mono">Authoritative specifications and official tournament pubmats</p>
           </div>
         </div>
@@ -997,7 +988,7 @@
         <img id="lightbox-img" src="" alt="Asset" class="max-w-full max-h-[70vh] object-contain rounded-lg border border-[#57201c] shadow-lg" />
       </div>
       <div class="w-full pt-3 mt-1 border-t border-[#3d1614] flex items-center justify-between text-[11px] font-mono text-slate-400">
-        <span>UPHSD Mechanical Engineering Society • MEODL 2026</span>
+        <span>UPHSD Engineering Days 2026 • Tekken 8</span>
         <a id="lightbox-download-link" href="" target="_blank" download class="text-amber-400 hover:underline flex items-center gap-1 font-bold">
           <span>Open Full Resolution</span>
           <span>↗</span>
@@ -1101,18 +1092,6 @@
         osc.start();
         osc.stop(audioCtx.currentTime + 0.13);
       } catch(e) {}
-    }
-
-    function toggleBracketLineMode() {
-      const modes = ['front', 'behind', 'off'];
-      const currentIdx = modes.indexOf(state.bracketLineMode || 'front');
-      state.bracketLineMode = modes[(currentIdx + 1) % modes.length];
-      const btn = document.getElementById('line-mode-btn');
-      if (btn) {
-        btn.innerHTML = '<span>⚡ Lines: ' + state.bracketLineMode.charAt(0).toUpperCase() + state.bracketLineMode.slice(1) + '</span>';
-      }
-      safeSetStorage(STORAGE_KEY, JSON.stringify(state));
-      drawConnectors();
     }
 
     // Embed Tekken 8 core logic
@@ -1850,8 +1829,9 @@
       const p2Winner = match.winner === 2;
       const p2Loser = match.winner === 1;
 
+      const byeAlias = (match.id === 'UB1' ? 'card-BYE 1 card-BYE1 card-bye1' : (match.id === 'UB2' ? 'card-BYE 2 card-BYE2 card-bye2' : ''));
       return `
-        <div id="${idPrefix}-${match.id}" data-match-id="${match.id}" class="match-node relative bg-[#1c1412]/95 backdrop-blur-md rounded-xl border border-[#57201c] hover:border-amber-500/60 p-2.5 transition-all shadow-card ${isLive ? 'match-live live-pulse' : (hasBothPlayers && !isCompleted ? 'match-ready' : (isCompleted ? 'match-complete' : ''))}">
+        <div id="${idPrefix}-${match.id}" data-match-id="${match.id}" data-match-code="${match.code || ''}" data-alt-ids="${byeAlias}" class="match-node relative bg-[#1c1412]/95 backdrop-blur-md rounded-xl border border-[#57201c] hover:border-amber-500/60 p-2.5 transition-all shadow-card ${isLive ? 'match-live live-pulse' : (hasBothPlayers && !isCompleted ? 'match-ready' : (isCompleted ? 'match-complete' : ''))}">
           <div class="flex items-center justify-between gap-2 mb-2 pb-1.5 border-b border-[#57201c]/80">
             <div class="flex items-center gap-1.5 cursor-pointer" onclick="openMatchModal('${match.id}')">
               <span class="font-mono font-bold text-[11px] text-[#f59e0b] hover:underline">
@@ -2325,25 +2305,77 @@
     // -------------------------------------------------------------------------
     // 5. SVG CONNECTORS
     // -------------------------------------------------------------------------
+    // Helper to find match card DOM element with robust fallbacks for BYE 1, BYE 2, etc.
+    function getMatchCardEl(matchId) {
+      if (!matchId) return null;
+      const raw = String(matchId).trim();
+      
+      // 1. Direct getElementById
+      let el = document.getElementById('card-' + raw) || document.getElementById(raw);
+      if (el) return el;
+
+      // 2. Normalized check (remove spaces, dashes, case-insensitive)
+      const norm = raw.toUpperCase().replace(/[\s\-_]/g, '');
+
+      // Special aliases for Bye matches
+      if (norm === 'UB1' || norm === 'BYE1' || norm === 'UBBYE1' || norm === 'SLOT1') {
+        el = document.getElementById('card-UB1') ||
+             document.getElementById('card-BYE 1') ||
+             document.getElementById('card-BYE1') ||
+             document.getElementById('card-bye1') ||
+             document.querySelector('[data-match-id="UB1"]') ||
+             document.querySelector('[data-match-code="BYE 1"]') ||
+             document.querySelector('#col-wr1 > div:first-child');
+        if (el) return el;
+      }
+      if (norm === 'UB2' || norm === 'BYE2' || norm === 'UBBYE2' || norm === 'SLOT2') {
+        el = document.getElementById('card-UB2') ||
+             document.getElementById('card-BYE 2') ||
+             document.getElementById('card-BYE2') ||
+             document.getElementById('card-bye2') ||
+             document.querySelector('[data-match-id="UB2"]') ||
+             document.querySelector('[data-match-code="BYE 2"]') ||
+             document.querySelector('#col-wr1 > div:nth-child(5)');
+        if (el) return el;
+      }
+
+      // 3. Match code query selectors
+      el = document.getElementById('card-' + norm) ||
+           document.querySelector('[data-match-id="' + raw + '"]') ||
+           document.querySelector('[data-match-id="' + norm + '"]') ||
+           document.querySelector('[data-match-code="' + raw + '"]') ||
+           document.querySelector('[id$="-' + raw + '"]') ||
+           document.querySelector('[id$="-' + norm + '"]');
+      return el;
+    }
+
     function updateBracketLinesUI() {
-      const mode = (typeof state !== 'undefined' && state && state.bracketLineMode) ? state.bracketLineMode : 'front';
+      // Force default to 'front' if undefined, 'behind', or 'off'
+      if (!state.bracketLineMode || state.bracketLineMode === 'behind') {
+        state.bracketLineMode = 'front';
+      }
+      const mode = state.bracketLineMode || 'front';
+
       if (document.body && document.body.classList) {
-        document.body.classList.remove('bracket-lines-front', 'bracket-lines-under', 'bracket-lines-off');
+        document.body.classList.remove('bracket-lines-front', 'bracket-lines-under', 'bracket-lines-off', 'bracket-lines-behind');
         document.body.classList.add(`bracket-lines-${mode}`);
       }
 
       const config = {
         'front': {
           label: '⚡ Lines: In Front',
-          class: 'px-2.5 py-1 rounded-lg bg-amber-950/80 hover:bg-amber-900 border border-amber-500/80 text-[11px] font-mono font-bold text-amber-300 flex items-center gap-1 transition-all shadow-sm'
+          class: 'px-2.5 py-1 rounded-lg bg-amber-950/80 hover:bg-amber-900 border border-amber-500/80 text-[11px] font-mono font-bold text-amber-300 flex items-center gap-1 transition-all shadow-sm',
+          headerClass: 'px-2.5 py-1.5 rounded-lg bg-amber-950/80 hover:bg-amber-900 border border-amber-500/80 text-xs font-mono font-bold text-amber-300 transition-all flex items-center gap-1 shadow-sm'
         },
         'under': {
           label: '⚡ Lines: Under Cards',
-          class: 'px-2.5 py-1 rounded-lg bg-stone-900/80 hover:bg-stone-800 border border-amber-600/50 text-[11px] font-mono font-bold text-amber-200 flex items-center gap-1 transition-all shadow-sm'
+          class: 'px-2.5 py-1 rounded-lg bg-[#1c1412] hover:bg-[#2b1d19] border border-amber-600/50 text-[11px] font-mono font-bold text-amber-200 flex items-center gap-1 transition-all shadow-sm',
+          headerClass: 'px-2.5 py-1.5 rounded-lg bg-[#1c1412] hover:bg-[#2b1d19] border border-amber-600/50 text-xs font-mono font-bold text-amber-200 transition-all flex items-center gap-1 shadow-sm'
         },
         'off': {
           label: '⚡ Lines: Hidden',
-          class: 'px-2.5 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 text-[11px] font-mono font-bold text-zinc-400 flex items-center gap-1 transition-all shadow-sm'
+          class: 'px-2.5 py-1 rounded-lg bg-[#160f0e] hover:bg-[#241815] border border-[#57201c] text-[11px] font-mono font-bold text-slate-400 flex items-center gap-1 transition-all shadow-sm',
+          headerClass: 'px-2.5 py-1.5 rounded-lg bg-[#160f0e] hover:bg-[#241815] border border-[#57201c] text-xs font-mono font-bold text-slate-400 transition-all flex items-center gap-1 shadow-sm'
         }
       };
 
@@ -2355,7 +2387,7 @@
       }
       const btn2 = document.getElementById('line-mode-btn');
       if (btn2) {
-        btn2.className = c.class;
+        btn2.className = c.headerClass;
         btn2.innerHTML = `<span>${c.label}</span>`;
       }
     }
@@ -2396,52 +2428,64 @@
       const canvasRect = canvas.getBoundingClientRect();
       let skippedDueToLayout = false;
 
+      // Exact Tournament Match Connections
       const links = [
-        // WINNERS R1 -> QUARTERFINALS
+        // UPPER BRACKET ROUND 1 -> QUARTERFINALS
+        // BYE 1 (Slot 1) + M1 ---> connect into M7 (Quarterfinals)
         { from: 'UB1', to: 'M7', slot: 1 },
         { from: 'M1', to: 'M7', slot: 2 },
+
+        // M2 + M3 ---> connect into M8 (Quarterfinals)
         { from: 'M2', to: 'M8', slot: 1 },
         { from: 'M3', to: 'M8', slot: 2 },
+
+        // BYE 2 (Slot 2) + M4 ---> connect into M9 (Quarterfinals)
         { from: 'UB2', to: 'M9', slot: 1 },
         { from: 'M4', to: 'M9', slot: 2 },
+
+        // M5 + M6 ---> connect into M10 (Quarterfinals)
         { from: 'M5', to: 'M10', slot: 1 },
         { from: 'M6', to: 'M10', slot: 2 },
 
-        // WINNERS QUARTERFINALS -> SEMIFINALS
+        // UPPER BRACKET QUARTERFINALS -> SEMIFINALS
+        // M7 + M8 ---> connect into M17 (Semifinals)
         { from: 'M7', to: 'M17', slot: 1 },
         { from: 'M8', to: 'M17', slot: 2 },
+
+        // M9 + M10 ---> connect into M18 (Semifinals)
         { from: 'M9', to: 'M18', slot: 1 },
         { from: 'M10', to: 'M18', slot: 2 },
 
-        // WINNERS SEMIFINALS -> WINNERS FINALS
+        // UPPER BRACKET SEMIFINALS -> WINNERS FINALS
+        // M17 + M18 ---> connect into M23 (Winners Finals)
         { from: 'M17', to: 'M23', slot: 1 },
         { from: 'M18', to: 'M23', slot: 2 },
 
         // WINNERS FINALS -> GRAND FINALS
         { from: 'M23', to: 'M26', slot: 1, crossSection: true },
 
-        // LOSERS R1 -> LOSERS R2
+        // LOWER BRACKET ROUND 1 -> LOWER BRACKET ROUND 2
         { from: 'M11', to: 'M14', slot: 2 },
         { from: 'M12', to: 'M16', slot: 2 },
 
-        // LOSERS R2 -> LOSERS R3
+        // LOWER BRACKET ROUND 2 -> LOWER BRACKET ROUND 3
         { from: 'M13', to: 'M19', slot: 1 },
         { from: 'M14', to: 'M19', slot: 2 },
         { from: 'M15', to: 'M20', slot: 1 },
         { from: 'M16', to: 'M20', slot: 2 },
 
-        // LOSERS R3 -> LOSERS QUARTERS
+        // LOWER BRACKET ROUND 3 -> LOWER BRACKET QUARTERFINALS (LB R4)
         { from: 'M19', to: 'M21', slot: 2 },
         { from: 'M20', to: 'M22', slot: 2 },
 
-        // LOSERS QUARTERS -> LOSERS SEMIS
+        // LOWER BRACKET QUARTERFINALS -> LOWER BRACKET SEMIFINALS (LB R5)
         { from: 'M21', to: 'M24', slot: 1 },
         { from: 'M22', to: 'M24', slot: 2 },
 
-        // LOSERS SEMIS -> LOSERS FINALS
+        // LOWER BRACKET SEMIFINALS -> LOWER BRACKET FINALS (LB R6)
         { from: 'M24', to: 'M25', slot: 2 },
 
-        // LOSERS FINALS -> GRAND FINALS
+        // LOWER BRACKET FINALS -> GRAND FINALS
         { from: 'M25', to: 'M26', slot: 2, crossSection: true },
 
         // GRAND FINALS 1 -> GRAND FINALS RESET (MATCH 27)
@@ -2468,8 +2512,8 @@
       `;
 
       links.forEach(link => {
-        const fromEl = document.getElementById(`card-${link.from}`);
-        const toEl = document.getElementById(`card-${link.to}`);
+        const fromEl = getMatchCardEl(link.from);
+        const toEl = getMatchCardEl(link.to);
 
         if (!fromEl || !toEl) return;
 
@@ -2489,13 +2533,13 @@
 
         if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) return;
 
-        const fromMatch = state.matches[link.from];
+        const fromMatch = state.matches[link.from] || (link.from === 'UB1' ? state.matches['UB1'] : null) || (link.from === 'UB2' ? state.matches['UB2'] : null);
         const isActive = fromMatch && fromMatch.completed;
         const strokeClass = isActive ? 'connector-active' : 'connector-inactive';
 
-        const strokeColor = isActive ? '#fbbf24' : '#b45309';
-        const strokeWidth = isActive ? '3.5' : '2.2';
-        const strokeDash = isActive ? '' : 'stroke-dasharray="6 4"';
+        // Vibrant visible Engineering Gold / Amber lines (#f59e0b, 2px, opacity: 0.85)
+        const strokeColor = isActive ? '#fbbf24' : '#f59e0b';
+        const strokeWidth = isActive ? '3' : '2';
         const opacity = isActive ? '1' : '0.85';
         const filterAttr = isActive ? 'filter="url(#tekken-glow-gold)"' : 'filter="url(#tekken-glow)"';
 
@@ -2506,20 +2550,20 @@
           const midY = (y1 + y2) / 2;
           d = `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${midY}, ${(x1 + x2) / 2} ${midY} S ${entryX} ${y2}, ${x2} ${y2}`;
         } else {
-          const dx = Math.max(30, (x2 - x1) * 0.55);
+          const dx = Math.max(30, (x2 - x1) * 0.52);
           d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
         }
 
-        svgContent += `<path d="${d}" class="connector-line ${strokeClass}" fill="none" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-opacity="${opacity}" ${strokeDash} ${filterAttr} stroke-linecap="round" stroke-linejoin="round" />`;
+        svgContent += `<path d="${d}" class="connector-line ${strokeClass}" fill="none" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-opacity="${opacity}" ${filterAttr} stroke-linecap="round" stroke-linejoin="round" />`;
       });
 
       svg.innerHTML = svgContent;
 
       if (skippedDueToLayout) {
-        [50, 150, 300, 600].forEach(delay => {
+        [50, 150, 300, 600, 1000].forEach(delay => {
           setTimeout(() => {
             const c = document.getElementById('bracket-canvas');
-            if (c && c.offsetWidth > 0 && (state.activeView === 'full' || !state.activeView)) {
+            if (c && c.offsetWidth > 0) {
               drawConnectors();
             }
           }, delay);
@@ -2553,10 +2597,7 @@
     function zoomBracket(delta) {
       state.zoom = Math.max(0.5, Math.min(1.5, (state.zoom || 1.0) + delta));
       const pct = `${Math.round(state.zoom * 100)}%`;
-      const tekkenTxt = document.getElementById('zoom-level-text');
-      if (tekkenTxt) tekkenTxt.innerText = pct;
-      const uniTxt = document.getElementById('uni-zoom-level-text');
-      if (uniTxt) uniTxt.innerText = pct;
+      document.querySelectorAll('#zoom-level-text').forEach(el => el.innerText = pct);
 
       const canvas = document.getElementById('bracket-canvas');
       if (canvas) {
@@ -2912,7 +2953,7 @@
               simClockMins: 0
             }, parsed);
             state.zoom = Math.max(0.2, Number(state.zoom) || 1.0);
-            if (!state.bracketLineMode) state.bracketLineMode = 'front';
+            if (!state.bracketLineMode || state.bracketLineMode === 'behind') state.bracketLineMode = 'front';
             updateBracketLinesUI();
             propagateBracket();
             loaded = true;
